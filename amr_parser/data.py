@@ -2,8 +2,8 @@ import random
 import torch
 from torch import nn
 import numpy as np
-from amr.AMRGraph import AMRGraph
-from amr.extract import read_file
+from amr_parser.AMRGraph import AMRGraph
+from amr_parser.extract import read_file
 
 PAD, UNK, DUM, NIL, END, CLS = '<PAD>', '<UNK>', '<DUMMY>', '<NULL>', '<END>', '<CLS>'
 GPU_SIZE = 12000  # okay for 8G memory
@@ -175,8 +175,8 @@ class DataLoader(object):
                     continue
             cp_seq, mp_seq, token2idx, idx2token = lex_map.get_concepts(lemma, token, vocabs['predictable_concept'])
             datum = {
-                'amr': amr, 'tok': token, 'lem': lemma, 'pos': pos, 'ner': ner,
-                'cp_seq': cp_seq, 'mp_seq': mp_seq, 'token2idx': token2idx, 'idx2token': idx2token
+                'amr': amr, 'tok': token, 'lem': lemma, 'cp_seq': cp_seq,
+                'mp_seq': mp_seq, 'token2idx': token2idx, 'idx2token': idx2token
             }
             if bert_tokenizer is not None:
                 bert_token, token_subword_index = bert_tokenizer.tokenize(token)

@@ -4,7 +4,8 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 import re
-from amr.transformer import Embedding
+from amr_parser.transformer import Embedding
+
 
 def AMREmbedding(vocab, embedding_dim, pretrained_file=None, amr=False, dump_file=None):
     if pretrained_file is None:
@@ -19,12 +20,12 @@ def AMREmbedding(vocab, embedding_dim, pretrained_file=None, amr=False, dump_fil
         tokens_to_keep.add(token)
 
     embeddings = {}
- 
+
     if dump_file is not None:
         fo = open(dump_file, 'w', encoding='utf8')
 
     with open(pretrained_file, encoding='utf8') as embeddings_file:
-        for line in embeddings_file.readlines():    
+        for line in embeddings_file.readlines():
             fields = line.rstrip().split(' ')
             if len(fields) - 1 != embedding_dim:
                 continue
@@ -39,17 +40,16 @@ def AMREmbedding(vocab, embedding_dim, pretrained_file=None, amr=False, dump_fil
         fo.close()
 
     all_embeddings = np.asarray(list(embeddings.values()))
-    print ('pretrained', all_embeddings.shape)
+    print('pretrained', all_embeddings.shape)
     embeddings_mean = float(np.mean(all_embeddings))
     embeddings_std = float(np.std(all_embeddings))
-
 
     all_embeddings -= embeddings_mean
     all_embeddings /= embeddings_std
     all_embeddings *= 0.02
     embeddings_mean = float(np.mean(all_embeddings))
     embeddings_std = float(np.std(all_embeddings))
-    print (embeddings_mean, embeddings_std)
+    print(embeddings_mean, embeddings_std)
     # Now we initialize the weight matrix for an embedding layer, starting with random vectors,
     # then filling in the word vectors we just read.
     embedding_matrix = torch.FloatTensor(vocab.size, embedding_dim).normal_(embeddings_mean,
@@ -71,57 +71,10 @@ def AMREmbedding(vocab, embedding_dim, pretrained_file=None, amr=False, dump_fil
 
     return nn.Embedding.from_pretrained(embedding_matrix, freeze=False)
 
-class WordEncoder(nn.Module):
-    def __init__(self, vocabs, char_dim, word_dim, pos_dim, ner_dim,
-        embed_dim, filters, char2word_dim, dropout, pretrained_file=None):
-        super(WordEncoder, self).__init__()
-        self.char_embed = AMREmbedding(vocabs['word_char'], char_dim)
-        self.char2word = CNNEncoder(filters, char_dim, char2word_dim)
-        self.lem_embed = AMREmbedding(vocabs['lem'], word_dim, pretrained_file)
-
-        if pos_dim > 0:
-            self.pos_embed = AMREmbedding(vocabs['pos'], pos_dim)
-        else:
-            self.pos_embed = None
-        if ner_dim > 0:
-            self.ner_embed = AMREmbedding(vocabs['ner'], ner_dim)
-        else:
-            self.ner_embed = None
-
-        tot_dim = word_dim + pos_dim + ner_dim + char2word_dim
-        
-        self.out_proj = nn.Linear(tot_dim, embed_dim)
-        self.dropout = dropout
-        self.reset_parameters()
-
-    def reset_parameters(self):
-        nn.init.normal_(self.out_proj.weight, std=0.02)
-        nn.init.constant_(self.out_proj.bias, 0.)
-
-    def forward(self, char_input, tok_input, lem_input, pos_input, ner_input):
-        # char: seq_len x bsz x word_len
-        # word, pos, ner: seq_len x bsz
-        seq_len, bsz, _ = char_input.size()
-        char_repr = self.char_embed(char_input.view(seq_len * bsz, -1))
-        char_repr = self.char2word(char_repr).view(seq_len, bsz, -1)
-
-        lem_repr = self.lem_embed(lem_input)
-        reprs = [char_repr, lem_repr]
-
-        if self.pos_embed is not None:
-            pos_repr = self.pos_embed(pos_input)
-            reprs.append(pos_repr)
-        
-        if self.ner_embed is not None:
-            ner_repr = self.ner_embed(ner_input)
-            reprs.append(ner_repr)
-
-        word = F.dropout(torch.cat(reprs, -1), p=self.dropout, training=self.training)
-        word = self.out_proj(word)
-        return word
 
 class ConceptEncoder(nn.Module):
-    def __init__(self, vocabs, char_dim, concept_dim, embed_dim, filters, char2concept_dim, dropout, pretrained_file=None):
+    def __init__(self, vocabs, char_dim, concept_dim, embed_dim, filters, char2concept_dim, dropout,
+                 pretrained_file=None):
         super(ConceptEncoder, self).__init__()
         self.char_embed = AMREmbedding(vocabs['concept_char'], char_dim)
         self.concept_embed = AMREmbedding(vocabs['concept'], concept_dim, pretrained_file, amr=True)
@@ -140,13 +93,12 @@ class ConceptEncoder(nn.Module):
         nn.init.constant_(self.out_proj.bias, 0.)
 
     def forward(self, char_input, concept_input):
-
         seq_len, bsz, _ = char_input.size()
         char_repr = self.char_embed(char_input.view(seq_len * bsz, -1))
         char_repr = self.char2concept(char_repr).view(seq_len, bsz, -1)
         concept_repr = self.concept_embed(concept_input)
 
-        concept = F.dropout(torch.cat([char_repr,concept_repr], -1), p=self.dropout, training=self.training)
+        concept = F.dropout(torch.cat([char_repr, concept_repr], -1), p=self.dropout, training=self.training)
         concept = self.out_proj(concept)
         return concept
 
@@ -168,7 +120,7 @@ class CNNEncoder(nn.Module):
 
     def forward(self, input):
         # input: batch_size x seq_len x input_dim
-        x  = input.transpose(1, 2)
+        x = input.transpose(1, 2)
         conv_result = []
         for i, conv in enumerate(self.convolutions):
             y = conv(x)
@@ -178,7 +130,8 @@ class CNNEncoder(nn.Module):
 
         conv_result = torch.cat(conv_result, dim=-1)
         conv_result = self.highway(conv_result)
-        return self.out_proj(conv_result) #  batch_size x output_dim
+        return self.out_proj(conv_result)  # batch_size x output_dim
+
 
 class Highway(nn.Module):
     def __init__(self, input_dim, layers):
@@ -203,10 +156,13 @@ class Highway(nn.Module):
             x = gate * x + (1 - gate) * new_x
         return x
 
+
 if __name__ == "__main__":
     from data import Vocab, CLS, DUM, END
-    vocab= Vocab('../data/AMR/amr_1.0_reca/lem_vocab', 3, [CLS])
-    embed = AMREmbedding(vocab, 300, pretrained_file='../data/glove.840B.300d.txt', dump_file='../data/AMR/amr_1.0_reca/glove_lem_embed')
-    vocab = Vocab('../data/AMR/amr_1.0_reca/concept_vocab', 3, [DUM, END])
-    embed = AMREmbedding(vocab, 300, pretrained_file='../data/glove.840B.300d.txt', amr=True, dump_file='../data/AMR/amr_1.0_reca/glove_concept_embed')
 
+    vocab = Vocab('../data/AMR/amr_1.0_reca/lem_vocab', 3, [CLS])
+    embed = AMREmbedding(vocab, 300, pretrained_file='../data/glove.840B.300d.txt',
+                         dump_file='../data/AMR/amr_1.0_reca/glove_lem_embed')
+    vocab = Vocab('../data/AMR/amr_1.0_reca/concept_vocab', 3, [DUM, END])
+    embed = AMREmbedding(vocab, 300, pretrained_file='../data/glove.840B.300d.txt', amr=True,
+                         dump_file='../data/AMR/amr_1.0_reca/glove_concept_embed')

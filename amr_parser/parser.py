@@ -3,35 +3,31 @@ from torch import nn
 import torch.nn.functional as F
 import math
 
-from amr.encoder import WordEncoder, ConceptEncoder
-from amr.decoder import DecodeLayer
-from amr.transformer import Transformer, SinusoidalPositionalEmbedding, SelfAttentionMask
-from amr.data import ListsToTensor, ListsofStringToTensor, DUM, NIL, PAD
-from amr.search import Hypothesis, Beam, search_by_batch
-from amr.utils import move_to_device
+from amr_parser.encoder import ConceptEncoder
+from amr_parser.decoder import DecodeLayer
+from amr_parser.transformer import Transformer, SinusoidalPositionalEmbedding, SelfAttentionMask
+from amr_parser.data import ListsToTensor, ListsofStringToTensor, DUM, NIL, PAD
+from amr_parser.search import Hypothesis, Beam, search_by_batch
+from amr_parser.utils import move_to_device
 
 
 class Parser(nn.Module):
-    def __init__(self, vocabs, word_char_dim, word_dim, pos_dim, ner_dim,
-                 concept_char_dim, concept_dim,
-                 cnn_filters, char2word_dim, char2concept_dim,
-                 embed_dim, ff_embed_dim, num_heads, dropout,
+    def __init__(self, vocabs, concept_char_dim, concept_dim,
+                 cnn_filters, char2concept_dim, embed_dim, ff_embed_dim, num_heads, dropout,
                  snt_layers, graph_layers, inference_layers, rel_dim,
                  pretrained_file=None, bert_encoder=None,
                  device=0):
         super(Parser, self).__init__()
         self.vocabs = vocabs
 
-        self.word_encoder = WordEncoder(vocabs,
-                                        word_char_dim, word_dim, pos_dim, ner_dim,
-                                        embed_dim, cnn_filters, char2word_dim, dropout, pretrained_file)
+        self.concept_encoder = ConceptEncoder(
+            vocabs, concept_char_dim, concept_dim, embed_dim,
+            cnn_filters, char2concept_dim, dropout, pretrained_file
+        )
 
-        self.concept_encoder = ConceptEncoder(vocabs,
-                                              concept_char_dim, concept_dim, embed_dim,
-                                              cnn_filters, char2concept_dim, dropout, pretrained_file)
-        self.snt_encoder = Transformer(snt_layers, embed_dim, ff_embed_dim, num_heads, dropout)
         self.graph_encoder = Transformer(graph_layers, embed_dim, ff_embed_dim, num_heads, dropout, with_external=True,
                                          weights_dropout=False)
+
         self.embed_dim = embed_dim
         self.embed_scale = math.sqrt(embed_dim)
         self.embed_positions = SinusoidalPositionalEmbedding(embed_dim, device=device)
@@ -52,44 +48,14 @@ class Parser(nn.Module):
         nn.init.normal_(self.probe_generator.weight, std=0.02)
         nn.init.constant_(self.probe_generator.bias, 0.)
 
-    def encode_step(self, tok, lem, pos, ner, word_char):
-        word_repr = self.embed_scale * self.word_encoder(word_char, tok, lem, pos, ner) + self.embed_positions(tok)
-        word_repr = self.word_embed_layer_norm(word_repr)
-        word_mask = torch.eq(lem, self.vocabs['lem'].padding_idx)
-
-        word_repr = self.snt_encoder(word_repr, self_padding_mask=word_mask)
-
-        probe = torch.tanh(self.probe_generator(word_repr[:1]))
-        word_repr = word_repr[1:]
-        word_mask = word_mask[1:]
-        return word_repr, word_mask, probe
-
-    def encode_step_with_bert(self, tok, lem, pos, ner, word_char, bert_token, token_subword_index):
+    def encode_step_with_bert(self, bert_token, token_subword_index):
         bert_embed, _ = self.bert_encoder(bert_token, token_subword_index=token_subword_index)
-        word_repr = self.word_encoder(word_char, tok, lem, pos, ner)
-        bert_embed = bert_embed.transpose(0, 1)
-        word_repr = word_repr + self.bert_adaptor(bert_embed)
-        word_repr = self.embed_scale * word_repr + self.embed_positions(tok)
-        word_repr = self.word_embed_layer_norm(word_repr)
-        word_mask = torch.eq(lem, self.vocabs['lem'].padding_idx)
-
-        word_repr = self.snt_encoder(word_repr, self_padding_mask=word_mask)
-
-        probe = torch.tanh(self.probe_generator(word_repr[:1]))
-        word_repr = word_repr[1:]
-        word_mask = word_mask[1:]
-        return word_repr, word_mask, probe
+        probe = torch.tanh(self.probe_generator(bert_embed[:1]))
+        return bert_embed, probe
 
     def work(self, data, beam_size, max_time_step, min_time_step=1):
         with torch.no_grad():
-            if self.bert_encoder is not None:
-                word_repr, word_mask, probe = self.encode_step_with_bert(data['tok'], data['lem'], data['pos'],
-                                                                         data['ner'], data['word_char'],
-                                                                         data['bert_token'],
-                                                                         data['token_subword_index'])
-            else:
-                word_repr, word_mask, probe = self.encode_step(data['tok'], data['lem'], data['pos'], data['ner'],
-                                                               data['word_char'])
+            word_repr, word_mask, probe = self.encode_step_with_bert(data['bert_token'], data['token_subword_index'])
 
             mem_dict = {'snt_state': word_repr,
                         'snt_padding_mask': word_mask,
@@ -177,27 +143,22 @@ class Parser(nn.Module):
         return new_state_dict, results
 
     def forward(self, data):
-        if self.bert_encoder is not None:
-            word_repr, word_mask, probe = self.encode_step_with_bert(data['tok'], data['lem'], data['pos'], data['ner'],
-                                                                     data['word_char'], data['bert_token'],
-                                                                     data['token_subword_index'])
-        else:
-            word_repr, word_mask, probe = self.encode_step(data['tok'], data['lem'], data['pos'], data['ner'],
-                                                           data['word_char'])
+        word_repr, word_mask, probe = self.encode_step_with_bert(data['bert_token'], data['token_subword_index'])
+
         concept_repr = self.embed_scale * self.concept_encoder(data['concept_char_in'], data['concept_in']) + \
                        self.embed_positions(data['concept_in'])
+
         concept_repr = self.concept_embed_layer_norm(concept_repr)
         concept_repr = F.dropout(concept_repr, p=self.dropout, training=self.training)
         concept_mask = torch.eq(data['concept_in'], self.vocabs['concept'].padding_idx)
         attn_mask = self.self_attn_mask(data['concept_in'].size(0))
-        # concept_repr = self.graph_encoder(concept_repr,
-        #                          self_padding_mask=concept_mask, self_attn_mask=attn_mask,
-        #                          external_memories=word_repr, external_padding_mask=word_mask)
         for idx, layer in enumerate(self.graph_encoder.layers):
-            concept_repr, arc_weight, _ = layer(concept_repr,
-                                                self_padding_mask=concept_mask, self_attn_mask=attn_mask,
-                                                external_memories=word_repr, external_padding_mask=word_mask,
-                                                need_weights='max')
+            concept_repr, arc_weight, _ = layer(
+                concept_repr,
+                self_padding_mask=concept_mask, self_attn_mask=attn_mask,
+                external_memories=word_repr, external_padding_mask=word_mask,
+                need_weights='max'
+            )
 
         graph_target_rel = data['rel'][:-1]
         graph_target_arc = torch.ne(graph_target_rel, self.vocabs['rel'].token2idx(NIL))  # 0 or 1

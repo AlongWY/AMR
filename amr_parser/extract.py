@@ -3,9 +3,11 @@
 from collections import Counter
 import json, re
 
-from amr.amr import AMR
-from amr.AMRGraph import AMRGraph, number_regexp
-from amr.AMRGraph import  _is_abs_form
+from amr_parser.amr import AMR
+from amr_parser.AMRGraph import AMRGraph, number_regexp
+from amr_parser.AMRGraph import _is_abs_form
+
+
 class AMRIO:
 
     def __init__(self):
@@ -24,7 +26,7 @@ class AMRIO:
                     tokens = json.loads(line[len('# ::tokens '):])
                 elif line.startswith('# ::lemmas '):
                     lemmas = json.loads(line[len('# ::lemmas '):])
-                    lemmas = [ le if _is_abs_form(le) else le.lower() for le in lemmas]
+                    lemmas = [le if _is_abs_form(le) else le.lower() for le in lemmas]
                 elif line.startswith('# ::pos_tags '):
                     pos_tags = json.loads(line[len('# ::pos_tags '):])
                 elif line.startswith('# ::ner_tags '):
@@ -36,19 +38,18 @@ class AMRIO:
                     myamr = AMRGraph(amr)
                     yield tokens, lemmas, pos_tags, ner_tags, myamr
 
+
 class LexicalMap(object):
-
-
     # build our lexical mapping (from token/lemma to concept), useful for copy mechanism.
     def __init__(self):
         pass
 
-    #cp_seq, mp_seq, token2idx, idx2token = lex_map.get(lemma, token, vocabs['predictable_concept'])
+    # cp_seq, mp_seq, token2idx, idx2token = lex_map.get(lemma, token, vocabs['predictable_concept'])
     def get_concepts(self, lem, tok, vocab=None):
         cp_seq, mp_seq = [], []
         new_tokens = set()
         for le, to in zip(lem, tok):
-            cp_seq.append(le+'_')
+            cp_seq.append(le + '_')
             mp_seq.append(le)
 
         if vocab is None:
@@ -77,8 +78,9 @@ def read_file(filename):
         pos.append(_pos)
         ner.append(_ner)
         amrs.append(_myamr)
-    print ('read from %s, %d amrs'%(filename, len(token)))
+    print('read from %s, %d amrs' % (filename, len(token)))
     return amrs, token, lemma, pos, ner
+
 
 def make_vocab(batch_seq, char_level=False):
     cnt = Counter()
@@ -96,13 +98,17 @@ def make_vocab(batch_seq, char_level=False):
 def write_vocab(vocab, path):
     with open(path, 'w', encoding='utf-8') as fo:
         for x, y in vocab.most_common():
-            fo.write('%s\t%d\n'%(x,y))
+            fo.write('%s\t%d\n' % (x, y))
+
 
 import argparse
+
+
 def parse_config():
     parser = argparse.ArgumentParser()
     parser.add_argument('--train_data', type=str)
     return parser.parse_args()
+
 
 if __name__ == "__main__":
     args = parse_config()
@@ -122,9 +128,9 @@ if __name__ == "__main__":
             for lc, lm in zip(cp_seq, mp_seq):
                 lexical_concepts.add(lc)
                 lexical_concepts.add(lm)
-            
+
             if i == 0:
-                predictable_conc.append([ c for c in concept if c not in lexical_concepts])
+                predictable_conc.append([c for c in concept if c not in lexical_concepts])
                 conc.append(concept)
             rel.append([e[-1] for e in edge])
 
@@ -138,10 +144,10 @@ if __name__ == "__main__":
     predictable_conc_vocab = make_vocab(predictable_conc)
     num_predictable_conc = sum(len(x) for x in predictable_conc)
     num_conc = sum(len(x) for x in conc)
-    print ('predictable concept coverage', num_predictable_conc, num_conc, num_predictable_conc/num_conc)
+    print('predictable concept coverage', num_predictable_conc, num_conc, num_predictable_conc / num_conc)
     rel_vocab = make_vocab(rel)
 
-    print ('make vocabularies')
+    print('make vocabularies')
     write_vocab(token_vocab, 'tok_vocab')
     write_vocab(token_char_vocab, 'word_char_vocab')
     write_vocab(lemma_vocab, 'lem_vocab')

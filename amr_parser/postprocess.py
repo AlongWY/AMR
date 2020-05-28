@@ -3,7 +3,7 @@ import re
 import networkx as nx
 import numpy as np
 
-from amr.AMRGraph import is_attr_or_abs_form, need_an_instance
+from amr_parser.AMRGraph import is_attr_or_abs_form, need_an_instance
 
 
 class PostProcessor(object):

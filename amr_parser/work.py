@@ -1,12 +1,12 @@
 import torch
 
-from amr.data import Vocab,  DataLoader, DUM, END, CLS, NIL
-from amr.parser import Parser
-from amr.postprocess import PostProcessor
-from amr.extract import LexicalMap
-from amr.utils import move_to_device
-from amr.bert_utils import BertEncoderTokenizer, BertEncoder
-from amr.match import match
+from amr_parser.data import Vocab,  DataLoader, DUM, END, CLS, NIL
+from amr_parser.parser import Parser
+from amr_parser.postprocess import PostProcessor
+from amr_parser.extract import LexicalMap
+from amr_parser.utils import move_to_device
+from amr_parser.bert_utils import BertEncoderTokenizer, BertEncoder
+from amr_parser.match import match
 
 import argparse, os, re
 

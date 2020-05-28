@@ -3,36 +3,26 @@ import torch.distributed as dist
 import torch.multiprocessing as mp
 
 import argparse, os, random
-from amr.data import Vocab, DataLoader, DUM, END, CLS, NIL
-from amr.parser import Parser
-from amr.work import show_progress
-from amr.extract import LexicalMap
-from amr.adam import AdamWeightDecayOptimizer
-from amr.utils import move_to_device
-from amr.bert_utils import BertEncoderTokenizer, BertEncoder
-from amr.postprocess import PostProcessor
-from amr.work import parse_data
+from amr_parser.data import Vocab, DataLoader, DUM, END, CLS, NIL
+from amr_parser.parser import Parser
+from amr_parser.work import show_progress
+from amr_parser.extract import LexicalMap
+from amr_parser.adam import AdamWeightDecayOptimizer
+from amr_parser.utils import move_to_device
+from amr_parser.bert_utils import BertEncoderTokenizer, BertEncoder
+from amr_parser.postprocess import PostProcessor
+from amr_parser.work import parse_data
 
 
 def parse_config():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--tok_vocab', type=str)
-    parser.add_argument('--lem_vocab', type=str)
-    parser.add_argument('--pos_vocab', type=str)
-    parser.add_argument('--ner_vocab', type=str)
     parser.add_argument('--concept_vocab', type=str)
+    parser.add_argument('--concept_char_vocab', type=str)
     parser.add_argument('--predictable_concept_vocab', type=str)
     parser.add_argument('--rel_vocab', type=str)
-    parser.add_argument('--word_char_vocab', type=str)
-    parser.add_argument('--concept_char_vocab', type=str)
     parser.add_argument('--pretrained_file', type=str, default=None)
-    parser.add_argument('--with_bert', dest='with_bert', action='store_true')
     parser.add_argument('--bert_path', type=str, default=None)
 
-    parser.add_argument('--word_char_dim', type=int)
-    parser.add_argument('--word_dim', type=int)
-    parser.add_argument('--pos_dim', type=int)
-    parser.add_argument('--ner_dim', type=int)
     parser.add_argument('--concept_char_dim', type=int)
     parser.add_argument('--concept_dim', type=int)
     parser.add_argument('--rel_dim', type=int)
@@ -97,10 +87,6 @@ def data_proc(data, queue):
 
 def load_vocabs(args):
     vocabs = dict()
-    vocabs['tok'] = Vocab(args.tok_vocab, 5, [CLS])
-    vocabs['lem'] = Vocab(args.lem_vocab, 5, [CLS])
-    vocabs['pos'] = Vocab(args.pos_vocab, 5, [CLS])
-    vocabs['ner'] = Vocab(args.ner_vocab, 5, [CLS])
     vocabs['predictable_concept'] = Vocab(args.predictable_concept_vocab, 5, [DUM, END])
     vocabs['concept'] = Vocab(args.concept_vocab, 5, [DUM, END])
     vocabs['rel'] = Vocab(args.rel_vocab, 50, [NIL])
@@ -108,9 +94,9 @@ def load_vocabs(args):
     vocabs['concept_char'] = Vocab(args.concept_char_vocab, 100, [CLS, END])
     lexical_mapping = LexicalMap()
     bert_encoder = None
-    if args.with_bert:
-        bert_tokenizer = BertEncoderTokenizer.from_pretrained(args.bert_path, do_lower_case=False)
-        vocabs['bert_tokenizer'] = bert_tokenizer
+
+    bert_tokenizer = BertEncoderTokenizer.from_pretrained(args.bert_path, do_lower_case=False)
+    vocabs['bert_tokenizer'] = bert_tokenizer
     for name in vocabs:
         if name == 'bert_tokenizer':
             continue
@@ -136,11 +122,10 @@ def main(local_rank, args):
         device = torch.device("cpu")
 
     model = Parser(vocabs,
-                   args.word_char_dim, args.word_dim, args.pos_dim, args.ner_dim,
                    args.concept_char_dim, args.concept_dim,
                    args.cnn_filters, args.char2word_dim, args.char2concept_dim,
                    args.embed_dim, args.ff_embed_dim, args.num_heads, args.dropout,
-                   args.snt_layers, args.graph_layers, args.inference_layers, args.rel_dim,
+                   args.graph_layers, args.inference_layers, args.rel_dim,
                    args.pretrained_file, bert_encoder,
                    device)
 
