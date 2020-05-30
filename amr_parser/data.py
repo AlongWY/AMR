@@ -185,6 +185,9 @@ class DataLoader(object):
             }
             if bert_tokenizer is not None:
                 bert_token, token_subword_index = bert_tokenizer.tokenize(token)
+                # todo
+                if len(bert_token) > 512:
+                    continue
                 datum['bert_token'] = bert_token
                 datum['token_subword_index'] = token_subword_index
 
