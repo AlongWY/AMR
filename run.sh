@@ -3,7 +3,7 @@
 # Author: Yunlong Feng <ylfeng@ir.hit.edu.cn>
 
 if [ $# == 1 ]; then
-  CUDA_VISIBLE_DEVICES=$1 PYTHONPATH=. python amr_parser_train.py \
+  CUDA_VISIBLE_DEVICES=$1 PYTHONPATH=. python amr_parser/train.py \
     --tok_vocab data/tok_vocab \
     --lem_vocab data/lem_vocab \
     --rel_vocab data/rel_vocab \
