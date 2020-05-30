@@ -241,7 +241,7 @@ class SelfAttentionMask(nn.Module):
     def forward(self, size):
         if self.weights is None or size > self.weights.size(0):
             self.weights = SelfAttentionMask.get_mask(size)
-        res = self.weights[:size, :size].to(self.weights.device).detach()
+        res = self.weights[:size, :size].to(self.device).detach()
         return res
 
 
