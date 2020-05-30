@@ -10,7 +10,7 @@ if [ $# == 1 ]; then
     --concept_char_vocab data/concept_char_vocab \
     --concept_vocab data/concept_vocab \
     --predictable_concept_vocab data/predictable_concept_vocab \
-    --train_data data/amr.dev.json \
+    --train_data data/amr.train.json \
     --dev_data data/amr.dev.json \
     --bert_path ./bert-base-cased \
     --concept_char_dim 32 \
