@@ -114,9 +114,9 @@ def ArraysToTensor(xs):
 def batchify(data, vocabs, unk_rate=0.):
     _tok = ListsToTensor([[CLS] + x['tok'] for x in data], vocabs['tok'], unk_rate=unk_rate)
     _lem = ListsToTensor([[CLS] + x['lem'] for x in data], vocabs['lem'], unk_rate=unk_rate)
-    _pos = ListsToTensor([[CLS] + x['pos'] for x in data], vocabs['pos'], unk_rate=unk_rate)
-    _ner = ListsToTensor([[CLS] + x['ner'] for x in data], vocabs['ner'], unk_rate=unk_rate)
-    _word_char = ListsofStringToTensor([[CLS] + x['tok'] for x in data], vocabs['word_char'])
+    # _pos = ListsToTensor([[CLS] + x['pos'] for x in data], vocabs['pos'], unk_rate=unk_rate)
+    # _ner = ListsToTensor([[CLS] + x['ner'] for x in data], vocabs['ner'], unk_rate=unk_rate)
+    # _word_char = ListsofStringToTensor([[CLS] + x['tok'] for x in data], vocabs['word_char'])
 
     local_token2idx = [x['token2idx'] for x in data]
     local_idx2token = [x['idx2token'] for x in data]
@@ -150,11 +150,16 @@ def batchify(data, vocabs, unk_rate=0.):
             _rel[v + 1, bidx, u + 1] = r
 
     ret = {
-        'lem': _lem, 'tok': _tok, 'pos': _pos, 'ner': _ner, 'word_char': _word_char,
+        'lem': _lem,
+        'tok': _tok,
+        'rel': _rel,
+        'concept_in': _concept_in,
+        'concept_char_in': _concept_char_in,
+        'concept_out': _concept_out,
         'copy_seq': np.stack([_cp_seq, _mp_seq], -1),
-        'local_token2idx': local_token2idx, 'local_idx2token': local_idx2token,
-        'concept_in': _concept_in, 'concept_char_in': _concept_char_in,
-        'concept_out': _concept_out, 'rel': _rel
+        'local_token2idx': local_token2idx,
+        'local_idx2token': local_idx2token,
+        # 'pos': _pos, 'ner': _ner, 'word_char': _word_char,
     }
 
     bert_tokenizer = vocabs.get('bert_tokenizer', None)
@@ -168,7 +173,7 @@ class DataLoader(object):
     def __init__(self, vocabs, lex_map, filename, batch_size, for_train):
         self.data = []
         bert_tokenizer = vocabs.get('bert_tokenizer', None)
-        for amr, token, lemma, pos, ner in zip(*read_file(filename)):
+        for amr, token, lemma in zip(*read_file(filename)):
             if for_train:
                 _, _, not_ok = amr.root_centered_sort()
                 if not_ok or len(token) == 0:

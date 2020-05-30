@@ -18,25 +18,13 @@ class AMRIO:
         with open(file_path, encoding='utf-8') as f:
             for line in f:
                 line = line.rstrip()
-                if line.startswith('# ::id '):
-                    amr_id = line[len('# ::id '):]
-                elif line.startswith('# ::snt '):
-                    sentence = line[len('# ::snt '):]
-                elif line.startswith('# ::tokens '):
-                    tokens = json.loads(line[len('# ::tokens '):])
-                elif line.startswith('# ::lemmas '):
-                    lemmas = json.loads(line[len('# ::lemmas '):])
-                    lemmas = [le if _is_abs_form(le) else le.lower() for le in lemmas]
-                elif line.startswith('# ::pos_tags '):
-                    pos_tags = json.loads(line[len('# ::pos_tags '):])
-                elif line.startswith('# ::ner_tags '):
-                    ner_tags = json.loads(line[len('# ::ner_tags '):])
-                elif line.startswith('# ::abstract_map '):
-                    abstract_map = json.loads(line[len('# ::abstract_map '):])
-                    graph_line = AMR.get_amr_line(f)
-                    amr = AMR.parse_AMR_line(graph_line)
-                    myamr = AMRGraph(amr)
-                    yield tokens, lemmas, pos_tags, ner_tags, myamr
+                data = json.loads(line)
+                tokens = data['token']
+                lemmas = data['lemmas']
+
+                amr_g = AMR.parse_amr(data)
+                amr = AMRGraph(amr_g)
+                yield tokens, lemmas, amr
 
 
 class LexicalMap(object):
@@ -71,15 +59,13 @@ class LexicalMap(object):
 
 def read_file(filename):
     # read preprocessed amr file
-    token, lemma, pos, ner, amrs = [], [], [], [], []
-    for _tok, _lem, _pos, _ner, _myamr in AMRIO.read(filename):
+    token, lemma, amrs = [], [], []
+    for _tok, _lem, _amr in AMRIO.read(filename):
         token.append(_tok)
         lemma.append(_lem)
-        pos.append(_pos)
-        ner.append(_ner)
-        amrs.append(_myamr)
+        amrs.append(_amr)
     print('read from %s, %d amrs' % (filename, len(token)))
-    return amrs, token, lemma, pos, ner
+    return amrs, token, lemma
 
 
 def make_vocab(batch_seq, char_level=False):
@@ -112,7 +98,7 @@ def parse_config():
 
 if __name__ == "__main__":
     args = parse_config()
-    amrs, token, lemma, pos, ner = read_file(args.train_data)
+    amrs, token, lemma = read_file(args.train_data)
     lexical_map = LexicalMap()
 
     # collect concepts and relations
@@ -137,8 +123,6 @@ if __name__ == "__main__":
     # make vocabularies
     token_vocab, token_char_vocab = make_vocab(token, char_level=True)
     lemma_vocab, lemma_char_vocab = make_vocab(lemma, char_level=True)
-    pos_vocab = make_vocab(pos)
-    ner_vocab = make_vocab(ner)
     conc_vocab, conc_char_vocab = make_vocab(conc, char_level=True)
 
     predictable_conc_vocab = make_vocab(predictable_conc)
@@ -152,8 +136,6 @@ if __name__ == "__main__":
     write_vocab(token_char_vocab, 'word_char_vocab')
     write_vocab(lemma_vocab, 'lem_vocab')
     write_vocab(lemma_char_vocab, 'lem_char_vocab')
-    write_vocab(pos_vocab, 'pos_vocab')
-    write_vocab(ner_vocab, 'ner_vocab')
     write_vocab(conc_vocab, 'concept_vocab')
     write_vocab(conc_char_vocab, 'concept_char_vocab')
     write_vocab(predictable_conc_vocab, 'predictable_concept_vocab')

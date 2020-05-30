@@ -16,6 +16,8 @@ from amr_parser.work import parse_data
 
 def parse_config():
     parser = argparse.ArgumentParser()
+    parser.add_argument('--tok_vocab', type=str)
+    parser.add_argument('--lem_vocab', type=str)
     parser.add_argument('--concept_vocab', type=str)
     parser.add_argument('--concept_char_vocab', type=str)
     parser.add_argument('--predictable_concept_vocab', type=str)
@@ -87,11 +89,12 @@ def data_proc(data, queue):
 
 def load_vocabs(args):
     vocabs = dict()
-    vocabs['predictable_concept'] = Vocab(args.predictable_concept_vocab, 5, [DUM, END])
+    vocabs['tok'] = Vocab(args.tok_vocab, 5, [CLS])
+    vocabs['lem'] = Vocab(args.lem_vocab, 5, [CLS])
     vocabs['concept'] = Vocab(args.concept_vocab, 5, [DUM, END])
-    vocabs['rel'] = Vocab(args.rel_vocab, 50, [NIL])
-    vocabs['word_char'] = Vocab(args.word_char_vocab, 100, [CLS, END])
     vocabs['concept_char'] = Vocab(args.concept_char_vocab, 100, [CLS, END])
+    vocabs['predictable_concept'] = Vocab(args.predictable_concept_vocab, 5, [DUM, END])
+    vocabs['rel'] = Vocab(args.rel_vocab, 50, [NIL])
     lexical_mapping = LexicalMap()
     bert_encoder = None
 
@@ -106,11 +109,10 @@ def load_vocabs(args):
 
 def main(local_rank, args):
     vocabs, lexical_mapping = load_vocabs(args)
-    bert_encoder = None
-    if args.with_bert:
-        bert_encoder = BertEncoder.from_pretrained(args.bert_path)
-        for p in bert_encoder.parameters():
-            p.requires_grad = False
+
+    bert_encoder = BertEncoder.from_pretrained(args.bert_path)
+    for p in bert_encoder.parameters():
+        p.requires_grad = False
 
     torch.manual_seed(19940117)
     torch.cuda.manual_seed_all(19940117)
@@ -121,13 +123,23 @@ def main(local_rank, args):
     else:
         device = torch.device("cpu")
 
-    model = Parser(vocabs,
-                   args.concept_char_dim, args.concept_dim,
-                   args.cnn_filters, args.char2word_dim, args.char2concept_dim,
-                   args.embed_dim, args.ff_embed_dim, args.num_heads, args.dropout,
-                   args.graph_layers, args.inference_layers, args.rel_dim,
-                   args.pretrained_file, bert_encoder,
-                   device)
+    model = Parser(
+        vocabs=vocabs,
+        concept_char_dim=args.concept_char_dim,
+        concept_dim=args.concept_dim,
+        cnn_filters=args.cnn_filters,
+        char2concept_dim=args.char2concept_dim,
+        embed_dim=args.embed_dim,
+        ff_embed_dim=args.ff_embed_dim,
+        num_heads=args.num_heads,
+        dropout=args.dropout,
+        graph_layers=args.graph_layers,
+        inference_layers=args.inference_layers,
+        rel_dim=args.rel_dim,
+        pretrained_file=args.pretrained_file,
+        bert_encoder=bert_encoder,
+        device=device
+    )
 
     if args.world_size > 1:
         torch.manual_seed(19940117 + dist.get_rank())

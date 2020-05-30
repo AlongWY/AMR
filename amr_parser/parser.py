@@ -13,8 +13,9 @@ from amr_parser.utils import move_to_device
 
 class Parser(nn.Module):
     def __init__(self, vocabs, concept_char_dim, concept_dim,
-                 cnn_filters, char2concept_dim, embed_dim, ff_embed_dim, num_heads, dropout,
-                 snt_layers, graph_layers, inference_layers, rel_dim,
+                 cnn_filters, char2concept_dim, embed_dim,
+                 ff_embed_dim, num_heads, dropout,
+                 graph_layers, inference_layers, rel_dim,
                  pretrained_file=None, bert_encoder=None,
                  device=0):
         super(Parser, self).__init__()
@@ -48,14 +49,19 @@ class Parser(nn.Module):
         nn.init.normal_(self.probe_generator.weight, std=0.02)
         nn.init.constant_(self.probe_generator.bias, 0.)
 
-    def encode_step_with_bert(self, bert_token, token_subword_index):
+    def encode_step_with_bert(self, lemma, bert_token, token_subword_index):
         bert_embed, _ = self.bert_encoder(bert_token, token_subword_index=token_subword_index)
-        probe = torch.tanh(self.probe_generator(bert_embed[:1]))
-        return bert_embed, probe
+        bert_embed = bert_embed.transpose(0, 1)
+        word_repr = self.bert_adaptor(bert_embed)
+        probe = torch.tanh(self.probe_generator(word_repr[:1]))
+        word_mask = torch.eq(lemma, self.vocabs['lem'].padding_idx)
+        return word_repr[1:], word_mask[1:], probe
 
     def work(self, data, beam_size, max_time_step, min_time_step=1):
         with torch.no_grad():
-            word_repr, word_mask, probe = self.encode_step_with_bert(data['bert_token'], data['token_subword_index'])
+            word_repr, word_mask, probe = self.encode_step_with_bert(
+                data['lem'], data['bert_token'], data['token_subword_index']
+            )
 
             mem_dict = {'snt_state': word_repr,
                         'snt_padding_mask': word_mask,
@@ -143,8 +149,9 @@ class Parser(nn.Module):
         return new_state_dict, results
 
     def forward(self, data):
-        word_repr, word_mask, probe = self.encode_step_with_bert(data['bert_token'], data['token_subword_index'])
-
+        word_repr, word_mask, probe = self.encode_step_with_bert(
+            data['lem'], data['bert_token'], data['token_subword_index']
+        )
         concept_repr = self.embed_scale * self.concept_encoder(data['concept_char_in'], data['concept_in']) + \
                        self.embed_positions(data['concept_in'])
 
