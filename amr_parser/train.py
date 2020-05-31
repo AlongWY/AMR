@@ -13,7 +13,12 @@ from amr_parser.bert_utils import BertEncoderTokenizer, BertEncoder
 from amr_parser.postprocess import PostProcessor
 from amr_parser.work import parse_data
 
-logging.basicConfig(filename='train.log', level=logging.DEBUG)
+logging.basicConfig(
+    filename='train.log',
+    format='%(asctime)s %(levelname)-8s %(message)s',
+    level=logging.INFO,
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
 
 
 def parse_config():
