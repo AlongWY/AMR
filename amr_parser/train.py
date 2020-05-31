@@ -1,4 +1,4 @@
-import torch
+import torch, logging
 import torch.distributed as dist
 import torch.multiprocessing as mp
 
@@ -12,6 +12,8 @@ from amr_parser.utils import move_to_device
 from amr_parser.bert_utils import BertEncoderTokenizer, BertEncoder
 from amr_parser.postprocess import PostProcessor
 from amr_parser.work import parse_data
+
+logging.basicConfig(filename='train.log', level=logging.DEBUG)
 
 
 def parse_config():
@@ -209,7 +211,7 @@ def main(local_rank, args):
             optimizer.zero_grad()
             if args.world_size == 1 or (dist.get_rank() == 0):
                 if batches_acm % args.print_every == -1 % args.print_every:
-                    print('Train Epoch %d, Batch %d, LR %.6f, conc_loss %.3f, arc_loss %.3f, rel_loss %.3f' % (
+                    logging.info('Train Epoch %d, Batch %d, LR %.6f, conc_loss %.3f, arc_loss %.3f, rel_loss %.3f' % (
                         epoch, batches_acm, lr, concept_loss_avg, arc_loss_avg, rel_loss_avg))
                     model.train()
                 if (batches_acm > 10000 or args.resume_ckpt is not None) and \

@@ -64,7 +64,7 @@ def parse_batch(model, batch, beam_size, alpha, max_time_step):
     return res
 
 
-def parse_data(model, pp, data, input_file, output_file, beam_size=8, alpha=0.6, max_time_step=100):
+def parse_data(model, pp, data, input_file, output_file, beam_size=8, alpha=0.6, max_time_step=100, logger=None):
     tot = 0
     with open(output_file, 'w', encoding='utf-8') as fo:
         for batch in data:
@@ -76,7 +76,10 @@ def parse_data(model, pp, data, input_file, output_file, beam_size=8, alpha=0.6,
                 fo.write(pp.postprocess(concept, relation) + '\n\n')
                 tot += 1
     # match(output_file, input_file)
-    print('write down %d amrs' % tot)
+    if logger is None:
+        print('write down %d amrs' % tot)
+    else:
+        logger.info(print('write down %d amrs' % tot))
 
 
 def load_ckpt_without_bert(model, test_model):

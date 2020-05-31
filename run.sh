@@ -33,7 +33,7 @@ if [ $# == 1 ]; then
     --lr_scale 1. \
     --warmup_steps 2000 \
     --print_every 100 \
-    --eval_every 1000 \
+    --eval_every 50000 \
     --batches_per_update 1 \
     --ckpt ckpt \
     --world_size 1 \
