@@ -6,5 +6,11 @@
 *.DS_Store
 *.pyc
 *.so
+*.pyd
+*.obj
+*.exp
+*.lib
 
-
+fast_smatch/_smatch.c
+fast_smatch/_smatch.cc
+fast_smatch/_smatch.cpp
