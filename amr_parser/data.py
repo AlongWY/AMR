@@ -1,12 +1,10 @@
 import random
-import torch
-from torch import nn
 import numpy as np
-from amr_parser.AMRGraph import AMRGraph
 from amr_parser.extract import read_file
 
 PAD, UNK, DUM, NIL, END, CLS = '<PAD>', '<UNK>', '<DUMMY>', '<NULL>', '<END>', '<CLS>'
-GPU_SIZE = 12000  # okay for 8G memory
+# GPU_SIZE = 12000  # okay for 8G memory
+GPU_SIZE = 24000  # okay for 16G memory
 
 
 class Vocab(object):

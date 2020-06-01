@@ -36,8 +36,8 @@ if [ $# == 1 ]; then
     --eval_every 50000 \
     --batches_per_update 1 \
     --ckpt ckpt \
-    --world_size 1 \
-    --gpus 1
+    --world_size 3 \
+    --gpus 3
 else
   echo "$0 [CUDA DEVICES]"
 fi
