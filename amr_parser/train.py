@@ -13,13 +13,12 @@ from amr_parser.bert_utils import BertEncoderTokenizer, BertEncoder
 from amr_parser.postprocess import PostProcessor
 from amr_parser.work import parse_data
 
-logging.basicConfig(
-    format='%(asctime)s %(levelname)-8s %(message)s',
-    level=logging.INFO,
-    datefmt='%Y-%m-%d %H:%M:%S'
-)
 logger = logging.getLogger(__name__)
-logger.addHandler(logging.FileHandler('train.log'))
+logger.setLevel(logging.INFO)
+console_handler = logging.FileHandler('train.log')
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+console_handler.setFormatter(formatter)
+logger.addHandler(console_handler)
 
 
 def parse_config():
@@ -186,13 +185,10 @@ def main(local_rank, args):
     model.train()
     epoch, loss_avg, concept_loss_avg, arc_loss_avg, rel_loss_avg = 0, 0, 0, 0, 0
     logger.info("start training")
-    start_time = time.time()
     while True:
         batch = queue.get()
         if isinstance(batch, str):
-            end_time = time.time()
             epoch += 1
-            logger.info(f'epoch:{epoch} done(batches:{batches_acm}) time: {end_time - start_time}')
         else:
             batch = move_to_device(batch, model.device)
             concept_loss, arc_loss, rel_loss, graph_arc_loss = model(batch)
@@ -219,8 +215,9 @@ def main(local_rank, args):
             optimizer.zero_grad()
             if args.world_size == 1 or (dist.get_rank() == 0):
                 if batches_acm % args.print_every == -1 % args.print_every:
-                    logger.info('Train Epoch %d, Batch %d, LR %.6f, conc_loss %.3f, arc_loss %.3f, rel_loss %.3f' % (
-                        epoch, batches_acm, lr, concept_loss_avg, arc_loss_avg, rel_loss_avg))
+                    logger.info(
+                        '[%d] Train Epoch %d, Batch %d, LR %.6f, conc_loss %.3f, arc_loss %.3f, rel_loss %.3f' % (
+                            local_rank, epoch, batches_acm, lr, concept_loss_avg, arc_loss_avg, rel_loss_avg))
                     model.train()
                 if (batches_acm > 10000 or args.resume_ckpt is not None) and \
                         (batches_acm % args.eval_every == -1 % args.eval_every):
