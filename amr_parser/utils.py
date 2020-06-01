@@ -1,8 +1,18 @@
 import torch
 from torch import nn
 import numpy as np
-import math
-import os
+import math, time
+
+
+def exe_time(func):
+    def new_func(*args, **args2):
+        t0 = time.time()
+        back = func(*args, **args2)
+        t1 = time.time()
+        print("@%.3fs taken for {%s}" % (t1 - t0, func.__name__))
+        return back
+
+    return new_func
 
 
 def move_to_device(maybe_tensor, device):
