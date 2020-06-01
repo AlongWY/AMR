@@ -1,4 +1,4 @@
-import torch, logging
+import torch, logging, time
 
 from amr_parser.data import Vocab, DataLoader, DUM, END, CLS, NIL
 from amr_parser.parser import Parser
@@ -168,6 +168,7 @@ if __name__ == "__main__":
         # loss = show_progress(model, test_data)
         pp = PostProcessor(vocabs['rel'])
         logging.info('start parsing')
+        start_time = time.time()
         parse_data(
             model, pp,
             another_test_data,
@@ -177,4 +178,5 @@ if __name__ == "__main__":
             args.alpha,
             args.max_time_step
         )
-        logging.info('done!')
+        end_time = time.time()
+        logging.info(f'done! time: {end_time - start_time}')

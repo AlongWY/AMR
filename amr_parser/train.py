@@ -1,4 +1,4 @@
-import torch, logging
+import torch, logging, time
 import torch.distributed as dist
 import torch.multiprocessing as mp
 
@@ -184,11 +184,13 @@ def main(local_rank, args):
     model.train()
     epoch, loss_avg, concept_loss_avg, arc_loss_avg, rel_loss_avg = 0, 0, 0, 0, 0
     logging.info("start training")
+    start_time = time.time()
     while True:
         batch = queue.get()
         if isinstance(batch, str):
+            end_time = time.time()
             epoch += 1
-            logging.info(f'epoch:{epoch} done(batches:{batches_acm})')
+            logging.info(f'epoch:{epoch} done(batches:{batches_acm}) time: {end_time - start_time}')
         else:
             batch = move_to_device(batch, model.device)
             concept_loss, arc_loss, rel_loss, graph_arc_loss = model(batch)
