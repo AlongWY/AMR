@@ -28,8 +28,8 @@ if [ $# == 1 ]; then
     --dropout 0.2 \
     --unk_rate 0.33 \
     --epochs 100000 \
-    --train_batch_size 5000 \
-    --dev_batch_size 5000 \
+    --train_batch_size 4444 \
+    --dev_batch_size 4444 \
     --lr_scale 1. \
     --warmup_steps 2000 \
     --print_every 100 \
