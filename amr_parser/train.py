@@ -189,7 +189,7 @@ def main(local_rank, args):
         batch = queue.get()
         if isinstance(batch, str):
             epoch += 1
-            logger.info(f'[{local_rank}] epoch:{epoch} done(batches:{batches_acm})')
+            # logger.info(f'[{local_rank}] epoch:{epoch} done(batches:{batches_acm})')
         else:
             batch = move_to_device(batch, model.device)
             concept_loss, arc_loss, rel_loss, graph_arc_loss = model(batch)
@@ -216,9 +216,8 @@ def main(local_rank, args):
             optimizer.zero_grad()
             if args.world_size == 1 or (dist.get_rank() == 0):
                 if batches_acm % args.print_every == -1 % args.print_every:
-                    logger.info(
-                        'Train Epoch %d, Batch %d, LR %.6f, conc_loss %.3f, arc_loss %.3f, rel_loss %.3f' % (
-                            local_rank, epoch, batches_acm, lr, concept_loss_avg, arc_loss_avg, rel_loss_avg))
+                    logger.info('Train Epoch %d, Batch %d, LR %.6f, conc_loss %.3f, arc_loss %.3f, rel_loss %.3f' %
+                                (epoch, batches_acm, lr, concept_loss_avg, arc_loss_avg, rel_loss_avg))
                     model.train()
                 if (batches_acm > 10000 or args.resume_ckpt is not None) and \
                         (batches_acm % args.eval_every == -1 % args.eval_every):
