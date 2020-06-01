@@ -5,7 +5,6 @@ import json, re
 
 from amr_parser.amr import AMR
 from amr_parser.AMRGraph import AMRGraph, number_regexp
-from amr_parser.AMRGraph import _is_abs_form
 
 
 class AMRIO:
