@@ -184,6 +184,7 @@ def main(local_rank, args):
     train_data_generator.start()
     model.train()
     epoch, loss_avg, concept_loss_avg, arc_loss_avg, rel_loss_avg = 0, 0, 0, 0, 0
+    logger.info("Start Training")
     while True:
         batch = queue.get()
         if isinstance(batch, str):
