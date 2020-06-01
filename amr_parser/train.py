@@ -66,9 +66,9 @@ def parse_config():
 
     parser.add_argument('--world_size', type=int)
     parser.add_argument('--gpus', type=int)
-    parser.add_argument('--MASTER_ADDR', type=str, default="127.0.0.1")
-    parser.add_argument('--MASTER_PORT', type=str, default="8991")
-    parser.add_argument('--start_rank', type=int)
+    parser.add_argument('--MASTER_ADDR', type=str, default="localhost")
+    parser.add_argument('--MASTER_PORT', type=str, default="29505")
+    parser.add_argument('--start_rank', type=int, default=0)
 
     return parser.parse_args()
 
