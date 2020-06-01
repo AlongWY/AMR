@@ -142,6 +142,7 @@ if __name__ == "__main__":
         ff_embed_dim=model_args.ff_embed_dim,
         num_heads=model_args.num_heads,
         dropout=model_args.dropout,
+        snt_layers=model_args.snt_layers,
         graph_layers=model_args.graph_layers,
         inference_layers=model_args.inference_layers,
         rel_dim=model_args.rel_dim,

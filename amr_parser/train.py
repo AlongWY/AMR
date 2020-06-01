@@ -139,6 +139,7 @@ def main(local_rank, args):
         ff_embed_dim=args.ff_embed_dim,
         num_heads=args.num_heads,
         dropout=args.dropout,
+        snt_layers=args.snt_layers,
         graph_layers=args.graph_layers,
         inference_layers=args.inference_layers,
         rel_dim=args.rel_dim,
@@ -225,7 +226,7 @@ def main(local_rank, args):
                         (batches_acm % args.eval_every == -1 % args.eval_every):
                     model.eval()
                     parse_data(model, pp, dev_data, args.dev_data,
-                               '%s/epoch%d_batch%d_dev_out' % (args.ckpt, epoch, batches_acm))
+                               '%s/epoch%d_batch%d_dev_out' % (args.ckpt, epoch, batches_acm), logger=logger)
                     torch.save({'args': args,
                                 'model': model.state_dict(),
                                 'batches_acm': batches_acm,
