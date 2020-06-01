@@ -103,8 +103,6 @@ def load_vocabs(args):
     vocabs['predictable_concept'] = Vocab(args.predictable_concept_vocab, 5, [DUM, END])
     vocabs['rel'] = Vocab(args.rel_vocab, 50, [NIL])
     lexical_mapping = LexicalMap()
-    bert_encoder = None
-
     bert_tokenizer = BertEncoderTokenizer.from_pretrained(args.bert_path, do_lower_case=False)
     vocabs['bert_tokenizer'] = bert_tokenizer
     for name in vocabs:
@@ -185,11 +183,12 @@ def main(local_rank, args):
     train_data_generator.start()
     model.train()
     epoch, loss_avg, concept_loss_avg, arc_loss_avg, rel_loss_avg = 0, 0, 0, 0, 0
+    logging.info("start training")
     while True:
         batch = queue.get()
         if isinstance(batch, str):
             epoch += 1
-            print('epoch', epoch, 'done', 'batches', batches_acm)
+            logging.info(f'epoch:{epoch} done(batches:{batches_acm})')
         else:
             batch = move_to_device(batch, model.device)
             concept_loss, arc_loss, rel_loss, graph_arc_loss = model(batch)

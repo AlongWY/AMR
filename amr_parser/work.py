@@ -1,4 +1,4 @@
-import torch
+import torch, logging
 
 from amr_parser.data import Vocab, DataLoader, DUM, END, CLS, NIL
 from amr_parser.parser import Parser
@@ -10,17 +10,24 @@ from amr_parser.match import match
 
 import argparse, os, re
 
+logging.basicConfig(
+    filename='work.log',
+    format='%(asctime)s %(levelname)-8s %(message)s',
+    level=logging.INFO,
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
+
 
 def parse_config():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--load_path', type=str)
-    parser.add_argument('--test_data', type=str)
-    parser.add_argument('--test_batch_size', type=int)
-    parser.add_argument('--beam_size', type=int)
-    parser.add_argument('--alpha', type=float)
-    parser.add_argument('--max_time_step', type=int)
-    parser.add_argument('--output_suffix', type=str)
+    parser.add_argument('--load_path', type=str, default='ckpt/epoch447_batch164999')
+    parser.add_argument('--test_data', type=str, default='data/amr.valid.json')
+    parser.add_argument('--test_batch_size', type=int, default=4444)
+    parser.add_argument('--beam_size', type=int, default=8)
+    parser.add_argument('--alpha', type=float, default=0.6)
+    parser.add_argument('--max_time_step', type=int, default=100)
+    parser.add_argument('--output_suffix', type=str, default='eval_test')
     parser.add_argument('--device', type=int, default=0)
 
     return parser.parse_args()
@@ -82,8 +89,8 @@ def parse_data(model, pp, data, input_file, output_file, beam_size=8, alpha=0.6,
         logger.info(print('write down %d amrs' % tot))
 
 
-def load_ckpt_without_bert(model, test_model):
-    ckpt = torch.load(test_model)['model']
+def load_ckpt_without_bert(model, test_model, device):
+    ckpt = torch.load(test_model, map_location=device)['model']
     for k, v in model.state_dict().items():
         if k.startswith('bert_encoder'):
             ckpt[k] = v
@@ -91,65 +98,83 @@ def load_ckpt_without_bert(model, test_model):
 
 
 if __name__ == "__main__":
-
     args = parse_config()
-
     test_models = []
+    if torch.cuda.is_available():
+        device = torch.device('cuda')
+    else:
+        device = torch.device('cpu')
+
     if os.path.isdir(args.load_path):
         for file in os.listdir(args.load_path):
             fname = os.path.join(args.load_path, file)
             if os.path.isfile(fname):
                 test_models.append(fname)
-        model_args = torch.load(fname)['args']
+        model_args = torch.load(fname, map_location=device)['args']
     else:
         test_models.append(args.load_path)
-        model_args = torch.load(args.load_path)['args']
+        model_args = torch.load(args.load_path, map_location=device)['args']
 
     vocabs = dict()
-
+    # vocabs['pos'] = Vocab(model_args.pos_vocab, 5, [CLS])
+    # vocabs['ner'] = Vocab(model_args.ner_vocab, 5, [CLS])
     vocabs['tok'] = Vocab(model_args.tok_vocab, 5, [CLS])
     vocabs['lem'] = Vocab(model_args.lem_vocab, 5, [CLS])
-    vocabs['pos'] = Vocab(model_args.pos_vocab, 5, [CLS])
-    vocabs['ner'] = Vocab(model_args.ner_vocab, 5, [CLS])
-    vocabs['predictable_concept'] = Vocab(model_args.predictable_concept_vocab, 5, [DUM, END])
     vocabs['concept'] = Vocab(model_args.concept_vocab, 5, [DUM, END])
-    vocabs['rel'] = Vocab(model_args.rel_vocab, 50, [NIL])
-    vocabs['word_char'] = Vocab(model_args.word_char_vocab, 100, [CLS, END])
     vocabs['concept_char'] = Vocab(model_args.concept_char_vocab, 100, [CLS, END])
+    vocabs['predictable_concept'] = Vocab(model_args.predictable_concept_vocab, 5, [DUM, END])
+    vocabs['rel'] = Vocab(model_args.rel_vocab, 50, [NIL])
+    # vocabs['word_char'] = Vocab(model_args.word_char_vocab, 100, [CLS, END])
     lexical_mapping = LexicalMap()
 
-    bert_encoder = None
+    bert_tokenizer = BertEncoderTokenizer.from_pretrained(model_args.bert_path, do_lower_case=False)
+    bert_encoder = BertEncoder.from_pretrained(model_args.bert_path)
+    vocabs['bert_tokenizer'] = bert_tokenizer
 
-    if model_args.with_bert:
-        bert_tokenizer = BertEncoderTokenizer.from_pretrained(model_args.bert_path, do_lower_case=False)
-        bert_encoder = BertEncoder.from_pretrained(model_args.bert_path)
-        vocabs['bert_tokenizer'] = bert_tokenizer
-
-    if args.device < 0:
-        device = torch.device('cpu')
-    else:
-        device = torch.device('cuda', args.device)
-
-    model = Parser(vocabs,
-                   model_args.word_char_dim, model_args.word_dim, model_args.pos_dim, model_args.ner_dim,
-                   model_args.concept_char_dim, model_args.concept_dim,
-                   model_args.cnn_filters, model_args.char2word_dim, model_args.char2concept_dim,
-                   model_args.embed_dim, model_args.ff_embed_dim, model_args.num_heads, model_args.dropout,
-                   model_args.snt_layers, model_args.graph_layers, model_args.inference_layers, model_args.rel_dim,
-                   bert_encoder=bert_encoder, device=device)
+    model = Parser(
+        vocabs=vocabs,
+        concept_char_dim=model_args.concept_char_dim,
+        concept_dim=model_args.concept_dim,
+        cnn_filters=model_args.cnn_filters,
+        char2concept_dim=model_args.char2concept_dim,
+        embed_dim=model_args.embed_dim,
+        ff_embed_dim=model_args.ff_embed_dim,
+        num_heads=model_args.num_heads,
+        dropout=model_args.dropout,
+        graph_layers=model_args.graph_layers,
+        inference_layers=model_args.inference_layers,
+        rel_dim=model_args.rel_dim,
+        pretrained_file=model_args.pretrained_file,
+        bert_encoder=bert_encoder,
+        device=device
+    )
 
     # test_data = DataLoader(vocabs, lexical_mapping, args.test_data, args.test_batch_size, for_train=True)
-    another_test_data = DataLoader(vocabs, lexical_mapping, args.test_data, args.test_batch_size, for_train=False)
+    another_test_data = DataLoader(
+        vocabs,
+        lexical_mapping,
+        args.test_data,
+        args.test_batch_size,
+        for_train=False
+    )
     for test_model in test_models:
         print(test_model)
         batch = int(re.search(r'batch([0-9])+', test_model)[0][5:])
         epoch = int(re.search(r'epoch([0-9])+', test_model)[0][5:])
 
-        load_ckpt_without_bert(model, test_model)
-        model = model.cuda()
+        load_ckpt_without_bert(model, test_model, device)
+        model = model.to(device)
         model.eval()
-
         # loss = show_progress(model, test_data)
         pp = PostProcessor(vocabs['rel'])
-        parse_data(model, pp, another_test_data, args.test_data, test_model + args.output_suffix, args.beam_size,
-                   args.alpha, args.max_time_step)
+        logging.info('start parsing')
+        parse_data(
+            model, pp,
+            another_test_data,
+            args.test_data,
+            test_model + args.output_suffix,
+            args.beam_size,
+            args.alpha,
+            args.max_time_step
+        )
+        logging.info('done!')

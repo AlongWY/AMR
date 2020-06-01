@@ -1,5 +1,6 @@
 /.idea/
 /data/
+/ckpt/
 /stanford-corenlp-full-2018-10-05
 /bert-base-cased
 
@@ -10,6 +11,7 @@
 *.obj
 *.exp
 *.lib
+*.log
 
 fast_smatch/_smatch.c
 fast_smatch/_smatch.cc
