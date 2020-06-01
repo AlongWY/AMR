@@ -189,6 +189,7 @@ def main(local_rank, args):
         batch = queue.get()
         if isinstance(batch, str):
             epoch += 1
+            logger.info(f'epoch:{epoch} done(batches:{batches_acm})')
         else:
             batch = move_to_device(batch, model.device)
             concept_loss, arc_loss, rel_loss, graph_arc_loss = model(batch)
