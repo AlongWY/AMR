@@ -11,11 +11,12 @@ from amr_parser.match import match
 import argparse, os, re
 
 logging.basicConfig(
-    filename='work.log',
     format='%(asctime)s %(levelname)-8s %(message)s',
     level=logging.INFO,
     datefmt='%Y-%m-%d %H:%M:%S'
 )
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.FileHandler('work.log'))
 
 
 def parse_config():
@@ -167,7 +168,7 @@ if __name__ == "__main__":
         model.eval()
         # loss = show_progress(model, test_data)
         pp = PostProcessor(vocabs['rel'])
-        logging.info('start parsing')
+        logger.info('start parsing')
         start_time = time.time()
         parse_data(
             model, pp,
@@ -179,4 +180,4 @@ if __name__ == "__main__":
             args.max_time_step
         )
         end_time = time.time()
-        logging.info(f'done! time: {end_time - start_time}')
+        logger.info(f'done! time: {end_time - start_time}')

@@ -14,11 +14,12 @@ from amr_parser.postprocess import PostProcessor
 from amr_parser.work import parse_data
 
 logging.basicConfig(
-    filename='train.log',
     format='%(asctime)s %(levelname)-8s %(message)s',
     level=logging.INFO,
     datefmt='%Y-%m-%d %H:%M:%S'
 )
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.FileHandler('train.log'))
 
 
 def parse_config():
@@ -183,14 +184,14 @@ def main(local_rank, args):
     train_data_generator.start()
     model.train()
     epoch, loss_avg, concept_loss_avg, arc_loss_avg, rel_loss_avg = 0, 0, 0, 0, 0
-    logging.info("start training")
+    logger.info("start training")
     start_time = time.time()
     while True:
         batch = queue.get()
         if isinstance(batch, str):
             end_time = time.time()
             epoch += 1
-            logging.info(f'epoch:{epoch} done(batches:{batches_acm}) time: {end_time - start_time}')
+            logger.info(f'epoch:{epoch} done(batches:{batches_acm}) time: {end_time - start_time}')
         else:
             batch = move_to_device(batch, model.device)
             concept_loss, arc_loss, rel_loss, graph_arc_loss = model(batch)
@@ -217,7 +218,7 @@ def main(local_rank, args):
             optimizer.zero_grad()
             if args.world_size == 1 or (dist.get_rank() == 0):
                 if batches_acm % args.print_every == -1 % args.print_every:
-                    logging.info('Train Epoch %d, Batch %d, LR %.6f, conc_loss %.3f, arc_loss %.3f, rel_loss %.3f' % (
+                    logger.info('Train Epoch %d, Batch %d, LR %.6f, conc_loss %.3f, arc_loss %.3f, rel_loss %.3f' % (
                         epoch, batches_acm, lr, concept_loss_avg, arc_loss_avg, rel_loss_avg))
                     model.train()
                 if (batches_acm > 10000 or args.resume_ckpt is not None) and \
