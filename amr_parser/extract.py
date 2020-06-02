@@ -21,7 +21,7 @@ class AMRIO:
                 tokens = data['token']
                 lemmas = data['lemmas']
 
-                amr_g = AMR.parse_amr(data)
+                amr_g = AMR.parse_amr_json(data)
                 amr = AMRGraph(amr_g)
                 yield tokens, lemmas, amr
 

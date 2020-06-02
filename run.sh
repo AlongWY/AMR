@@ -7,12 +7,15 @@ if [ $# == 1 ]; then
     --tok_vocab data/tok_vocab \
     --lem_vocab data/lem_vocab \
     --rel_vocab data/rel_vocab \
+    --word_char_vocab data/word_char_vocab \
     --concept_char_vocab data/concept_char_vocab \
     --concept_vocab data/concept_vocab \
     --predictable_concept_vocab data/predictable_concept_vocab \
     --train_data data/amr.train.json \
     --dev_data data/amr.dev.json \
     --bert_path ./bert-base-cased \
+    --word_dim 300 \
+    --word_char_dim 32 \
     --concept_char_dim 32 \
     --concept_dim 300 \
     --rel_dim 100 \

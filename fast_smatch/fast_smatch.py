@@ -7,10 +7,10 @@ For detailed description of smatch, see http://www.isi.edu/natural-language/amr/
 
 """
 
-import amr
+from . import amr
 from amr_parser.bert_utils import BertEncoderTokenizer
 import os, sys, json, argparse
-from _smatch import get_best_match, compute_f
+from ._smatch import get_best_match, compute_f
 
 # total number of iteration in smatch computation
 iteration_num = 5

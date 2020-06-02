@@ -25,6 +25,7 @@ def parse_config():
     parser = argparse.ArgumentParser()
     parser.add_argument('--tok_vocab', type=str)
     parser.add_argument('--lem_vocab', type=str)
+    parser.add_argument('--word_char_vocab', type=str)
     parser.add_argument('--concept_vocab', type=str)
     parser.add_argument('--concept_char_vocab', type=str)
     parser.add_argument('--predictable_concept_vocab', type=str)
@@ -32,13 +33,19 @@ def parse_config():
     parser.add_argument('--pretrained_file', type=str, default=None)
     parser.add_argument('--bert_path', type=str, default=None)
 
-    parser.add_argument('--concept_char_dim', type=int)
     parser.add_argument('--concept_dim', type=int)
+    parser.add_argument('--concept_char_dim', type=int)
+    parser.add_argument('--char2concept_dim', type=int)
+
     parser.add_argument('--rel_dim', type=int)
+    parser.add_argument('--pos_dim', type=int, default=0)
+    parser.add_argument('--ner_dim', type=int, default=0)
+
+    parser.add_argument('--word_dim', type=int)
+    parser.add_argument('--word_char_dim', type=int)
+    parser.add_argument('--char2word_dim', type=int)
 
     parser.add_argument('--cnn_filters', type=int, nargs='+')
-    parser.add_argument('--char2word_dim', type=int)
-    parser.add_argument('--char2concept_dim', type=int)
 
     parser.add_argument('--embed_dim', type=int)
     parser.add_argument('--ff_embed_dim', type=int)
@@ -98,10 +105,11 @@ def load_vocabs(args):
     vocabs = dict()
     vocabs['tok'] = Vocab(args.tok_vocab, 5, [CLS])
     vocabs['lem'] = Vocab(args.lem_vocab, 5, [CLS])
+    vocabs['rel'] = Vocab(args.rel_vocab, 50, [NIL])
     vocabs['concept'] = Vocab(args.concept_vocab, 5, [DUM, END])
     vocabs['concept_char'] = Vocab(args.concept_char_vocab, 100, [CLS, END])
+    vocabs['word_char'] = Vocab(args.word_char_vocab, 100, [CLS, END])
     vocabs['predictable_concept'] = Vocab(args.predictable_concept_vocab, 5, [DUM, END])
-    vocabs['rel'] = Vocab(args.rel_vocab, 50, [NIL])
     lexical_mapping = LexicalMap()
     bert_tokenizer = BertEncoderTokenizer.from_pretrained(args.bert_path, do_lower_case=False)
     vocabs['bert_tokenizer'] = bert_tokenizer
@@ -130,6 +138,11 @@ def main(local_rank, args):
 
     model = Parser(
         vocabs=vocabs,
+        word_char_dim=args.word_char_dim,
+        word_dim=args.word_dim,
+        char2word_dim=args.char2word_dim,
+        pos_dim=args.pos_dim,
+        ner_dim=args.ner_dim,
         concept_char_dim=args.concept_char_dim,
         concept_dim=args.concept_dim,
         cnn_filters=args.cnn_filters,

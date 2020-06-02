@@ -6,7 +6,6 @@ from amr_parser.postprocess import PostProcessor
 from amr_parser.extract import LexicalMap
 from amr_parser.utils import move_to_device
 from amr_parser.bert_utils import BertEncoderTokenizer, BertEncoder
-from amr_parser.match import match
 
 import argparse, os, re
 
@@ -134,6 +133,11 @@ if __name__ == "__main__":
 
     model = Parser(
         vocabs=vocabs,
+        word_char_dim=model_args.word_char_dim,
+        word_dim=model_args.word_dim,
+        char2word_dim=model_args.char2word_dim,
+        pos_dim=model_args.pos_dim,
+        ner_dim=model_args.ner_dim,
         concept_char_dim=model_args.concept_char_dim,
         concept_dim=model_args.concept_dim,
         cnn_filters=model_args.cnn_filters,

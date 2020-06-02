@@ -3,7 +3,7 @@ from torch import nn
 import torch.nn.functional as F
 import math
 
-from amr_parser.encoder import ConceptEncoder
+from amr_parser.encoder import ConceptEncoder, WordEncoder
 from amr_parser.decoder import DecodeLayer
 from amr_parser.transformer import Transformer, SinusoidalPositionalEmbedding, SelfAttentionMask
 from amr_parser.data import ListsToTensor, ListsofStringToTensor, DUM, NIL, PAD
@@ -12,7 +12,9 @@ from amr_parser.utils import move_to_device
 
 
 class Parser(nn.Module):
-    def __init__(self, vocabs, concept_char_dim, concept_dim,
+    def __init__(self, vocabs,
+                 word_char_dim, word_dim, char2word_dim, pos_dim, ner_dim,
+                 concept_char_dim, concept_dim,
                  cnn_filters, char2concept_dim, embed_dim,
                  ff_embed_dim, num_heads, dropout, snt_layers,
                  graph_layers, inference_layers, rel_dim,
@@ -20,7 +22,10 @@ class Parser(nn.Module):
                  device=0):
         super(Parser, self).__init__()
         self.vocabs = vocabs
-
+        self.word_encoder = WordEncoder(
+            vocabs, word_char_dim, word_dim, char2word_dim, pos_dim, ner_dim,
+            embed_dim, cnn_filters, dropout, pretrained_file
+        )
         self.concept_encoder = ConceptEncoder(
             vocabs, concept_char_dim, concept_dim, embed_dim,
             cnn_filters, char2concept_dim, dropout, pretrained_file
@@ -49,14 +54,15 @@ class Parser(nn.Module):
         nn.init.normal_(self.probe_generator.weight, std=0.02)
         nn.init.constant_(self.probe_generator.bias, 0.)
 
-    def encode_step_with_bert(self, lemma, bert_token, token_subword_index):
+    def encode_step_with_bert(self, tok, lem, pos, ner, word_char, bert_token, token_subword_index):
+        word_repr = self.word_encoder(word_char, tok, lem, pos, ner)
         bert_embed, _ = self.bert_encoder(bert_token, token_subword_index=token_subword_index)
         bert_embed = bert_embed.transpose(0, 1)
-        word_repr = self.bert_adaptor(bert_embed)
+        word_repr = word_repr + self.bert_adaptor(bert_embed)
+        word_repr = self.embed_scale * word_repr + self.embed_positions(tok)
 
-        word_repr = self.embed_scale * word_repr + self.embed_positions(lemma)
         word_repr = self.word_embed_layer_norm(word_repr)
-        word_mask = torch.eq(lemma, self.vocabs['lem'].padding_idx)
+        word_mask = torch.eq(lem, self.vocabs['lem'].padding_idx)
         word_repr = self.snt_encoder(word_repr, self_padding_mask=word_mask)
 
         probe = torch.tanh(self.probe_generator(word_repr[:1]))
@@ -66,7 +72,8 @@ class Parser(nn.Module):
     def work(self, data, beam_size, max_time_step, min_time_step=1):
         with torch.no_grad():
             word_repr, word_mask, probe = self.encode_step_with_bert(
-                data['lem'], data['bert_token'], data['token_subword_index']
+                data['tok'], data['lem'], data['pos'], data['ner'],
+                data['word_char'], data['bert_token'], data['token_subword_index']
             )
 
             mem_dict = {'snt_state': word_repr,
@@ -156,7 +163,8 @@ class Parser(nn.Module):
 
     def forward(self, data):
         word_repr, word_mask, probe = self.encode_step_with_bert(
-            data['lem'], data['bert_token'], data['token_subword_index']
+            data['tok'], data['lem'], data['pos'], data['ner'],
+            data['word_char'], data['bert_token'], data['token_subword_index']
         )
         concept_repr = self.embed_scale * self.concept_encoder(data['concept_char_in'], data['concept_in']) + \
                        self.embed_positions(data['concept_in'])

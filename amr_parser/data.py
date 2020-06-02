@@ -114,7 +114,7 @@ def batchify(data, vocabs, unk_rate=0.):
     _lem = ListsToTensor([[CLS] + x['lem'] for x in data], vocabs['lem'], unk_rate=unk_rate)
     # _pos = ListsToTensor([[CLS] + x['pos'] for x in data], vocabs['pos'], unk_rate=unk_rate)
     # _ner = ListsToTensor([[CLS] + x['ner'] for x in data], vocabs['ner'], unk_rate=unk_rate)
-    # _word_char = ListsofStringToTensor([[CLS] + x['tok'] for x in data], vocabs['word_char'])
+    _word_char = ListsofStringToTensor([[CLS] + x['tok'] for x in data], vocabs['word_char'])
 
     local_token2idx = [x['token2idx'] for x in data]
     local_idx2token = [x['idx2token'] for x in data]
@@ -150,6 +150,7 @@ def batchify(data, vocabs, unk_rate=0.):
     ret = {
         'lem': _lem,
         'tok': _tok,
+        'word_char': _word_char,
         'rel': _rel,
         'concept_in': _concept_in,
         'concept_char_in': _concept_char_in,
@@ -157,7 +158,7 @@ def batchify(data, vocabs, unk_rate=0.):
         'copy_seq': np.stack([_cp_seq, _mp_seq], -1),
         'local_token2idx': local_token2idx,
         'local_idx2token': local_idx2token,
-        # 'pos': _pos, 'ner': _ner, 'word_char': _word_char,
+        'pos': None, 'ner': None,
     }
 
     bert_tokenizer = vocabs.get('bert_tokenizer', None)

@@ -196,7 +196,7 @@ class AMR(object):
         attribute_list = []
         for idx, node in enumerate(data['nodes']):
             node: dict
-            node_name_list.append(f"a{idx}")
+            node_name_list.append(f"c{idx}")
             node_value_list.append(node['label'])
             attributes = []
             for attribute, value in zip(node.get('properties', []), node.get('values', [])):

@@ -103,6 +103,56 @@ class ConceptEncoder(nn.Module):
         return concept
 
 
+class WordEncoder(nn.Module):
+    def __init__(self, vocabs, char_dim, word_dim, char2word_dim, pos_dim, ner_dim,
+                 embed_dim, filters, dropout, pretrained_file=None):
+        super(WordEncoder, self).__init__()
+        self.char_embed = AMREmbedding(vocabs['word_char'], char_dim)
+        self.char2word = CNNEncoder(filters, char_dim, char2word_dim)
+        self.lem_embed = AMREmbedding(vocabs['lem'], word_dim, pretrained_file)
+
+        if pos_dim > 0:
+            self.pos_embed = AMREmbedding(vocabs['pos'], pos_dim)
+        else:
+            self.pos_embed = None
+        if ner_dim > 0:
+            self.ner_embed = AMREmbedding(vocabs['ner'], ner_dim)
+        else:
+            self.ner_embed = None
+
+        tot_dim = word_dim + pos_dim + ner_dim + char2word_dim
+
+        self.out_proj = nn.Linear(tot_dim, embed_dim)
+        self.dropout = dropout
+        self.reset_parameters()
+
+    def reset_parameters(self):
+        nn.init.normal_(self.out_proj.weight, std=0.02)
+        nn.init.constant_(self.out_proj.bias, 0.)
+
+    def forward(self, char_input, tok_input, lem_input, pos_input, ner_input):
+        # char: seq_len x bsz x word_len
+        # word, pos, ner: seq_len x bsz
+        seq_len, bsz, _ = char_input.size()
+        char_repr = self.char_embed(char_input.view(seq_len * bsz, -1))
+        char_repr = self.char2word(char_repr).view(seq_len, bsz, -1)
+
+        lem_repr = self.lem_embed(lem_input)
+        reprs = [char_repr, lem_repr]
+
+        if self.pos_embed is not None:
+            pos_repr = self.pos_embed(pos_input)
+            reprs.append(pos_repr)
+
+        if self.ner_embed is not None:
+            ner_repr = self.ner_embed(ner_input)
+            reprs.append(ner_repr)
+
+        word = F.dropout(torch.cat(reprs, -1), p=self.dropout, training=self.training)
+        word = self.out_proj(word)
+        return word
+
+
 class CNNEncoder(nn.Module):
     def __init__(self, filters, input_dim, output_dim, highway_layers=1):
         super(CNNEncoder, self).__init__()
