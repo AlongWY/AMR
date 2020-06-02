@@ -13,6 +13,7 @@
 *.lib
 *.log
 
+fast_smatch/build
 fast_smatch/_smatch.c
 fast_smatch/_smatch.cc
 fast_smatch/_smatch.cpp
