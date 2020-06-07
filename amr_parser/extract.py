@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 from collections import Counter
-import json, re
+import json, re, os
 
 from amr_parser.amr import AMR
 from amr_parser.AMRGraph import AMRGraph, number_regexp
@@ -19,11 +19,13 @@ class AMRIO:
                 line = line.rstrip()
                 data = json.loads(line)
                 tokens = data['token']
-                lemmas = data['lemmas']
+                lemma = data['lemma']
+                upos = data['upos']
+                xpos = data['xpos']
 
                 amr_g = AMR.parse_amr_json(data)
                 amr = AMRGraph(amr_g)
-                yield tokens, lemmas, amr
+                yield tokens, lemma, upos, xpos, amr
 
 
 class LexicalMap(object):
@@ -58,13 +60,15 @@ class LexicalMap(object):
 
 def read_file(filename):
     # read preprocessed amr file
-    token, lemma, amrs = [], [], []
-    for _tok, _lem, _amr in AMRIO.read(filename):
-        token.append(_tok)
-        lemma.append(_lem)
-        amrs.append(_amr)
+    token, lemma, upos, xpos, amr = [], [], [], [], []
+    for _token, _lemma, _upos, _xpos, _amr in AMRIO.read(filename):
+        token.append(_token)
+        lemma.append(_lemma)
+        upos.append(_upos)
+        xpos.append(_xpos)
+        amr.append(_amr)
     print('read from %s, %d amrs' % (filename, len(token)))
-    return amrs, token, lemma
+    return token, lemma, upos, xpos, amr
 
 
 def make_vocab(batch_seq, char_level=False):
@@ -92,12 +96,15 @@ import argparse
 def parse_config():
     parser = argparse.ArgumentParser()
     parser.add_argument('--train_data', type=str)
+    parser.add_argument('--output_dir', type=str)
     return parser.parse_args()
 
 
 if __name__ == "__main__":
     args = parse_config()
-    amrs, token, lemma = read_file(args.train_data)
+    output_dir = args.output_dir
+    os.makedirs(output_dir, exist_ok=True)
+    token, lemma, upos, xpos, amr = read_file(args.train_data)
     lexical_map = LexicalMap()
 
     # collect concepts and relations
@@ -106,8 +113,8 @@ if __name__ == "__main__":
     predictable_conc = []
     for i in range(10):
         # run 10 times random sort to get the priorities of different types of edges
-        for amr, lem, tok in zip(amrs, lemma, token):
-            concept, edge, not_ok = amr.root_centered_sort()
+        for amr_, lem, tok in zip(amr, lemma, token):
+            concept, edge, not_ok = amr_.root_centered_sort()
             lexical_concepts = set()
             cp_seq, mp_seq = lexical_map.get_concepts(lem, tok)
             for lc, lm in zip(cp_seq, mp_seq):
@@ -122,20 +129,26 @@ if __name__ == "__main__":
     # make vocabularies
     token_vocab, token_char_vocab = make_vocab(token, char_level=True)
     lemma_vocab, lemma_char_vocab = make_vocab(lemma, char_level=True)
+    upos_vocab, upos_char_vocab = make_vocab(upos, char_level=True)
+    xpos_vocab, xpos_char_vocab = make_vocab(xpos, char_level=True)
     conc_vocab, conc_char_vocab = make_vocab(conc, char_level=True)
-
     predictable_conc_vocab = make_vocab(predictable_conc)
+    rel_vocab = make_vocab(rel)
+
     num_predictable_conc = sum(len(x) for x in predictable_conc)
     num_conc = sum(len(x) for x in conc)
     print('predictable concept coverage', num_predictable_conc, num_conc, num_predictable_conc / num_conc)
-    rel_vocab = make_vocab(rel)
 
     print('make vocabularies')
-    write_vocab(token_vocab, 'tok_vocab')
-    write_vocab(token_char_vocab, 'word_char_vocab')
-    write_vocab(lemma_vocab, 'lem_vocab')
-    write_vocab(lemma_char_vocab, 'lem_char_vocab')
-    write_vocab(conc_vocab, 'concept_vocab')
-    write_vocab(conc_char_vocab, 'concept_char_vocab')
-    write_vocab(predictable_conc_vocab, 'predictable_concept_vocab')
-    write_vocab(rel_vocab, 'rel_vocab')
+    write_vocab(token_vocab, os.path.join(output_dir, 'tok_vocab'))
+    write_vocab(token_char_vocab, os.path.join(output_dir, 'tok_char_vocab'))
+    write_vocab(lemma_vocab, os.path.join(output_dir, 'lem_vocab'))
+    write_vocab(lemma_char_vocab, os.path.join(output_dir, 'lem_char_vocab'))
+    write_vocab(xpos_vocab, os.path.join(output_dir, 'xpos_vocab'))
+    write_vocab(xpos_char_vocab, os.path.join(output_dir, 'xpos_char_vocab'))
+    write_vocab(upos_vocab, os.path.join(output_dir, 'upos_vocab'))
+    write_vocab(upos_char_vocab, os.path.join(output_dir, 'upos_char_vocab'))
+    write_vocab(conc_vocab, os.path.join(output_dir, 'concept_vocab'))
+    write_vocab(conc_char_vocab, os.path.join(output_dir, 'concept_char_vocab'))
+    write_vocab(predictable_conc_vocab, os.path.join(output_dir, 'predictable_concept_vocab'))
+    write_vocab(rel_vocab, os.path.join(output_dir, 'rel_vocab'))
