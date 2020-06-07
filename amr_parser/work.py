@@ -116,15 +116,17 @@ if __name__ == "__main__":
         model_args = torch.load(args.load_path, map_location=device)['args']
 
     vocabs = dict()
-    # vocabs['pos'] = Vocab(model_args.pos_vocab, 5, [CLS])
-    # vocabs['ner'] = Vocab(model_args.ner_vocab, 5, [CLS])
     vocabs['tok'] = Vocab(model_args.tok_vocab, 5, [CLS])
     vocabs['lem'] = Vocab(model_args.lem_vocab, 5, [CLS])
+    vocabs['pos'] = Vocab(model_args.pos_vocab, 5, [CLS])
+    vocabs['lem_char'] = Vocab(model_args.lem_vocab, 5, [CLS])
     vocabs['concept'] = Vocab(model_args.concept_vocab, 5, [DUM, END])
-    vocabs['concept_char'] = Vocab(model_args.concept_char_vocab, 100, [CLS, END])
     vocabs['predictable_concept'] = Vocab(model_args.predictable_concept_vocab, 5, [DUM, END])
+
     vocabs['rel'] = Vocab(model_args.rel_vocab, 50, [NIL])
-    # vocabs['word_char'] = Vocab(model_args.word_char_vocab, 100, [CLS, END])
+
+    vocabs['tok_char'] = Vocab(model_args.tok_char_vocab, 100, [CLS, END])
+    vocabs['concept_char'] = Vocab(model_args.concept_char_vocab, 100, [CLS, END])
     lexical_mapping = LexicalMap()
 
     bert_tokenizer = BertEncoderTokenizer.from_pretrained(model_args.bert_path, do_lower_case=False)

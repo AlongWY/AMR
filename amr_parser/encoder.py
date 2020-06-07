@@ -107,7 +107,7 @@ class WordEncoder(nn.Module):
     def __init__(self, vocabs, char_dim, word_dim, char2word_dim, pos_dim, ner_dim,
                  embed_dim, filters, dropout, pretrained_file=None):
         super(WordEncoder, self).__init__()
-        self.char_embed = AMREmbedding(vocabs['word_char'], char_dim)
+        self.char_embed = AMREmbedding(vocabs['tok_char'], char_dim)
         self.char2word = CNNEncoder(filters, char_dim, char2word_dim)
         self.lem_embed = AMREmbedding(vocabs['lem'], word_dim, pretrained_file)
 
