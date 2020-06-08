@@ -7,6 +7,7 @@ os.environ.setdefault('CORENLP_HOME', 'stanford-corenlp')
 
 
 def main(args):
+    num_sentences = 0
     with open(args.input, encoding='utf-8') as f, open(args.output, mode='w', encoding='utf-8') as out:
         with corenlp.CoreNLPClient(annotators="tokenize ner".split(), endpoint="http://localhost:5000") as client:
             for line in f.readlines():
@@ -24,6 +25,9 @@ def main(args):
                     nodes['values'].append(ner)
 
                 out.write(json.dumps(mrp_json) + '\n')
+                num_sentences += 1
+                if num_sentences % 1000 == 0:
+                    print(f"Processed {num_sentences} sentences!")
 
 
 if __name__ == '__main__':
