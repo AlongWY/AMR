@@ -7,7 +7,7 @@ from amr_parser.AMRGraph import _is_attr_form, need_an_instance
 
 class PostProcessor(object):
     def __init__(self, rel_vocab):
-        self.amr = penman.AMRCodec()
+        self.amr = penman
         self.rel_vocab = rel_vocab
 
     def to_triple(self, res_concept, res_relation):

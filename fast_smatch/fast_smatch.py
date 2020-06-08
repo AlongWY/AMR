@@ -69,6 +69,7 @@ def get_amr_json(bert_tokenizer, input_f):
         data = json.loads(line)
         bert_token, token_subword_index = bert_tokenizer.tokenize(data['token'])
         if len(bert_token) > 512:
+            print('skip')
             continue
         return data
     return ''
