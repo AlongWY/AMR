@@ -48,8 +48,8 @@ class Morph:
             elif token in self.morph_dict:
                 morphed_lemmas = self.morph_dict[token][0]
             if morphed_lemmas is not None:
-                pos = [amr.pos_tags[index]]
-                ner = [amr.ner_tags[index]]
+                pos = [amr.upos[index]]
+                ner = [amr.ner[index]]
                 if len(morphed_lemmas) == 2:
                     pos = ['VBG', 'NN']
                     ner.append('O')

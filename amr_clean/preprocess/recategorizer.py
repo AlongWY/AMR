@@ -1,6 +1,7 @@
 import os
 import json
 from collections import defaultdict
+from tqdm import tqdm
 
 import nltk
 
@@ -151,7 +152,7 @@ class Recategorizer:
     def _map_name_node_type(self, name_node_type):
         if not self.build_utils and name_node_type in self.name_type_cooccur_counter:
             ner_type = max(self.name_type_cooccur_counter[name_node_type].keys(),
-                       key=lambda ner_type: self.name_type_cooccur_counter[name_node_type][ner_type])
+                           key=lambda ner_type: self.name_type_cooccur_counter[name_node_type][ner_type])
             if ner_type in ('0', 'O'):
                 return Entity.unknown_entity_type
             else:
@@ -295,8 +296,7 @@ class Recategorizer:
             self.url_count += url_count
             self.recat_url_count += recat_url_count
         except Exception as e:
-            print (e)
-
+            print(e)
 
     def _get_aligned_date(self, node, amr):
         date = Date(node, amr.graph)
@@ -348,6 +348,5 @@ if __name__ == '__main__':
 
     for file_path in args.amr_files:
         with open(file_path + '.recategorize', 'w', encoding='utf-8') as f:
-            for amr in recategorizer.recategorize_file(file_path):
+            for amr in tqdm(recategorizer.recategorize_file(file_path)):
                 f.write(str(amr) + '\n\n')
-

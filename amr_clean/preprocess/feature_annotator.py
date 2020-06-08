@@ -201,7 +201,7 @@ if __name__ == '__main__':
                 annotation = annotator(amr.sentence)
                 amr.tokens = annotation['tokens']
                 amr.lemmas = annotation['lemmas']
-                amr.pos_tags = annotation['pos_tags']
-                amr.ner_tags = annotation['ner_tags']
+                amr.upos = annotation['pos_tags']
+                amr.ner = annotation['ner_tags']
                 AMRIO.dump([amr], f)
     logger.info('Done!')

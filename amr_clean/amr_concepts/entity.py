@@ -265,7 +265,7 @@ class Entity:
             possible_ner_types = set()
             for index in best_span:
                 token = amr.tokens[index]
-                ner_tag = amr.ner_tags[index]
+                ner_tag = amr.ner[index]
                 if ner_tag not in ('0', 'O') or token[0].isupper():
                     possible_ner_types.add(ner_tag)
             possible_ner_types = list(possible_ner_types)

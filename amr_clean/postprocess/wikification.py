@@ -3,14 +3,11 @@ import json
 import requests
 from time import sleep
 from collections import defaultdict
-
 from bs4 import BeautifulSoup
+from amr_clean.io import AMRIO
+import logging
 
-from stog.data.dataset_readers.amr_parsing.io import AMRIO
-from stog.utils import logging
-
-
-logger = logging.init_logger()
+logger = logging.getLogger(__name__)
 
 
 def strip(text):
@@ -32,7 +29,7 @@ class Wikification:
     def __init__(self, util_dir):
         self.util_dir = util_dir
         self.wiki_span_cooccur_counter = None
-        self.spotlight_cooccur_counter = defaultdict(lambda : defaultdict(int))
+        self.spotlight_cooccur_counter = defaultdict(lambda: defaultdict(int))
         self.nationality_map = {}
         self.name_node_count = 0
         self.correct_wikification_count = 0
@@ -58,9 +55,10 @@ class Wikification:
             if instance in abstract_map:
                 saved_dict = abstract_map[instance]
                 instance_type = saved_dict['type']
-                #!!! the following line has been changed by Deng Cai. If you can access dbpedia-spotlight,
+                # !!! the following line has been changed by Deng Cai. If you can access dbpedia-spotlight,
                 # Change it back to cached_wiki = self._spotlight_wiki[amr.sentence] if amr.sentence in self._spotlight_wiki else self.spotlight_wiki(amr.sentence)
-                cached_wiki = self._spotlight_wiki[amr.sentence] if amr.sentence in self._spotlight_wiki else None #self.spotlight_wiki(amr.sentence)
+                cached_wiki = self._spotlight_wiki[
+                    amr.sentence] if amr.sentence in self._spotlight_wiki else None  # self.spotlight_wiki(amr.sentence)
                 if instance_type == 'named-entity':
                     self.name_node_count += 1
                     wiki = '-'
@@ -124,7 +122,7 @@ class Wikification:
 
     @staticmethod
     def spotlight_wiki(sent, confidence=0.5):
-        #!!! This function has been changed by Deng Cai
+        # !!! This function has been changed by Deng Cai
         logger.info('dbpedia-spotlight')
         success = False
         while not success:
@@ -139,7 +137,7 @@ class Wikification:
                 sleep(0.1)
                 continue
             success = True
-        #!!! the following lines have been changed by Deng Cai
+        # !!! the following lines have been changed by Deng Cai
         success = spotlight.status_code == 200
         if not success:
             logger.info(spotlight)
@@ -152,7 +150,7 @@ class Wikification:
         return mention_map
 
     def dump_spotlight_wiki(self, amr_files):
-        #!!! This function has been changed by Deng Cai
+        # !!! This function has been changed by Deng Cai
         sent_map = {}
         for file_path in amr_files:
             for i, amr in enumerate(AMRIO.read(file_path), 1):

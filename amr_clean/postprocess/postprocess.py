@@ -1,14 +1,12 @@
-from stog.data.dataset_readers.amr_parsing.io import AMRIO
-from stog.data.dataset_readers.amr_parsing.postprocess.wikification import strip, joint_dash, Wikification
-from stog.data.dataset_readers.amr_parsing.amr_concepts import Polarity, Polite
-from stog.data.dataset_readers.amr_parsing.node_utils import NodeUtilities as NU
-from stog.data.dataset_readers.amr_parsing.postprocess.expander import Expander, normalize_text, TRIVIAL_TOKENS
-from stog.data.dataset_readers.amr_parsing.postprocess.node_restore import NodeRestore
-import os
+from amr_clean.postprocess.wikification import Wikification
+from amr_clean.node_utils import NodeUtilities as NU
+from amr_clean.postprocess.expander import Expander
+from amr_clean.postprocess.node_restore import NodeRestore
+
 
 def postprocess2(x):
     file_path, util_dir = x
-    print (file_path, args.util_dir)
+    print(file_path, args.util_dir)
     node_utils = NU.from_json(util_dir, 0)
 
     nr = NodeRestore(node_utils)
@@ -21,7 +19,7 @@ def postprocess2(x):
     with open(file_path + '.frame.wiki', 'w', encoding='utf-8') as f:
         for amr in wikification.wikify_file(file_path + '.frame'):
             f.write(str(amr) + '\n\n')
-    
+
     expander = Expander(util_dir=util_dir)
     with open(file_path + '.post', 'w', encoding='utf-8') as f:
         for amr in expander.expand_file(file_path + '.frame.wiki'):
@@ -30,22 +28,24 @@ def postprocess2(x):
     os.remove(file_path + '.frame')
     os.remove(file_path + '.frame.wiki')
 
+
 def postprocess1(x):
     file_path, util_dir = x
-    print (file_path, args.util_dir)
+    print(file_path, args.util_dir)
     node_utils = NU.from_json(util_dir, 0)
 
     nr = NodeRestore(node_utils)
     with open(file_path + '.frame', 'w', encoding='utf-8') as f:
         for amr in nr.restore_file(file_path):
             f.write(str(amr) + '\n\n')
-    
+
     expander = Expander(util_dir=util_dir)
     with open(file_path + '.post', 'w', encoding='utf-8') as f:
         for amr in expander.expand_file(file_path + '.frame'):
             f.write(str(amr) + '\n\n')
-            
+
     os.remove(file_path + '.frame')
+
 
 if __name__ == '__main__':
     import argparse, os
@@ -59,7 +59,6 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-
     amr_files = []
     if os.path.isdir(args.amr_path):
         for file in os.listdir(args.amr_path):
@@ -70,7 +69,6 @@ if __name__ == '__main__':
                 amr_files.append((fname, args.util_dir))
     else:
         amr_files = [(args.amr_path, args.util_dir)]
-
 
     pool = Pool(args.nprocessors)
     if args.v == 2:

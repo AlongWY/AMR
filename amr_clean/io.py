@@ -28,14 +28,16 @@ class AMRIO:
                         amr.id = line[len('# ::id '):]
                     elif line.startswith('# ::snt '):
                         amr.sentence = line[len('# ::snt '):]
-                    elif line.startswith('# ::tokens '):
-                        amr.tokens = json.loads(line[len('# ::tokens '):])
-                    elif line.startswith('# ::lemmas '):
-                        amr.lemmas = json.loads(line[len('# ::lemmas '):])
-                    elif line.startswith('# ::pos_tags '):
-                        amr.pos_tags = json.loads(line[len('# ::pos_tags '):])
-                    elif line.startswith('# ::ner_tags '):
-                        amr.ner_tags = json.loads(line[len('# ::ner_tags '):])
+                    elif line.startswith('# ::token '):
+                        amr.tokens = json.loads(line[len('# ::token '):])
+                    elif line.startswith('# ::lemma '):
+                        amr.lemmas = json.loads(line[len('# ::lemma '):])
+                    elif line.startswith('# ::upos '):
+                        amr.upos = json.loads(line[len('# ::upos '):])
+                    elif line.startswith('# ::xpos '):
+                        amr.xpos = json.loads(line[len('# ::xpos '):])
+                    elif line.startswith('# ::ner '):
+                        amr.ner = json.loads(line[len('# ::ner '):])
                     elif line.startswith('# ::abstract_map '):
                         amr.abstract_map = json.loads(line[len('# ::abstract_map '):])
                     else:

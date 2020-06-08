@@ -198,7 +198,7 @@ class Polarity:
     def is_head(self, index):
         lemma = self.amr.lemmas[index]
         token = self.amr.tokens[index]
-        pos_tag = self.amr.pos_tags[index]
+        pos_tag = self.amr.upos[index]
         next_lemma = self.amr.lemmas[index + 1] if index + 1 < len(self.amr.lemmas) else None
         if re.search(r'^(^[^a-zA-Z0-9]+|be|the|a|so|that|any|person|this|stage|people|near|health)$', lemma):
             return False
@@ -239,7 +239,7 @@ class Polarity:
             return True
         if next_lemma == '-' and third_lemma != 'alignment':
             return True
-        if next_lemma == 'like' and self.amr.pos_tags[index + 1] == 'IN':
+        if next_lemma == 'like' and self.amr.upos[index + 1] == 'IN':
             return True
         if last_lemma and last_lemma in ('will',) and next_lemma not in ('fade', 'get', 'make', 'succumb'):
             return True
@@ -272,7 +272,7 @@ class Polarity:
         if next_lemma in ('as',):
             if third_lemma in ('much', 'severely'):
                 return index + 2
-            if third_lemma and self.amr.pos_tags[index + 2] in ('RB',):
+            if third_lemma and self.amr.upos[index + 2] in ('RB',):
                 return None
             return index + 1
         if next_lemma == 'new' and third_lemma == 'initiative':

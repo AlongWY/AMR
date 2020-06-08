@@ -3,9 +3,11 @@ from amr_parser.bert_utils import BertEncoderTokenizer
 from fast_smatch.amr import AMR
 from fast_smatch.fast_smatch import get_amr_json
 import penman as pp
+import json, re
 
 
 def main(args):
+    pattern = re.compile(r'''[\s()":/,\\'#]+''')
     bert_tokenizer = BertEncoderTokenizer.from_pretrained('./bert-base-cased', do_lower_case=False)
     with open(args.input, encoding='utf-8') as f:
         with open(args.output, mode='w', encoding='utf-8') as out:
@@ -24,17 +26,18 @@ def main(args):
                     graph.append((short, instance, label))
 
                 for relation, source, target in relation_triple:
+                    target = f"\"{target}\"" if pattern.search(target) else target
                     graph.append((source, relation, target))
 
                 assert len(amr_data['tops']) == 1
                 graph = pp.Graph(graph)
                 out.write('# ::id ' + amr_data['id'] + '\n')
                 out.write('# ::snt ' + amr_data['input'] + '\n')
-                out.write('# ::token ' + ' '.join(amr_data['token']) + '\n')
-                out.write('# ::lemma ' + ' '.join(amr_data['lemma']) + '\n')
-                out.write('# ::upos ' + ' '.join(amr_data['upos']) + '\n')
-                out.write('# ::xpos ' + ' '.join(amr_data['xpos']) + '\n')
-                out.write('# ::conc ' + ' '.join(concepts) + '\n')
+                out.write('# ::token ' + json.dumps(amr_data['token']) + '\n')
+                out.write('# ::lemma ' + json.dumps(amr_data['lemma']) + '\n')
+                out.write('# ::upos ' + json.dumps(amr_data['upos']) + '\n')
+                out.write('# ::xpos ' + json.dumps(amr_data['xpos']) + '\n')
+                out.write('# ::conc ' + json.dumps(concepts) + '\n')
                 out.write(pp.encode(graph) + '\n\n')
 
 

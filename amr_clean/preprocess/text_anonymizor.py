@@ -108,7 +108,7 @@ class TextAnonymizor:
                      text_map: Dict,
                      anonym_type: str) -> bool:
         if anonym_type == 'named-entity':
-            if amr.pos_tags[index].startswith('V') and not next_token_is(index, 1, amr, self._VNE):
+            if amr.upos[index].startswith('V') and not next_token_is(index, 1, amr, self._VNE):
                 return True
             if (is_anonym_type(index, amr, text_map, ["LOCATION", "ENTITY"])
                     and next_token_is(index, 0, amr, self._LOCEN1[0]) and (
@@ -124,7 +124,7 @@ class TextAnonymizor:
             if len(amr.lemmas[index]) == 1 and amr.lemmas[index].isdigit() and (
                     next_token_is(index, 1, amr, self._R[0]) or next_token_is(index, 2, amr, self._R[1])):
                 return False
-            if index == len(amr.lemmas) - 2 and amr.pos_tags[index + 1] in '.,!?':
+            if index == len(amr.lemmas) - 2 and amr.upos[index + 1] in '.,!?':
                 return True
             if prev_token_is(index, 1, amr, self._INVP[0]) or next_token_is(index, 1, amr, self._INVS[0]):
                 return True
@@ -157,7 +157,7 @@ class TextAnonymizor:
                 return True
 
         if anonym_type != 'ordinal-entity':
-            if amr.ner_tags[index] == 'ORDINAL' and not next_token_is(index, 0, amr, self._N[1]):
+            if amr.ner[index] == 'ORDINAL' and not next_token_is(index, 0, amr, self._N[1]):
                 return True
 
         if next_token_is(index, 0, amr, self._N[0]) and (
@@ -192,7 +192,7 @@ class TextAnonymizor:
                         else:
                             collected_entities.add(entity_name)
                     anonym_lemma = value['ner'] + '_' + str(len(replaced_spans))
-                    pos_tag = amr.pos_tags[start] if anonym_type == 'quantity' else pos_tag
+                    pos_tag = amr.upos[start] if anonym_type == 'quantity' else pos_tag
                     ner = 'NUMBER' if anonym_type == 'quantity' else value['ner']
                     replaced_spans[anonym_lemma] = value
                     amr.replace_span(list(range(start, start + length)), [anonym_lemma], [pos_tag], [ner])

@@ -203,7 +203,7 @@ class Quantity:
                 type='quantity',
                 span=' '.join(map(self.amr.lemmas.__getitem__, span)),
                 value=alignment.value)
-            pos_tag = self.amr.pos_tags[span[0]]
+            pos_tag = self.amr.upos[span[0]]
             if pos_tag in ('0', 'O'):
                 pos_tag = 'CD'
             self.amr.replace_span(span, [abstract], [pos_tag], ['NUMBER'])

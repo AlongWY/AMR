@@ -287,11 +287,11 @@ def normalize_tokens(amr):
                 pos = ['CD']
                 ner = ['ORDINAL']
                 break
-            if lemma_lower == 'quarter' and i > 0 and amr.pos_tags[i - 1] == 'CD':
+            if lemma_lower == 'quarter' and i > 0 and amr.upos[i - 1] == 'CD':
                 span = [i - 1, i]
                 tokens = [amr.tokens[i - 1]]
-                pos = [amr.pos_tags[i - 1]]
-                ner = [amr.ner_tags[i - 1]]
+                pos = [amr.upos[i - 1]]
+                ner = [amr.ner[i - 1]]
                 break
         else:
             break
@@ -402,8 +402,8 @@ def split_entity_with_slash(amr):
                 break
         else:
             break
-        pos = amr.pos_tags[index]
-        ner = amr.ner_tags[index]
+        pos = amr.upos[index]
+        ner = amr.ner[index]
         x, y = amr.tokens[index].split('/', 1)
         amr.replace_span([index], [x, '/', y], [pos, 'SYM', pos], [ner, ner, ner])
 
@@ -418,8 +418,8 @@ def split_entity_with_non(amr):
                 break
         else:
             break
-        pos = amr.pos_tags[index]
-        ner = amr.ner_tags[index]
+        pos = amr.upos[index]
+        ner = amr.ner[index]
         x = amr.tokens[index]
         amr.replace_span([index], ['non', x[3:]], ['JJ', pos], ['O', ner])
 
@@ -434,8 +434,8 @@ def split_entity_prefix(amr, prefix):
                 break
         else:
             break
-        pos = amr.pos_tags[index]
-        ner = amr.ner_tags[index]
+        pos = amr.upos[index]
+        ner = amr.ner[index]
         _, lemma = amr.lemmas[index].split('-', 1)
         if lemma == '':
             amr.replace_span([index], [prefix], ['JJ'], ['O'])
@@ -485,7 +485,7 @@ def split_number_with_dash_prefix(amr):
         else:
             break
         lemma = amr.lemmas[index]
-        ner_tag = amr.ner_tags[index]
+        ner_tag = amr.ner[index]
         if ner_tag in ('0', 'O'):
             ner_tag = 'NUMBER'
         x = lemma[0]

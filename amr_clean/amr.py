@@ -72,36 +72,38 @@ class AMR:
                  id=None,
                  sentence=None,
                  graph=None,
-                 tokens=None,
-                 lemmas=None,
-                 pos_tags=None,
-                 ner_tags=None,
+                 token=None,
+                 lemma=None,
+                 upos=None,
+                 xpos=None,
+                 ner=None,
                  abstract_map=None,
                  misc=None):
         self.id = id
         self.sentence = sentence
         self.graph = graph
-        self.tokens = tokens
-        self.lemmas = lemmas
-        self.pos_tags = pos_tags
-        self.ner_tags = ner_tags
+        self.tokens = token
+        self.lemmas = lemma
+        self.upos = upos
+        self.xpos = xpos
+        self.ner = ner
         self.abstract_map = abstract_map
         self.misc = misc
 
     def is_named_entity(self, index):
-        return self.ner_tags[index] not in ('0', 'O')
+        return self.ner[index] not in ('0', 'O')
 
     def get_named_entity_span(self, index):
-        if self.ner_tags is None or not self.is_named_entity(index):
+        if self.ner is None or not self.is_named_entity(index):
             return []
         span = [index]
-        tag = self.ner_tags[index]
+        tag = self.ner[index]
         prev = index - 1
-        while prev > 0 and self.ner_tags[prev] == tag:
+        while prev > 0 and self.ner[prev] == tag:
             span.append(prev)
             prev -= 1
         next = index + 1
-        while next < len(self.ner_tags) and self.ner_tags[next] == tag:
+        while next < len(self.ner) and self.ner[next] == tag:
             span.append(next)
             next += 1
         return span
@@ -118,11 +120,11 @@ class AMR:
         self.tokens = self.tokens[:indexes[0]] + new + self.tokens[indexes[-1] + 1:]
         self.lemmas = self.lemmas[:indexes[0]] + new + self.lemmas[indexes[-1] + 1:]
         if pos is None:
-            pos = [self.pos_tags[indexes[0]]]
-        self.pos_tags = self.pos_tags[:indexes[0]] + pos + self.pos_tags[indexes[-1] + 1:]
+            pos = [self.upos[indexes[0]]]
+        self.upos = self.upos[:indexes[0]] + pos + self.upos[indexes[-1] + 1:]
         if ner is None:
-            ner = [self.ner_tags[indexes[0]]]
-        self.ner_tags = self.ner_tags[:indexes[0]] + ner + self.ner_tags[indexes[-1] + 1:]
+            ner = [self.ner[indexes[0]]]
+        self.ner = self.ner[:indexes[0]] + ner + self.ner[indexes[-1] + 1:]
 
     def remove_span(self, indexes):
         self.replace_span(indexes, [], [], [])
@@ -132,10 +134,11 @@ class AMR:
         for k, v in dict(
                 id=self.id,
                 snt=self.sentence,
-                tokens=self.tokens,
-                lemmas=self.lemmas,
-                pos_tags=self.pos_tags,
-                ner_tags=self.ner_tags,
+                token=self.tokens,
+                lemma=self.lemmas,
+                upos=self.upos,
+                xpos=self.xpos,
+                ner=self.ner,
                 abstract_map=self.abstract_map,
                 misc=self.misc,
                 graph=self.graph
@@ -274,7 +277,7 @@ class AMRGraph(penman.Graph):
         self._src_tokens = []
 
     def __str__(self):
-        self.triples = sorted(self.triples, key=model.alphanumeric_order)
+        self.triples = sorted(self.triples, key=lambda x: model.alphanumeric_order(x[0]))
         return penman.encode(self)
 
     def _build_extras(self):
@@ -315,18 +318,6 @@ class AMRGraph(penman.Graph):
             G.add_edge(source, target, label=relation)
 
         self._G = G
-
-    def attributes(self, source=None, relation=None, target=None):
-        # Refine attributes because there's a bug in penman.attributes()
-        # See https://github.com/goodmami/penman/issues/29
-        attrmatch = lambda a: (
-                (source is None or source == a.source) and
-                (relation is None or relation == a.relation) and
-                (target is None or target == a.target)
-        )
-        variables = self.variables()
-        attrs = [t for t in self.triples() if t.target not in variables or t.relation == 'instance']
-        return list(filter(attrmatch, attrs))
 
     def _update_penman_graph(self, triples):
         self.triples = triples
@@ -374,7 +365,7 @@ class AMRGraph(penman.Graph):
         self._G.add_edge(source, target, label=label)
         t = penman.Triple(source=source.identifier, target=target.identifier, role=label)
         triples = self.triples + [t]
-        triples = sorted(triples, key=model.alphanumeric_order)
+        triples = sorted(triples, key=lambda x: model.alphanumeric_order(x[0]))
         self._update_penman_graph(triples)
 
     def remove_edge(self, x, y):
@@ -405,7 +396,7 @@ class AMRGraph(penman.Graph):
                 i += 1
             identifier += str(i)
         triples = self.triples + [Triple(identifier, 'instance', instance)]
-        self.triples = sorted(triples, key=model.alphanumeric_order)
+        self.triples = sorted(triples, key=lambda x: model.alphanumeric_order(x[0]))
 
         node = AMRNode(identifier, [('instance', instance)])
         self._G.add_node(node)
@@ -429,7 +420,7 @@ class AMRGraph(penman.Graph):
             print('Something went wrong!!!')
             return
             # raise KeyError
-        self.triples = sorted(self.triples, key=model.alphanumeric_order)
+        self.triples = sorted(self.triples, key=lambda x: model.alphanumeric_order(x[0]))
 
     def remove_node_attribute(self, node, attr, value):
         node.remove_attribute(attr, value)
@@ -440,7 +431,7 @@ class AMRGraph(penman.Graph):
     def add_node_attribute(self, node, attr, value):
         node.add_attribute(attr, value)
         t = penman.Triple(source=node.identifier, role=attr, target=value)
-        self.triples = sorted(self.triples + [t], key=model.alphanumeric_order)
+        self.triples = sorted(self.triples + [t], key=lambda x: model.alphanumeric_order(x[0]))
 
     def remove_node_ops(self, node):
         ops = []
@@ -490,27 +481,45 @@ class AMRGraph(penman.Graph):
         return self._src_tokens
 
     def get_list_node(self, replace_copy=True):
+        node_num = len(self.variable_to_node)
         visited = defaultdict(int)
         node_list = []
 
         def dfs(node, relation, parent):
-
-            node_list.append((
-                node if node.copy_of is None or not replace_copy else node.copy_of,
-                relation,
-                parent if parent.copy_of is None or not replace_copy else parent.copy_of))
+            if visited[node] == 0:
+                node_list.append((
+                    node if node.copy_of is None or not replace_copy else node.copy_of,
+                    relation,
+                    parent if parent.copy_of is None or not replace_copy else parent.copy_of))
 
             if len(self._G[node]) > 0 and visited[node] == 0:
                 visited[node] = 1
                 for child_node, child_relation in self.sort_edges(self._G[node].items()):
                     dfs(child_node, child_relation["label"], node)
+            visited[node] = 1
 
         dfs(
             self.variable_to_node[self._top],
             'root',
             self.variable_to_node[self._top]
         )
-
+        while len(node_list) < node_num:
+            for name, node in self.variable_to_node.items():
+                if visited[node] == 1:
+                    continue
+                if len(self._G[node]) > 0 and visited[node] == 0:
+                    for child_node, child_relation in self.sort_edges(self._G[node].items()):
+                        relation = child_relation["label"]
+                        if visited[child_node] == 0:
+                            dfs(child_node, relation, node)
+                            continue
+                        if visited[node] == 0 and visited[child_node] == 1:
+                            node_list.append((
+                                node if node.copy_of is None or not replace_copy else node.copy_of,
+                                model.invert_role(relation),
+                                child_node if child_node.copy_of is None or not replace_copy else child_node.copy_of
+                            ))
+                            visited[node] = 1
         return node_list
 
     def sort_edges(self, edges):
@@ -641,7 +650,7 @@ class AMRGraph(penman.Graph):
         src_tokens = self.get_src_tokens()
         src_token_ids = None
         src_token_subword_index = None
-        src_pos_tags = amr.pos_tags
+        src_pos_tags = amr.upos
         src_copy_vocab = SourceCopyVocabulary(src_tokens)
         src_copy_indices = src_copy_vocab.index_sequence(tgt_tokens)
         src_copy_map = src_copy_vocab.get_copy_map(src_tokens)
@@ -676,7 +685,7 @@ class AMRGraph(penman.Graph):
 
     @classmethod
     def decode(cls, raw_graph_string):
-        _graph = penman.decode(raw_graph_string)
+        _graph = penman.decode(raw_graph_string, model=model)
         return cls(_graph)
 
     @classmethod
