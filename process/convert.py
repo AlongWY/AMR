@@ -1,13 +1,14 @@
+from argparse import ArgumentParser
 from amr_parser.bert_utils import BertEncoderTokenizer
 from fast_smatch.amr import AMR
 from fast_smatch.fast_smatch import get_amr_json
 import penman as pp
 
 
-def main():
+def main(args):
     bert_tokenizer = BertEncoderTokenizer.from_pretrained('./bert-base-cased', do_lower_case=False)
-    with open('data/amr.valid.json', encoding='utf-8') as f:
-        with open('data/amr.valid.convert', mode='w', encoding='utf-8') as out:
+    with open(args.input, encoding='utf-8') as f:
+        with open(args.output, mode='w', encoding='utf-8') as out:
             while True:
                 amr_data = get_amr_json(bert_tokenizer, f)
                 if amr_data == '' or amr_data is None:
@@ -25,6 +26,7 @@ def main():
                 for relation, source, target in relation_triple:
                     graph.append((source, relation, target))
 
+                assert len(amr_data['tops']) == 1
                 graph = pp.Graph(graph)
                 out.write('# ::id ' + amr_data['id'] + '\n')
                 out.write('# ::snt ' + amr_data['input'] + '\n')
@@ -37,4 +39,9 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    argparser = ArgumentParser()
+    argparser.add_argument('--input', '-i', required=True)
+    argparser.add_argument('--output', '-o', required=True)
+    args = argparser.parse_args()
+
+    main(args)
