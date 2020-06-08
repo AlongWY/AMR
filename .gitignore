@@ -2,6 +2,7 @@
 /data/
 /ckpt/
 /stanford-corenlp-full-2018-10-05
+/stanford-corenlp
 /bert-base-cased
 
 *.DS_Store
