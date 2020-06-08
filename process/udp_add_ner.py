@@ -8,7 +8,7 @@ os.environ.setdefault('CORENLP_HOME', 'stanford-corenlp')
 
 def main(args):
     with open(args.input, encoding='utf-8') as f, open(args.output, mode='w', encoding='utf-8') as out:
-        with corenlp.CoreNLPClient(annotators="tokenize ner".split()) as client:
+        with corenlp.CoreNLPClient(annotators="tokenize ner".split(), endpoint="http://localhost:5000") as client:
             for line in f.readlines():
                 mrp_json = json.loads(line)
 
