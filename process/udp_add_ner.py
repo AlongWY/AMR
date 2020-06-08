@@ -17,8 +17,8 @@ def main(args):
                 for sentence in ann['sentences']:
                     for tokens in sentence['tokens']:
                         ner.append(tokens['ner'])
-
-                assert len(ner) == len(mrp_json['nodes'])
+                if len(ner) != len(mrp_json['nodes']):
+                    print(mrp_json['id'], " error!", os.error)
                 for ner, nodes in zip(ner, mrp_json['nodes']):
                     nodes['properties'].append('ner')
                     nodes['values'].append(ner)
