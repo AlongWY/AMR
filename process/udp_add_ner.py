@@ -13,14 +13,17 @@ def main(args):
             for line in f.readlines():
                 mrp_json = json.loads(line)
 
+                tok = []
                 ner = []
                 ann = client.annotate(mrp_json['input'], output_format='json')
                 for sentence in ann['sentences']:
                     for tokens in sentence['tokens']:
+                        tok.append(tokens['word'])
                         ner.append(tokens['ner'])
                 if len(ner) != len(mrp_json['nodes']):
                     print(mrp_json['id'], " error!")
 
+                mrp_json['tok'] = tok
                 mrp_json['ner'] = ner
                 # for ner, nodes in zip(ner, mrp_json['nodes']):
                 #     nodes['properties'].append('ner')
