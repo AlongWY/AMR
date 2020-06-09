@@ -149,7 +149,7 @@ class Entity:
     def get_aligned_entity(cls, node, amr, backup_ner_type, entity_type_lut):
         if len(node.ops) == 0:
             amr_type = amr.graph.get_name_node_type(node)
-            return cls(None, node, backup_ner_type, amr_type=amr_type)
+            return cls([], node, backup_ner_type, amr_type=amr_type)
         alignment = cls.get_alignment_for_ops(rephrase_ops(node.ops), amr)
         if len(alignment) == 0:
             alignment = cls.get_alignment_for_ops(node.ops, amr)

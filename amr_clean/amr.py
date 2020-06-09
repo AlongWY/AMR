@@ -59,8 +59,6 @@ def find_similar_token(token, tokens):
 import logging
 
 logger = logging.getLogger(__name__)
-from penman import Triple
-
 amr_codec = penman.codec
 
 WORDSENSE_RE = re.compile(r'-\d\d$')
@@ -363,7 +361,7 @@ class AMRGraph(penman.Graph):
 
     def add_edge(self, source, target, label):
         self._G.add_edge(source, target, label=label)
-        t = Triple(source=source.identifier, target=target.identifier, role=label)
+        t = (source.identifier, label, target.identifier)
         triples = self.triples + [t]
         triples = sorted(triples, key=lambda x: model.alphanumeric_order(x[0]))
         self._update_penman_graph(triples)
@@ -382,9 +380,9 @@ class AMRGraph(penman.Graph):
         self._G[x][y]['label'] = new
         triples = []
         for src, role, target in self.triples:
-            t = Triple(src, role=role, target=target)
+            t = (src, role, target)
             if src == x.identifier and target == y.identifier and role == old:
-                t = Triple(x.identifier, new, y.identifier)
+                t = (x.identifier, new, y.identifier)
             triples.append(t)
         self._update_penman_graph(triples)
 
@@ -396,7 +394,7 @@ class AMRGraph(penman.Graph):
             while identifier + str(i) in self.variables():
                 i += 1
             identifier += str(i)
-        triples = self.triples + [Triple(identifier, ':instance', instance)]
+        triples = self.triples + [(identifier, ':instance', instance)]
         self.triples = sorted(triples, key=lambda x: model.alphanumeric_order(x[0]))
 
         node = AMRNode(identifier, [(':instance', instance)])
@@ -420,9 +418,8 @@ class AMRGraph(penman.Graph):
             triples.append(t)
         if not found:
             print('Something went wrong!!!')
-            return
-            # raise KeyError
-        self.triples = sorted(self.triples, key=lambda x: model.alphanumeric_order(x[0]))
+            raise KeyError
+        self.triples = sorted(triples, key=lambda x: model.alphanumeric_order(x[0]))
 
     def remove_node_attribute(self, node, attr, value):
         node.remove_attribute(attr, value)
@@ -432,7 +429,7 @@ class AMRGraph(penman.Graph):
 
     def add_node_attribute(self, node, attr, value):
         node.add_attribute(attr, value)
-        t = penman.Triple(source=node.identifier, role=attr, target=value)
+        t = (node.identifier, attr, value)
         self.triples = sorted(self.triples + [t], key=lambda x: model.alphanumeric_order(x[0]))
 
     def remove_node_ops(self, node):
@@ -719,14 +716,8 @@ class AMRGraph(penman.Graph):
 
         Triples = []
         for variable, token in zip(variables, tgt_tokens):
-            Triples.append(Triple(variable, ":instance", token))
-            Triples.append(
-                Triple(
-                    head_indices[variable],
-                    head_tags[variable],
-                    variable
-                )
-            )
+            Triples.append((variable, ":instance", token))
+            Triples.append((head_indices[variable], head_tags[variable], variable))
 
     @classmethod
     def from_prediction(cls, prediction):
