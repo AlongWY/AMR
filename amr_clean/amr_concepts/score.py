@@ -72,3 +72,4 @@ class Score:
                 offset += len(score.span) - 1
             else:
                 amr.graph.remove_node(score.node)
+                amr.graph.variable_to_node.pop(score.node.identifier)

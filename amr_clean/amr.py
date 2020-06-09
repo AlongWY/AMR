@@ -295,7 +295,8 @@ class AMRGraph(penman.Graph):
             self.variable_to_node[v] = node
 
         edge_set = set()
-        for edge in self.edges():
+        edges = self.edges()
+        for edge in edges:
             if type(edge.source) is not str:
                 continue
             if type(edge.target) is not str:
@@ -404,7 +405,7 @@ class AMRGraph(penman.Graph):
 
     def remove_node(self, node):
         self._G.remove_node(node)
-        triples = [t for t in self.triples if t.source != node.identifier]
+        triples = [(source, role, target) for source, role, target in self.triples if source != node.identifier]
         self._update_penman_graph(triples)
 
     def replace_node_attribute(self, node, attr, old, new):
@@ -528,7 +529,6 @@ class AMRGraph(penman.Graph):
                             if node.copy_of:
                                 node_num[0] = node_num[0] + 1
                             visited[node] = 1
-
         return node_list
 
     def sort_edges(self, edges):

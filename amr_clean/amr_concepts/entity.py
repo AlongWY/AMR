@@ -239,6 +239,7 @@ class Entity:
                 offset += len(entity.span) - 1
             else:
                 amr.graph.remove_node(entity.node)
+                amr.graph.variable_to_node.pop(entity.node.identifier)
         return type_counter
 
     @staticmethod

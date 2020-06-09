@@ -157,10 +157,12 @@ class Ordinal:
                 if ordinal.value_node:
                     # Remove the value node.
                     amr.graph.remove_edge(ordinal.node, ordinal.value_node)
-                    amr.graph.remove_subtree(ordinal.value_node)
+                    for node in amr.graph.remove_subtree(ordinal.value_node):
+                        amr.graph.variable_to_node.pop(node.identifier)
                 offset += len(ordinal.span) - 1
             else:
                 edges = list(amr.graph._G.in_edges(ordinal.node))
                 for source, target in edges:
                     amr.graph.remove_edge(source, target)
-                    amr.graph.remove_subtree(target)
+                    for node in amr.graph.remove_subtree(target):
+                        amr.graph.variable_to_node.pop(node.identifier)

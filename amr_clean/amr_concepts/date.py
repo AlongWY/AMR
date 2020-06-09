@@ -69,9 +69,10 @@ class Date:
                     edge_label = amr.graph._G[source][target]['label']
                     if edge_label in Date.edge_list:
                         amr.graph.remove_edge(source, target)
-                        amr.graph.remove_subtree(target)
+                        for node in amr.graph.remove_subtree(target):
+                            amr.graph.variable_to_node.pop(node.identifier)
                 # Update instance
-                amr.graph.replace_node_attribute(date.node, ':instance', ':date-entity', abstract)
+                amr.graph.replace_node_attribute(date.node, ':instance', 'date-entity', abstract)
                 # Remove attributes
                 for attr, value in date.attributes.items():
                     amr.graph.remove_node_attribute(date.node, attr, value)
@@ -154,11 +155,11 @@ class Date:
 
     def _maybe_align(self, attr, value, index, amr):
         if attr == ':year':
-            return self._maybe_align_year(value, index, amr)
+            return self._maybe_align_year(int(value), index, amr)
         elif attr == ':month':
-            return self._maybe_align_month(value, index, amr)
+            return self._maybe_align_month(int(value), index, amr)
         elif attr == ':day':
-            return self._maybe_align_day(value, index, amr)
+            return self._maybe_align_day(int(value), index, amr)
         elif attr == ':decade':
             return self._maybe_align_decade(value, index, amr)
         elif attr == ':time':

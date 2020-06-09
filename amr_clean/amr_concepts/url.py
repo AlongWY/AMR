@@ -65,7 +65,8 @@ class URL:
         name_node = list(self.amr.graph._G[node].items())[0][0]
         url = name_node.ops[0]
         self.amr.graph.remove_edge(node, name_node)
-        self.amr.graph.remove_subtree(name_node)
+        for node in self.amr.graph.remove_subtree(name_node):
+            self.amr.graph.variable_to_node.pop(node.identifier)
         self.amr.graph.add_node_attribute(node, ':value', url)
         return url
 

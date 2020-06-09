@@ -163,8 +163,6 @@ class Recategorizer:
 
     def recategorize_file(self, file_path):
         for i, amr in enumerate(AMRIO.read(file_path), 1):
-            # if i < 53000:
-            #     continue
             self.recategorize_graph(amr)
             yield amr
             if i % 1000 == 0:
@@ -172,18 +170,22 @@ class Recategorizer:
         logger.info('Done.\n')
 
     def recategorize_graph(self, amr):
-        amr.stems = [self.stemmer(l) for l in amr.lemmas]
-        self.resolve_name_node_reentrancy(amr)
-        self.recategorize_name_nodes(amr)
-        if self.build_utils:
-            return
-        self.remove_wiki(amr)
-        self.remove_negation(amr)
-        self.recategorize_date_nodes(amr)
-        self.recategorize_score_nodes(amr)
-        self.recategorize_ordinal_nodes(amr)
-        self.recategorize_quantities(amr)
-        self.recategorize_urls(amr)
+        try:
+            amr.stems = [self.stemmer(l) for l in amr.lemmas]
+            self.resolve_name_node_reentrancy(amr)
+            self.recategorize_name_nodes(amr)
+            if self.build_utils:
+                return
+            self.remove_wiki(amr)
+            self.remove_negation(amr)
+            self.recategorize_date_nodes(amr)
+            self.recategorize_score_nodes(amr)
+            self.recategorize_ordinal_nodes(amr)
+            self.recategorize_quantities(amr)
+            self.recategorize_urls(amr)
+        except Exception as e:
+            print(f"error {amr.id}")
+            raise e
 
     def resolve_name_node_reentrancy(self, amr):
         graph = amr.graph
@@ -232,8 +234,6 @@ class Recategorizer:
                 )
                 if entity.span and len(entity.span):
                     self.recat_named_entity_count += 1
-                else:
-                    continue
                 entities.append(entity)
         entities, removed_entities = resolve_conflict_entities(entities)
         if not self.build_utils:
