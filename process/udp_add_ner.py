@@ -22,9 +22,9 @@ def main(args):
                     print(mrp_json['id'], " error!")
 
                 mrp_json['ner'] = ner
-                for ner, nodes in zip(ner, mrp_json['nodes']):
-                    nodes['properties'].append('ner')
-                    nodes['values'].append(ner)
+                # for ner, nodes in zip(ner, mrp_json['nodes']):
+                #     nodes['properties'].append('ner')
+                #     nodes['values'].append(ner)
 
                 out.write(json.dumps(mrp_json) + '\n')
                 num_sentences += 1
