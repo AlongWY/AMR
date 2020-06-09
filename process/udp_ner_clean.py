@@ -1,6 +1,7 @@
 import json, re
 from argparse import ArgumentParser
 from collections import defaultdict
+from itertools import zip_longest
 
 URL = pattern = re.compile(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F])|[\-])+')
 
@@ -37,11 +38,13 @@ def main(args):
 
             print(difference)
 
-            to_clean = {
-                'src_tok': src_token,
-                'ner_tok': mrp_json['tok'],
-                'ner': mrp_json['ner'],
-            }
+            to_clean = []
+            for src_tok, ner_tok, ner in zip_longest(src_token, mrp_json['tok'], mrp_json['ner']):
+                to_clean.append({
+                    'src_tok': src_tok,
+                    'ner_tok': ner_tok,
+                    'ner': ner,
+                })
 
             res[mrp_json['id']] = to_clean
         out.write(json.dumps(res, ensure_ascii=False) + '\n')
