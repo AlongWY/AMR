@@ -5,10 +5,12 @@ from word2number import w2n
 
 
 class Date:
-    attribute_list = ['year', 'month', 'day', 'decade', 'time', 'century', 'era', 'timezone',
-                      'quant', 'value', 'quarter', 'year2']
+    attribute_list = [
+        ':year', ':month', ':day', ':decade', ':time', ':century', ':era', ':timezone',
+        ':quant', ':value', ':quarter', ':year2'
+    ]
 
-    edge_list = ['dayperiod', 'weekday']
+    edge_list = [':dayperiod', ':weekday']
 
     month_map = [
         ('January', 'Jan.', 'Jan'),
@@ -59,7 +61,8 @@ class Date:
                 abstract = '{}_{}'.format(date.ner_type, align_count)
                 span_with_offset = [index - offset for index in date.span]
                 amr.abstract_map[abstract] = Date.save_collapsed_date_node(
-                    date, span_with_offset, amr)
+                    date, span_with_offset, amr
+                )
                 amr.replace_span(span_with_offset, [abstract], ['NNP'], [date.ner_type])
                 # Remove edges
                 for source, target in list(amr.graph._G.edges(date.node)):
@@ -68,7 +71,7 @@ class Date:
                         amr.graph.remove_edge(source, target)
                         amr.graph.remove_subtree(target)
                 # Update instance
-                amr.graph.replace_node_attribute(date.node, 'instance', 'date-entity', abstract)
+                amr.graph.replace_node_attribute(date.node, ':instance', ':date-entity', abstract)
                 # Remove attributes
                 for attr, value in date.attributes.items():
                     amr.graph.remove_node_attribute(date.node, attr, value)
@@ -150,25 +153,25 @@ class Date:
         return clean_spans
 
     def _maybe_align(self, attr, value, index, amr):
-        if attr == 'year':
+        if attr == ':year':
             return self._maybe_align_year(value, index, amr)
-        elif attr == 'month':
+        elif attr == ':month':
             return self._maybe_align_month(value, index, amr)
-        elif attr == 'day':
+        elif attr == ':day':
             return self._maybe_align_day(value, index, amr)
-        elif attr == 'decade':
+        elif attr == ':decade':
             return self._maybe_align_decade(value, index, amr)
-        elif attr == 'time':
+        elif attr == ':time':
             return self._maybe_align_time(value, index, amr)
-        elif attr == 'century':
+        elif attr == ':century':
             return self._maybe_align_century(value, index, amr)
-        elif attr == 'era':
+        elif attr == ':era':
             return self._maybe_align_era(value, index, amr)
-        elif attr == 'quant':
+        elif attr == ':quant':
             return self._maybe_align_quant(value, index, amr)
-        elif attr == 'quarter':
+        elif attr == ':quarter':
             return self._maybe_align_quarter(value, index, amr)
-        elif attr == 'weekday':
+        elif attr == ':weekday':
             return self._maybe_align_weekday(value, index, amr)
         else:
             return self._maybe_align_basic(value, index, amr)

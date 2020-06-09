@@ -63,7 +63,7 @@ class Polarity:
         count = 0
         for node in self.get_negated_nodes():
             for attr, value in node.attributes:
-                if attr == 'polarity':
+                if attr == ':polarity':
                     if not self.dry:
                         self.amr.graph.remove_node_attribute(node, attr, value)
                     count += 1
@@ -123,20 +123,20 @@ class Polarity:
         for node in self.amr.graph.get_nodes():
             if node.instance == 'have-polarity':
                 for attr, value in node.attributes:
-                    if attr == 'ARG2' and value == '-':
+                    if attr == ':ARG2' and value == '-':
                         self.true_positive += 1
                         break
                 else:
-                    self.amr.graph.add_node_attribute(node, 'ARG2', '-')
+                    self.amr.graph.add_node_attribute(node, ':ARG2', '-')
 
     def restore_node_polarity(self, neg_index, head, node):
         if self.special_restoration(neg_index, head, node):
             return
         if not self.dry:
-            self.amr.graph.add_node_attribute(node, 'polarity', '-')
+            self.amr.graph.add_node_attribute(node, ':polarity', '-')
         else:
             for attr, value in node.attributes:
-                if attr == 'polarity':
+                if attr == ':polarity':
                     self.true_positive += 1
                     break
             else:
@@ -150,11 +150,11 @@ class Polarity:
         if node.instance == 'have-polarity':
             if self.dry:
                 for attr, value in node.attributes:
-                    if attr == 'ARG2' and value == '-':
+                    if attr == ':ARG2' and value == '-':
                         self.true_positive += 1
                         break
             else:
-                self.amr.graph.add_node_attribute(node, 'ARG2', '-')
+                self.amr.graph.add_node_attribute(node, ':ARG2', '-')
             return True
 
         if head_lemma == 'face' and node.instance == 'face':
@@ -162,11 +162,11 @@ class Polarity:
                 if source.instance == 'want':
                     if self.dry:
                         for attr, value in source.attributes:
-                            if attr == 'polarity':
+                            if attr == ':polarity':
                                 self.true_positive += 1
                                 break
                     else:
-                        self.amr.graph.add_node_attribute(source, 'polarity', '-')
+                        self.amr.graph.add_node_attribute(source, ':polarity', '-')
                     break
             return True
         return False
@@ -318,7 +318,7 @@ class Polarity:
         nodes = []
         for node in graph.get_nodes():
             for attr, value in node.attributes:
-                if attr == 'polarity':
+                if attr == ':polarity':
                     nodes.append(node)
                     break
         return nodes

@@ -17,7 +17,7 @@ class Polite:
         count = 0
         for node in self.amr.graph.get_nodes():
             for attr, value in node.attributes:
-                if attr == 'polite':
+                if attr == ':polite':
                     if not self.dry:
                         self.amr.graph.remove_node_attribute(node, attr, value)
                     count += 1
@@ -42,7 +42,7 @@ class Polite:
     def restore_node_polite(self, node):
         if self.dry:
             for attr, value in node.attributes:
-                if attr == 'polite':
+                if attr == ':polite':
                     self.true_positive += 1
                     break
             else:

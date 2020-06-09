@@ -67,7 +67,8 @@ class Score:
                 amr.stems = amr.stems[:span[0]] + [abstract] + amr.stems[span[-1] + 1:]
                 amr.graph.remove_node_ops(score.node)
                 amr.graph.replace_node_attribute(
-                    score.node, 'instance', score.node.instance, abstract)
+                    score.node, ':instance', score.node.instance, abstract
+                )
                 offset += len(score.span) - 1
             else:
                 amr.graph.remove_node(score.node)

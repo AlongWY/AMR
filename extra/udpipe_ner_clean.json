@@ -1,0 +1,708 @@
+{
+  "bolt-eng-DF-170-181103-8888447_0076.16": [
+    {
+      "src_tok": "<a href=\"https://www.counterpunch.org/2011/12/02/debt-slavery-why-it-destroyed-rome-why-it-will-destroy-us-unless-its-stopped/\">",
+      "ner_tok": "<a href=\"https://www.counterpunch.org/2011/12/02/debt-slavery-why-it-destroyed-rome-why-it-will-destroy-us-unless-its-stopped/\">",
+      "ner": "O"
+    },
+    {
+      "src_tok": "Debt",
+      "ner_tok": "Debt",
+      "ner": "O"
+    },
+    {
+      "src_tok": "Slavery",
+      "ner_tok": "Slavery",
+      "ner": "O"
+    },
+    {
+      "src_tok": "</a>",
+      "ner_tok": "</a>",
+      "ner": "O"
+    }
+  ],
+  "bolt-eng-DF-170-181122-8788322_0044.4": [
+    {
+      "src_tok": "This",
+      "ner_tok": "This",
+      "ner": "O"
+    },
+    {
+      "src_tok": "post",
+      "ner_tok": "post",
+      "ner": "O"
+    },
+    {
+      "src_tok": "is",
+      "ner_tok": "is",
+      "ner": "O"
+    },
+    {
+      "src_tok": "a",
+      "ner_tok": "a",
+      "ner": "O"
+    },
+    {
+      "src_tok": "perfect",
+      "ner_tok": "perfect",
+      "ner": "O"
+    },
+    {
+      "src_tok": "example",
+      "ner_tok": "example",
+      "ner": "O"
+    },
+    {
+      "src_tok": "of",
+      "ner_tok": "of",
+      "ner": "O"
+    },
+    {
+      "src_tok": "moronic",
+      "ner_tok": "moronic",
+      "ner": "MISC"
+    },
+    {
+      "src_tok": "Americanism",
+      "ner_tok": "Americanism",
+      "ner": "MISC"
+    },
+    {
+      "src_tok": ",",
+      "ner_tok": ",",
+      "ner": "O"
+    },
+    {
+      "src_tok": "fueled",
+      "ner_tok": "fueled",
+      "ner": "O"
+    },
+    {
+      "src_tok": "%",
+      "ner_tok": "%",
+      "ner": "PERCENT"
+    },
+    {
+      "src_tok": "100",
+      "ner_tok": "100",
+      "ner": "PERCENT"
+    },
+    {
+      "src_tok": "by",
+      "ner_tok": "by",
+      "ner": "O"
+    },
+    {
+      "src_tok": "current",
+      "ner_tok": "current",
+      "ner": "DATE"
+    },
+    {
+      "src_tok": "republican",
+      "ner_tok": "republican",
+      "ner": "IDEOLOGY"
+    },
+    {
+      "src_tok": "ideology",
+      "ner_tok": "ideology",
+      "ner": "O"
+    },
+    {
+      "src_tok": ".",
+      "ner_tok": ".",
+      "ner": "O"
+    }
+  ],
+  "bolt-eng-DF-170-181122-8792505_0056.3": [
+    {
+      "src_tok": "<a href=\"http://www.citizensforethics.org/files/Katrina%20Matrix.pdf\">",
+      "ner_tok": "<a href=\"http://www.citizensforethics.org/files/Katrina%20Matrix.pdf\">",
+      "ner": "O"
+    },
+    {
+      "src_tok": "http://www.citizensforethics.org/fil...a%20Matrix.pdf",
+      "ner_tok": "http://www.citizensforethics.org/fil...a%20Matrix.pdf",
+      "ner": "O"
+    },
+    {
+      "src_tok": "</a>",
+      "ner_tok": "</a>",
+      "ner": "O"
+    }
+  ],
+  "bolt-eng-DF-170-181122-8792505_0057.5": [
+    {
+      "src_tok": "Read",
+      "ner_tok": "Read",
+      "ner": "O"
+    },
+    {
+      "src_tok": "through",
+      "ner_tok": "through",
+      "ner": "O"
+    },
+    {
+      "src_tok": "that",
+      "ner_tok": "that",
+      "ner": "O"
+    },
+    {
+      "src_tok": "last",
+      "ner_tok": "last",
+      "ner": "O"
+    },
+    {
+      "src_tok": "link",
+      "ner_tok": "link",
+      "ner": "O"
+    },
+    {
+      "src_tok": "(",
+      "ner_tok": "(",
+      "ner": "O"
+    },
+    {
+      "src_tok": "<a href=\"http://www.citizensforethics.org/files/Katrina%20Matrix.pdf\">",
+      "ner_tok": "<a href=\"http://www.citizensforethics.org/files/Katrina%20Matrix.pdf\">",
+      "ner": "O"
+    },
+    {
+      "src_tok": "http://www.citizensforethics.org/fil...a%20Matrix.pdf",
+      "ner_tok": "http://www.citizensforethics.org/fil...a%20Matrix.pdf",
+      "ner": "O"
+    },
+    {
+      "src_tok": "</a>",
+      "ner_tok": "</a>",
+      "ner": "O"
+    },
+    {
+      "src_tok": ")",
+      "ner_tok": ")",
+      "ner": "O"
+    }
+  ],
+  "NW_WSJ_ENG_0174_2006_0331.22": [
+    {
+      "src_tok": "If",
+      "ner_tok": "If",
+      "ner": "O"
+    },
+    {
+      "src_tok": "Tasurinchi",
+      "ner_tok": "Tasurinchi",
+      "ner": "PERSON"
+    },
+    {
+      "src_tok": "wanted",
+      "ner_tok": "wanted",
+      "ner": "O"
+    },
+    {
+      "src_tok": "to",
+      "ner_tok": "to",
+      "ner": "O"
+    },
+    {
+      "src_tok": "eat",
+      "ner_tok": "eat",
+      "ner": "O"
+    },
+    {
+      "src_tok": ",",
+      "ner_tok": ",",
+      "ner": "O"
+    },
+    {
+      "src_tok": "he",
+      "ner_tok": "he",
+      "ner": "O"
+    },
+    {
+      "src_tok": "dipped",
+      "ner_tok": "dipped",
+      "ner": "O"
+    },
+    {
+      "src_tok": "his",
+      "ner_tok": "his",
+      "ner": "O"
+    },
+    {
+      "src_tok": "hand",
+      "ner_tok": "hand",
+      "ner": "O"
+    },
+    {
+      "src_tok": "into",
+      "ner_tok": "into",
+      "ner": "O"
+    },
+    {
+      "src_tok": "the",
+      "ner_tok": "the",
+      "ner": "O"
+    },
+    {
+      "src_tok": "river",
+      "ner_tok": "river",
+      "ner": "O"
+    },
+    {
+      "src_tok": "and",
+      "ner_tok": "and",
+      "ner": "O"
+    },
+    {
+      "src_tok": "brought",
+      "ner_tok": "brought",
+      "ner": "O"
+    },
+    {
+      "src_tok": "out",
+      "ner_tok": "out",
+      "ner": "O"
+    },
+    {
+      "src_tok": "a",
+      "ner_tok": "a",
+      "ner": "O"
+    },
+    {
+      "src_tok": "shad",
+      "ner_tok": "shad",
+      "ner": "O"
+    },
+    {
+      "src_tok": "flicking",
+      "ner_tok": "flicking",
+      "ner": "O"
+    },
+    {
+      "src_tok": "its",
+      "ner_tok": "its",
+      "ner": "O"
+    },
+    {
+      "src_tok": "tail",
+      "ner_tok": "tail",
+      "ner": "O"
+    },
+    {
+      "src_tok": "…",
+      "ner_tok": ". . .",
+      "ner": "O"
+    },
+    {
+      "src_tok": "”",
+      "ner_tok": "\"",
+      "ner": "O"
+    }
+  ],
+  "059088-0003": [
+    {
+      "src_tok": "If",
+      "ner_tok": "If",
+      "ner": "O"
+    },
+    {
+      "src_tok": "you",
+      "ner_tok": "you",
+      "ner": "O"
+    },
+    {
+      "src_tok": "mention",
+      "ner_tok": "mention",
+      "ner": "O"
+    },
+    {
+      "src_tok": "the",
+      "ner_tok": "the",
+      "ner": "O"
+    },
+    {
+      "src_tok": "name",
+      "ner_tok": "name",
+      "ner": "O"
+    },
+    {
+      "src_tok": "Amir",
+      "ner_tok": "Amir",
+      "ner": "PERSON"
+    },
+    {
+      "src_tok": "you",
+      "ner_tok": "you",
+      "ner": "O"
+    },
+    {
+      "src_tok": "will",
+      "ner_tok": "will",
+      "ner": "O"
+    },
+    {
+      "src_tok": "receive",
+      "ner_tok": "receive",
+      "ner": "O"
+    },
+    {
+      "src_tok": "%",
+      "ner_tok": "%",
+      "ner": "PERCENT"
+    },
+    {
+      "src_tok": "10",
+      "ner_tok": "10",
+      "ner": "PERCENT"
+    },
+    {
+      "src_tok": "off",
+      "ner_tok": "off",
+      "ner": "O"
+    },
+    {
+      "src_tok": "at",
+      "ner_tok": "at",
+      "ner": "O"
+    },
+    {
+      "src_tok": "time",
+      "ner_tok": "time",
+      "ner": "O"
+    },
+    {
+      "src_tok": "of",
+      "ner_tok": "of",
+      "ner": "O"
+    },
+    {
+      "src_tok": "purchase",
+      "ner_tok": "purchase",
+      "ner": "O"
+    }
+  ],
+  "20435007": [
+    {
+      "src_tok": "At",
+      "ner_tok": "At",
+      "ner": "O"
+    },
+    {
+      "src_tok": "Chrysler",
+      "ner_tok": "Chrysler",
+      "ner": "ORGANIZATION"
+    },
+    {
+      "src_tok": "’s",
+      "ner_tok": "'s",
+      "ner": "O"
+    },
+    {
+      "src_tok": "1990",
+      "ner_tok": "1990",
+      "ner": "DATE"
+    },
+    {
+      "src_tok": "model",
+      "ner_tok": "model",
+      "ner": "TITLE"
+    },
+    {
+      "src_tok": "preview",
+      "ner_tok": "preview",
+      "ner": "O"
+    },
+    {
+      "src_tok": "last",
+      "ner_tok": "last",
+      "ner": "DATE"
+    },
+    {
+      "src_tok": "month",
+      "ner_tok": "month",
+      "ner": "DATE"
+    },
+    {
+      "src_tok": ",",
+      "ner_tok": ",",
+      "ner": "O"
+    },
+    {
+      "src_tok": "Chrysler",
+      "ner_tok": "Chrysler",
+      "ner": "ORGANIZATION"
+    },
+    {
+      "src_tok": "Motors",
+      "ner_tok": "Motors",
+      "ner": "ORGANIZATION"
+    },
+    {
+      "src_tok": "President",
+      "ner_tok": "President",
+      "ner": "TITLE"
+    },
+    {
+      "src_tok": "Robert",
+      "ner_tok": "Robert",
+      "ner": "PERSON"
+    },
+    {
+      "src_tok": "A.",
+      "ner_tok": "A.",
+      "ner": "PERSON"
+    },
+    {
+      "src_tok": "Lutz",
+      "ner_tok": "Lutz",
+      "ner": "PERSON"
+    },
+    {
+      "src_tok": "said",
+      "ner_tok": "said",
+      "ner": "O"
+    },
+    {
+      "src_tok": "the",
+      "ner_tok": "the",
+      "ner": "O"
+    },
+    {
+      "src_tok": "No.",
+      "ner_tok": "No.",
+      "ner": "O"
+    },
+    {
+      "src_tok": "3",
+      "ner_tok": "3",
+      "ner": "NUMBER"
+    },
+    {
+      "src_tok": "auto",
+      "ner_tok": "auto",
+      "ner": "O"
+    },
+    {
+      "src_tok": "maker",
+      "ner_tok": "maker",
+      "ner": "O"
+    },
+    {
+      "src_tok": ",",
+      "ner_tok": ",",
+      "ner": "O"
+    },
+    {
+      "src_tok": "along",
+      "ner_tok": "along",
+      "ner": "O"
+    },
+    {
+      "src_tok": "with",
+      "ner_tok": "with",
+      "ner": "O"
+    },
+    {
+      "src_tok": "other",
+      "ner_tok": "other",
+      "ner": "O"
+    },
+    {
+      "src_tok": "U.S.",
+      "ner_tok": "U.S.",
+      "ner": "COUNTRY"
+    },
+    {
+      "src_tok": "manufacturers",
+      "ner_tok": "manufacturers",
+      "ner": "O"
+    },
+    {
+      "src_tok": ",",
+      "ner_tok": ",",
+      "ner": "O"
+    },
+    {
+      "src_tok": "might",
+      "ner_tok": "might",
+      "ner": "O"
+    },
+    {
+      "src_tok": "be",
+      "ner_tok": "be",
+      "ner": "O"
+    },
+    {
+      "src_tok": "forced",
+      "ner_tok": "forced",
+      "ner": "O"
+    },
+    {
+      "src_tok": "to",
+      "ner_tok": "to",
+      "ner": "O"
+    },
+    {
+      "src_tok": "“",
+      "ner_tok": "\"",
+      "ner": "O"
+    },
+    {
+      "src_tok": "realign",
+      "ner_tok": "realign",
+      "ner": "O"
+    },
+    {
+      "src_tok": "…",
+      "ner_tok": ". . .",
+      "ner": "O"
+    },
+    {
+      "src_tok": "capacity",
+      "ner_tok": "capacity",
+      "ner": "O"
+    },
+    {
+      "src_tok": "”",
+      "ner_tok": "\"",
+      "ner": "O"
+    },
+    {
+      "src_tok": "if",
+      "ner_tok": "if",
+      "ner": "O"
+    },
+    {
+      "src_tok": "market",
+      "ner_tok": "market",
+      "ner": "O"
+    },
+    {
+      "src_tok": "demand",
+      "ner_tok": "demand",
+      "ner": "O"
+    },
+    {
+      "src_tok": "does",
+      "ner_tok": "does",
+      "ner": "O"
+    },
+    {
+      "src_tok": "n’t",
+      "ner_tok": "n't",
+      "ner": "O"
+    },
+    {
+      "src_tok": "improve",
+      "ner_tok": "improve",
+      "ner": "O"
+    },
+    {
+      "src_tok": ".",
+      "ner_tok": ".",
+      "ner": "O"
+    }
+  ],
+  "21615020": [
+    {
+      "src_tok": "“",
+      "ner_tok": "\"",
+      "ner": "O"
+    },
+    {
+      "src_tok": "We",
+      "ner_tok": "We",
+      "ner": "O"
+    },
+    {
+      "src_tok": "could",
+      "ner_tok": "could",
+      "ner": "O"
+    },
+    {
+      "src_tok": "have",
+      "ner_tok": "have",
+      "ner": "O"
+    },
+    {
+      "src_tok": "shouted",
+      "ner_tok": "shouted",
+      "ner": "O"
+    },
+    {
+      "src_tok": "from",
+      "ner_tok": "from",
+      "ner": "O"
+    },
+    {
+      "src_tok": "the",
+      "ner_tok": "the",
+      "ner": "O"
+    },
+    {
+      "src_tok": "rooftops",
+      "ner_tok": "rooftops",
+      "ner": "O"
+    },
+    {
+      "src_tok": "about",
+      "ner_tok": "about",
+      "ner": "O"
+    },
+    {
+      "src_tok": "Courter",
+      "ner_tok": "Courter",
+      "ner": "PERSON"
+    },
+    {
+      "src_tok": "…",
+      "ner_tok": ". . .",
+      "ner": "O"
+    },
+    {
+      "src_tok": "and",
+      "ner_tok": "and",
+      "ner": "O"
+    },
+    {
+      "src_tok": "no",
+      "ner_tok": "no",
+      "ner": "O"
+    },
+    {
+      "src_tok": "one",
+      "ner_tok": "one",
+      "ner": "NUMBER"
+    },
+    {
+      "src_tok": "would",
+      "ner_tok": "would",
+      "ner": "O"
+    },
+    {
+      "src_tok": "have",
+      "ner_tok": "have",
+      "ner": "O"
+    },
+    {
+      "src_tok": "heard",
+      "ner_tok": "heard",
+      "ner": "O"
+    },
+    {
+      "src_tok": "us",
+      "ner_tok": "us",
+      "ner": "O"
+    },
+    {
+      "src_tok": ".",
+      "ner_tok": ".",
+      "ner": "O"
+    },
+    {
+      "src_tok": "”",
+      "ner_tok": "\"",
+      "ner": "O"
+    }
+  ]
+}

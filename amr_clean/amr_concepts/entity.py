@@ -20,13 +20,13 @@ def strip_span(span, tokens):
     start = 0
     while start < len(span):
         token = tokens[span[start]]
-        if not re.search(r'^(in|of|at|-|,)$', token):
+        if not re.search(r'^:(in|of|at|-|,)$', token):
             break
         start += 1
     end = len(span) - 1
     while end > start:
         token = tokens[span[end]]
-        if not re.search(r'^(in|of|at|-|,)$', token):
+        if not re.search(r'^:(in|of|at|-|,)$', token):
             break
         end -= 1
     return span[start: end + 1]
@@ -113,7 +113,7 @@ class Entity:
         self.debug = False
 
     def __str__(self):
-        return 'node:{}\nalignment:{}'.format(str(self.node), self.alignment)
+        return 'node{}\nalignment{}'.format(str(self.node), self.alignment)
 
     def get_text_spans(self, amr):
         spans = []
@@ -148,11 +148,13 @@ class Entity:
     @classmethod
     def get_aligned_entity(cls, node, amr, backup_ner_type, entity_type_lut):
         if len(node.ops) == 0:
-            return None
+            amr_type = amr.graph.get_name_node_type(node)
+            return cls(None, node, backup_ner_type, amr_type=amr_type)
         alignment = cls.get_alignment_for_ops(rephrase_ops(node.ops), amr)
         if len(alignment) == 0:
             alignment = cls.get_alignment_for_ops(node.ops, amr)
-        entity1 = cls(node=node, alignment=alignment)
+        amr_type = amr.graph.get_name_node_type(node)
+        entity1 = cls(node=node, alignment=alignment, amr_type=amr_type)
         entity1._get_aligned_info(amr, backup_ner_type, entity_type_lut)
 
         alignment = cls.get_alignment_for_ops(tokenize_ops(node.ops), amr)
@@ -233,7 +235,7 @@ class Entity:
                 amr.stems = amr.stems[:span_with_offset[0]] + [abstract] + amr.stems[span_with_offset[-1] + 1:]
                 amr.graph.remove_node_ops(entity.node)
                 amr.graph.replace_node_attribute(
-                    entity.node, 'instance', entity.node.instance, abstract)
+                    entity.node, ':instance', entity.node.instance, abstract)
                 offset += len(entity.span) - 1
             else:
                 amr.graph.remove_node(entity.node)

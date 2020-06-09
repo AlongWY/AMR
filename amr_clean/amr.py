@@ -122,6 +122,7 @@ class AMR:
         if pos is None:
             pos = [self.upos[indexes[0]]]
         self.upos = self.upos[:indexes[0]] + pos + self.upos[indexes[-1] + 1:]
+        self.xpos = self.xpos[:indexes[0]] + pos + self.xpos[indexes[-1] + 1:]
         if ner is None:
             ner = [self.ner[indexes[0]]]
         self.ner = self.ner[:indexes[0]] + ner + self.ner[indexes[-1] + 1:]
@@ -161,8 +162,8 @@ class AMR:
 
 class AMRNode:
     attribute_priority = [
-        'instance', 'quant', 'mode', 'value', 'name', 'li', 'mod', 'frequency',
-        'month', 'day', 'year', 'time', 'unit', 'decade', 'poss'
+        ':instance', ':quant', ':mode', ':value', ':name', ':li', ':mod', ':frequency',
+        ':month', ':day', ':year', ':time', ':unit', ':decade', ':poss'
     ]
 
     def __init__(self, identifier, attributes=None, copy_of=None):
@@ -179,7 +180,7 @@ class AMRNode:
         def get_attr_priority(attr):
             if attr in self.attribute_priority:
                 return self.attribute_priority.index(attr), attr
-            if not re.search(r'^(ARG|op|snt)', attr):
+            if not re.search(r'^:(ARG|op|snt)', attr):
                 return len(self.attribute_priority), attr
             else:
                 return len(self.attribute_priority) + 1, attr
@@ -197,7 +198,7 @@ class AMRNode:
     def __repr__(self):
         ret = str(self.identifier)
         for k, v in self.attributes:
-            if k == 'instance':
+            if k == ':instance':
                 ret += ' / ' + v
                 break
         return ret
@@ -205,15 +206,15 @@ class AMRNode:
     def __str__(self):
         ret = repr(self)
         for key, value in self.attributes:
-            if key == 'instance':
+            if key == ':instance':
                 continue
-            ret += '\n\t:{} {}'.format(key, value)
+            ret += '\n\t{} {}'.format(key, value)
         return ret
 
     @property
     def instance(self):
         for key, value in self.attributes:
-            if key == 'instance':
+            if key == ':instance':
                 return value
         else:
             return None
@@ -222,8 +223,8 @@ class AMRNode:
     def ops(self):
         ops = []
         for key, value in self.attributes:
-            if re.search(r'op\d+', key):
-                ops.append((int(key[2:]), value))
+            if re.search(r':op\d+', key):
+                ops.append((int(key[3:]), value))
         if len(ops):
             ops.sort(key=lambda x: x[0])
         return [v for k, v in ops]
@@ -288,7 +289,8 @@ class AMRGraph(penman.Graph):
             if type(v) is not str:
                 continue
             attributes = [(t.role, t.target) for t in self.attributes(source=v)]
-            node = AMRNode(v, attributes)
+            instance = [(label, target) for src, label, target in self.instances() if src == v]
+            node = AMRNode(v, attributes=attributes + instance)
             G.add_node(node)
             self.variable_to_node[v] = node
 
@@ -300,22 +302,19 @@ class AMRGraph(penman.Graph):
                 continue
             source = self.variable_to_node[edge.source]
             target = self.variable_to_node[edge.target]
-            relation = edge.role
-
-            if relation == 'instance':
-                continue
+            role = edge.role
 
             if source == target:
                 continue
 
             if model.is_role_inverted(edge.role):
-                source, target, relation = target, source, model.invert_role(edge.role)
+                source, target, role = target, source, model.invert_role(edge.role)
 
             if (source, target) in edge_set:
                 target = target.copy()
 
             edge_set.add((source, target))
-            G.add_edge(source, target, label=relation)
+            G.add_edge(source, target, label=role)
 
         self._G = G
 
@@ -326,21 +325,21 @@ class AMRGraph(penman.Graph):
 
     def is_name_node(self, node):
         edges = list(self._G.in_edges(node))
-        return any(self._G[source][target].get('label', None) == 'name' for source, target in edges)
+        return any(self._G[source][target].get('label', None) == ':name' for source, target in edges)
 
     def get_name_node_type(self, node):
         edges = list(self._G.in_edges(node))
         for source, target in edges:
-            if self._G[source][target].get('label', None) == 'name':
+            if self._G[source][target].get('label', None) == ':name':
                 return source.instance
         raise KeyError
 
     def get_name_node_wiki(self, node):
         edges = list(self._G.in_edges(node))
         for source, target in edges:
-            if self._G[source][target].get('label', None) == 'name':
+            if self._G[source][target].get('label', None) == ':name':
                 for attr, value in source.attributes:
-                    if attr == 'wiki':
+                    if attr == ':wiki':
                         if value != '-':
                             value = value[1:-1]  # remove quotes
                         return value
@@ -350,20 +349,20 @@ class AMRGraph(penman.Graph):
         edges = list(self._G.in_edges(node))
         parent = None
         for source, target in edges:
-            if self._G[source][target].get('label', None) == 'name':
+            if self._G[source][target].get('label', None) == ':name':
                 parent = source
                 break
         if parent:
             if wiki != '-':
                 wiki = '"{}"'.format(wiki)
-            self.add_node_attribute(parent, 'wiki', wiki)
+            self.add_node_attribute(parent, ':wiki', wiki)
 
     def is_date_node(self, node):
         return node.instance == 'date-entity'
 
     def add_edge(self, source, target, label):
         self._G.add_edge(source, target, label=label)
-        t = penman.Triple(source=source.identifier, target=target.identifier, role=label)
+        t = Triple(source=source.identifier, target=target.identifier, role=label)
         triples = self.triples + [t]
         triples = sorted(triples, key=lambda x: model.alphanumeric_order(x[0]))
         self._update_penman_graph(triples)
@@ -375,14 +374,15 @@ class AMRGraph(penman.Graph):
             x = x.identifier
         if isinstance(y, AMRNode):
             y = y.identifier
-        triples = [t for t in self.triples if not (t.source == x and t.target == y)]
+        triples = [(src, role, target) for src, role, target in self.triples if not (src == x and target == y)]
         self._update_penman_graph(triples)
 
     def update_edge_label(self, x, y, old, new):
         self._G[x][y]['label'] = new
         triples = []
-        for t in self.triples:
-            if t.source == x.identifier and t.target == y.identifier and t.relation == old:
+        for src, role, target in self.triples:
+            t = Triple(src, role=role, target=target)
+            if src == x.identifier and target == y.identifier and role == old:
                 t = Triple(x.identifier, new, y.identifier)
             triples.append(t)
         self._update_penman_graph(triples)
@@ -395,10 +395,10 @@ class AMRGraph(penman.Graph):
             while identifier + str(i) in self.variables():
                 i += 1
             identifier += str(i)
-        triples = self.triples + [Triple(identifier, 'instance', instance)]
+        triples = self.triples + [Triple(identifier, ':instance', instance)]
         self.triples = sorted(triples, key=lambda x: model.alphanumeric_order(x[0]))
 
-        node = AMRNode(identifier, [('instance', instance)])
+        node = AMRNode(identifier, [(':instance', instance)])
         self._G.add_node(node)
         return node
 
@@ -411,10 +411,11 @@ class AMRGraph(penman.Graph):
         node.replace_attribute(attr, old, new)
         triples = []
         found = False
-        for t in self.triples:
-            if t.source == node.identifier and t.relation == attr and t.target == old:
+        for source, role, target in self.triples:
+            t = (source, role, target)
+            if source == node.identifier and role == attr and target == old:
                 found = True
-                t = penman.Triple(source=node.identifier, role=attr, target=new)
+                t = (node.identifier, attr, new)
             triples.append(t)
         if not found:
             print('Something went wrong!!!')
@@ -424,8 +425,8 @@ class AMRGraph(penman.Graph):
 
     def remove_node_attribute(self, node, attr, value):
         node.remove_attribute(attr, value)
-        triples = [t for t in self.triples if
-                   not (t.source == node.identifier and t.relation == attr and t.target == value)]
+        triples = [(src, role, target) for src, role, target in self.triples if
+                   not (src == node.identifier and role == attr and target == value)]
         self._update_penman_graph(triples)
 
     def add_node_attribute(self, node, attr, value):
@@ -436,7 +437,7 @@ class AMRGraph(penman.Graph):
     def remove_node_ops(self, node):
         ops = []
         for attr, value in node.attributes:
-            if re.search(r'^op\d+$', attr):
+            if re.search(r'^:op\d+$', attr):
                 ops.append((attr, value))
         for attr, value in ops:
             self.remove_node_attribute(node, attr, value)
@@ -481,7 +482,7 @@ class AMRGraph(penman.Graph):
         return self._src_tokens
 
     def get_list_node(self, replace_copy=True):
-        node_num = len(self.variable_to_node)
+        node_num = [len(self.variable_to_node)]
         visited = defaultdict(int)
         node_list = []
 
@@ -492,34 +493,42 @@ class AMRGraph(penman.Graph):
                     relation,
                     parent if parent.copy_of is None or not replace_copy else parent.copy_of))
 
-            if len(self._G[node]) > 0 and visited[node] == 0:
+                if node.copy_of:
+                    node_num[0] = node_num[0] + 1
+
                 visited[node] = 1
-                for child_node, child_relation in self.sort_edges(self._G[node].items()):
-                    dfs(child_node, child_relation["label"], node)
-            visited[node] = 1
+
+                if len(self._G[node]) > 0:
+                    for child_node, child_relation in self.sort_edges(self._G[node].items()):
+                        dfs(child_node, child_relation["label"], node)
 
         dfs(
             self.variable_to_node[self._top],
             'root',
             self.variable_to_node[self._top]
         )
-        while len(node_list) < node_num:
-            for name, node in self.variable_to_node.items():
+        while len(node_list) < node_num[0]:
+            for node in self.variable_to_node.values():
                 if visited[node] == 1:
                     continue
-                if len(self._G[node]) > 0 and visited[node] == 0:
-                    for child_node, child_relation in self.sort_edges(self._G[node].items()):
+                linkd_edges = self._G[node]
+                if len(linkd_edges) > 0:
+                    for child_node, child_relation in self.sort_edges(linkd_edges.items()):
                         relation = child_relation["label"]
+
                         if visited[child_node] == 0:
                             dfs(child_node, relation, node)
-                            continue
-                        if visited[node] == 0 and visited[child_node] == 1:
+
+                        if visited[child_node] == 1 and visited[node] == 0:
                             node_list.append((
                                 node if node.copy_of is None or not replace_copy else node.copy_of,
                                 model.invert_role(relation),
                                 child_node if child_node.copy_of is None or not replace_copy else child_node.copy_of
                             ))
+                            if node.copy_of:
+                                node_num[0] = node_num[0] + 1
                             visited[node] = 1
+
         return node_list
 
     def sort_edges(self, edges):
@@ -532,13 +541,13 @@ class AMRGraph(penman.Graph):
         visited = defaultdict(int)
 
         for node, relation, parent_node in node_list:
-            instance = [attr[1] for attr in node.attributes if attr[0] == "instance"]
+            instance = [attr[1] for attr in node.attributes if attr[0] == ":instance"]
             assert len(instance) == 1
             tgt_token.append(str(instance[0]))
 
             if len(node.attributes) > 1 and visited[node] == 0:
                 for attr in node.attributes:
-                    if attr[0] != "instance":
+                    if attr[0] != ":instance":
                         tgt_token.append(str(attr[1]))
 
             visited[node] = 1
@@ -710,7 +719,7 @@ class AMRGraph(penman.Graph):
 
         Triples = []
         for variable, token in zip(variables, tgt_tokens):
-            Triples.append(Triple(variable, "instance", token))
+            Triples.append(Triple(variable, ":instance", token))
             Triples.append(
                 Triple(
                     head_indices[variable],
@@ -726,7 +735,7 @@ class AMRGraph(penman.Graph):
             return re.search(r'(^".*"$|^[^a-zA-Z]+$)', value) is not None
 
         def is_attribute_edge(label):
-            return label in ('instance', 'mode', 'li', 'value', 'month', 'year', 'day', 'decade', 'ARG6')
+            return label in (':instance', ':mode', ':li', ':value', ':month', ':year', ':day', ':decade', ':ARG6')
 
         def normalize_number(text):
             if re.search(r'^\d+,\d+$', text):
@@ -799,10 +808,10 @@ class AMRGraph(penman.Graph):
                         break
                 else:
                     node = re.sub(r'[/:\\()]', '_', node)
-            triples.append((var, 'instance', node))
+            triples.append((var, ':instance', node))
 
         if len(triples) == 0:
-            triples.append(('vv1', 'instance', 'string-entity'))
+            triples.append(('vv1', ':instance', 'string-entity'))
             top = 'vv1'
         triples.sort(key=lambda x: int(x[0].replace('vv', '')))
         graph = penman.Graph()

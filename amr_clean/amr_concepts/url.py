@@ -53,7 +53,7 @@ class URL:
 
     def get_url_value(self, node):
         for attr, value in node.attributes:
-            if attr == 'value':
+            if attr == ':value':
                 assert re.search(r'^".*"$', value)
                 return value
         try:
@@ -66,7 +66,7 @@ class URL:
         url = name_node.ops[0]
         self.amr.graph.remove_edge(node, name_node)
         self.amr.graph.remove_subtree(name_node)
-        self.amr.graph.add_node_attribute(node, 'value', url)
+        self.amr.graph.add_node_attribute(node, ':value', url)
         return url
 
     def align_url(self, node, url):
@@ -112,7 +112,7 @@ class URL:
                 span=' '.join(map(self.amr.lemmas.__getitem__, span)),
                 value=alignment.url)
             self.amr.replace_span(span, [abstract], ['NN'], ['URL'])
-            self.amr.graph.replace_node_attribute(alignment.node, 'value', alignment.url, abstract)
+            self.amr.graph.replace_node_attribute(alignment.node, ':value', alignment.url, abstract)
         return count
 
     def remove_redundant_url(self):

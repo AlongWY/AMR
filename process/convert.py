@@ -5,7 +5,7 @@ from fast_smatch.fast_smatch import get_amr_json
 import penman as pp
 import json, re
 
-import os
+from penman import Graph, Triple
 
 
 def main(args):
@@ -17,18 +17,30 @@ def main(args):
             amr_data = get_amr_json(bert_tokenizer, f)
             if amr_data == '' or amr_data is None:
                 break
-            amr = AMR.parse_amr_json(amr_data)
-            instance_triple, relation_triple = amr.get_triples2()
-            concepts = []
+
+            amr_nodes = amr_data['nodes']
+            amr_edges = amr_data.get('edges', [])
+
             graph = []
-            for instance, short, label in instance_triple:
-                concepts.append(label)
-                graph.append((short, instance, label))
-            for relation, source, target in relation_triple:
+            concepts = []
+
+            for node in amr_nodes:
+                short_name = f'c{node["id"]}'
+                concept = node["label"]
+                concepts.append(concept)
+                graph.append((short_name, 'instance', concept))
+                for attr, value in zip(node.get('properties', []), node.get('values', [])):
+                    value = f"\"{value}\"" if pattern.search(value) else value
+                    graph.append((short_name, attr, value))
+            for edge in amr_edges:
+                src = f'c{edge["source"]}'
+                target = f'c{edge["target"]}'
+                label = edge["label"]
                 target = f"\"{target}\"" if pattern.search(target) else target
-                graph.append((source, relation, target))
-            assert len(amr_data['tops']) == 1
-            graph = pp.Graph(graph)
+                graph.append((src, label, target))
+
+            graph = Graph(graph)
+
             out.write('# ::id ' + amr_data['id'] + '\n')
             out.write('# ::snt ' + amr_data['input'] + '\n')
             out.write('# ::token ' + json.dumps(amr_data['token']) + '\n')

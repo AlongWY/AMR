@@ -59,7 +59,7 @@ class Wikification:
                 # Change it back to cached_wiki = self._spotlight_wiki[amr.sentence] if amr.sentence in self._spotlight_wiki else self.spotlight_wiki(amr.sentence)
                 cached_wiki = self._spotlight_wiki[
                     amr.sentence] if amr.sentence in self._spotlight_wiki else None  # self.spotlight_wiki(amr.sentence)
-                if instance_type == 'named-entity':
+                if instance_type == ':named-entity':
                     self.name_node_count += 1
                     wiki = '-'
                     span = strip(saved_dict['span'])

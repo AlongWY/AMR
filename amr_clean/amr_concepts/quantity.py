@@ -236,7 +236,7 @@ class Quantity:
             position = lemmas.index(node_lemma)
         if position == -1:
             for _, child in self.amr.graph._G.edges(node):
-                if self.amr.graph._G[node][child]['label'] == 'unit':
+                if self.amr.graph._G[node][child]['label'] == ':unit':
                     instance = child.instance
                     if instance in lemmas:
                         position = lemmas.index(instance)

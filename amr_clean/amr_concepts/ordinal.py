@@ -49,11 +49,12 @@ class Ordinal:
         return {
             'type': 'ordinal-entity',
             'span': ' '.join(map(amr.lemmas.__getitem__, span)),
-            'ops': self.ops}
+            'ops': self.ops
+        }
 
     def _get_ops(self):
         for attr, value in self.node.attributes:
-            if attr == 'value':
+            if attr == ':value':
                 return [str(value)]
         # The ordinal value is not an attribute, try to find it in the children.
         value = None
@@ -61,7 +62,7 @@ class Ordinal:
         edges = list(graph._G.edges(self.node))
         for source, target in edges:
             label = graph._G[source][target]['label']
-            if label == 'value':
+            if label == ':value':
                 value = target
                 break
         if value is None:
@@ -147,11 +148,12 @@ class Ordinal:
                 amr.replace_span(span, [abstract], ['JJ'], [ordinal.ner_type])
                 amr.stems = amr.stems[:span[0]] + [abstract] + amr.stems[span[-1] + 1:]
                 for attr, value in ordinal.node.attributes:
-                    if attr == 'value':
+                    if attr == ':value':
                         amr.graph.remove_node_attribute(ordinal.node, attr, value)
                         break
                 amr.graph.replace_node_attribute(
-                    ordinal.node, 'instance', ordinal.node.instance, abstract)
+                    ordinal.node, ':instance', ordinal.node.instance, abstract
+                )
                 if ordinal.value_node:
                     # Remove the value node.
                     amr.graph.remove_edge(ordinal.node, ordinal.value_node)

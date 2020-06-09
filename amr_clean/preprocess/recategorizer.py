@@ -1,7 +1,6 @@
 import os
 import json
 from collections import defaultdict
-from tqdm import tqdm
 
 import nltk
 
@@ -10,6 +9,7 @@ from amr_clean.amr_concepts import Entity, Date, Score, Quantity, Ordinal, Polar
 import logging
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 def resolve_conflict_entities(entities):
@@ -45,7 +45,6 @@ def resolve_conflict_entities(entities):
 
 
 class Recategorizer:
-
     def __init__(self, train_data=None, build_utils=False, util_dir=None):
         self.stemmer = nltk.stem.SnowballStemmer('english').stem
         self.train_data = train_data
@@ -130,6 +129,7 @@ class Recategorizer:
         logger.info('Done.\n')
 
     def _dump_utils(self, directory):
+        logger.info("Dumping utils")
         with open(os.path.join(directory, 'name_type_cooccur_counter.json'), 'w', encoding='utf-8') as f:
             json.dump(self.name_type_cooccur_counter, f, indent=4)
         with open(os.path.join(directory, 'name_op_cooccur_counter.json'), 'w', encoding='utf-8') as f:
@@ -138,6 +138,7 @@ class Recategorizer:
             json.dump(self.wiki_span_cooccur_counter, f, indent=4)
         with open(os.path.join(directory, 'entity_type_cooccur_counter.json'), 'w', encoding='utf-8') as f:
             json.dump(self.entity_type_cooccur_counter, f, indent=4)
+        logger.info("Dumped utils")
 
     def _load_utils(self, directory):
         with open(os.path.join(directory, 'name_type_cooccur_counter.json'), encoding='utf-8') as f:
@@ -162,6 +163,8 @@ class Recategorizer:
 
     def recategorize_file(self, file_path):
         for i, amr in enumerate(AMRIO.read(file_path), 1):
+            # if i < 53000:
+            #     continue
             self.recategorize_graph(amr)
             yield amr
             if i % 1000 == 0:
@@ -189,12 +192,12 @@ class Recategorizer:
                 edges = list(graph._G.in_edges(node))
                 name_head = None
                 for source, target in edges:
-                    if graph._G[source][target]['label'] == 'name':
+                    if graph._G[source][target]['label'] == ':name':
                         name_head = source
                         break
                 for source, target in edges:
                     label = graph._G[source][target]['label']
-                    if label != 'name':
+                    if label != ':name':
                         graph.remove_edge(source, target)
                         graph.add_edge(source, name_head, label)
 
@@ -202,7 +205,7 @@ class Recategorizer:
         graph = amr.graph
         for node in graph.get_nodes():
             for attr, value in node.attributes.copy():
-                if attr == 'wiki':
+                if attr == ':wiki':
                     self.removed_wiki_count += 1
                     graph.remove_node_attribute(node, attr, value)
 
@@ -220,14 +223,17 @@ class Recategorizer:
                 continue
             if graph.is_name_node(node):
                 edges = list(graph._G.in_edges(node))
-                assert all(graph._G[s][t]['label'] == 'name' for s, t in edges)
+                assert all(graph._G[s][t]['label'] == ':name' for s, t in edges)
                 self.named_entity_count += 1
                 amr_type = amr.graph.get_name_node_type(node)
                 backup_ner_type = self._map_name_node_type(amr_type)
                 entity = Entity.get_aligned_entity(
-                    node, amr, backup_ner_type, self.entity_type_cooccur_counter)
-                if len(entity.span):
+                    node, amr, backup_ner_type, self.entity_type_cooccur_counter
+                )
+                if entity.span and len(entity.span):
                     self.recat_named_entity_count += 1
+                else:
+                    continue
                 entities.append(entity)
         entities, removed_entities = resolve_conflict_entities(entities)
         if not self.build_utils:
@@ -344,9 +350,10 @@ if __name__ == '__main__':
     recategorizer = Recategorizer(
         train_data=args.amr_train_file,
         build_utils=args.build_utils,
-        util_dir=args.dump_dir)
+        util_dir=args.dump_dir
+    )
 
     for file_path in args.amr_files:
         with open(file_path + '.recategorize', 'w', encoding='utf-8') as f:
-            for amr in tqdm(recategorizer.recategorize_file(file_path)):
+            for amr in recategorizer.recategorize_file(file_path):
                 f.write(str(amr) + '\n\n')

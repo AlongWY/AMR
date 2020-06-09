@@ -11,7 +11,7 @@ class NodeRestore:
             instance = node.instance
             new_instance = self.node_utils.get_frames(instance)[0]
             if instance != new_instance:
-                graph.replace_node_attribute(node, 'instance', instance, new_instance)
+                graph.replace_node_attribute(node, ':instance', instance, new_instance)
             continue
 
     def restore_file(self, file_path):
