@@ -74,13 +74,19 @@ class Date:
                         amr.graph.remove_edge(source, target)
 
                         # repair graph
-                        backup = list(amr.graph._G.in_edges(target)) + list(amr.graph._G.edges(target))
-                        if len(backup):
+                        in_edges = list(amr.graph._G.in_edges(target))
+                        out_edges = list(amr.graph._G.out_edges(target))
+                        if len(in_edges) or len(out_edges):
                             print("repaire")
-                        for src, tgt in backup:
+                        for src, tgt in in_edges:
                             label = amr.graph._G[src][tgt]['label']
+                            amr.graph.remove_edge(src, tgt)
                             amr.graph.add_edge(src, source, label)
-                            amr.graph._G.remove_edge(src, tgt)
+                        for src, tgt in out_edges:
+                            if src == source: continue
+                            label = amr.graph._G[src][tgt]['label']
+                            amr.graph.remove_edge(src, tgt)
+                            amr.graph.add_edge(source, tgt, label)
 
                         subtree = amr.graph.remove_subtree(target)
                         for node in subtree:
