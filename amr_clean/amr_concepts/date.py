@@ -67,13 +67,14 @@ class Date:
                 )
                 amr.replace_span(span_with_offset, [abstract], ['NNP'], [date.ner_type])
                 # Remove edges
-                for source, target in list(amr.graph._G.edges(date.node)):
+                edges = amr.graph._G.edges(date.node)
+                for source, target in list(edges):
                     edge_label = amr.graph._G[source][target]['label']
                     if edge_label in Date.edge_list:
                         amr.graph.remove_edge(source, target)
 
                         # repair graph
-                        backup = list(amr.graph._G.in_edges(target))
+                        backup = list(amr.graph._G.in_edges(target)) + list(amr.graph._G.edges(target))
                         if len(backup):
                             print("repaire")
                         for src, tgt in backup:
@@ -81,7 +82,8 @@ class Date:
                             amr.graph.add_edge(src, source, label)
                             amr.graph._G.remove_edge(src, tgt)
 
-                        for node in amr.graph.remove_subtree(target):
+                        subtree = amr.graph.remove_subtree(target)
+                        for node in subtree:
                             amr.graph.variable_to_node.pop(node.identifier)
                 # Update instance
                 amr.graph.replace_node_attribute(date.node, ':instance', 'date-entity', abstract)
