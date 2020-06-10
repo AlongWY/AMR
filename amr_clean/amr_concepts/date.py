@@ -3,6 +3,8 @@ from collections import defaultdict
 
 from word2number import w2n
 
+from amr_clean.amr import AMR
+
 
 class Date:
     attribute_list = [
@@ -49,7 +51,7 @@ class Date:
                 return True
 
     @staticmethod
-    def collapse_date_nodes(dates, amr):
+    def collapse_date_nodes(dates, amr: AMR):
         if amr.abstract_map is None:
             amr.abstract_map = {}
         dates.sort(key=lambda date: date.span[-1] if date.span else float('inf'))
@@ -69,6 +71,16 @@ class Date:
                     edge_label = amr.graph._G[source][target]['label']
                     if edge_label in Date.edge_list:
                         amr.graph.remove_edge(source, target)
+
+                        # repair graph
+                        backup = list(amr.graph._G.in_edges(target))
+                        if len(backup):
+                            print("repaire")
+                        for src, tgt in backup:
+                            label = amr.graph._G[src][tgt]['label']
+                            amr.graph.add_edge(src, source, label)
+                            amr.graph._G.remove_edge(src, tgt)
+
                         for node in amr.graph.remove_subtree(target):
                             amr.graph.variable_to_node.pop(node.identifier)
                 # Update instance

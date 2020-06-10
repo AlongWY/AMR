@@ -65,99 +65,6 @@ WORDSENSE_RE = re.compile(r'-\d\d$')
 QUOTED_RE = re.compile(r'^".*"$')
 
 
-class AMR:
-    def __init__(self,
-                 id=None,
-                 sentence=None,
-                 graph=None,
-                 token=None,
-                 lemma=None,
-                 upos=None,
-                 xpos=None,
-                 ner=None,
-                 abstract_map=None,
-                 misc=None):
-        self.id = id
-        self.sentence = sentence
-        self.graph = graph
-        self.tokens = token
-        self.lemmas = lemma
-        self.upos = upos
-        self.xpos = xpos
-        self.ner = ner
-        self.abstract_map = abstract_map
-        self.misc = misc
-
-    def is_named_entity(self, index):
-        return self.ner[index] not in ('0', 'O')
-
-    def get_named_entity_span(self, index):
-        if self.ner is None or not self.is_named_entity(index):
-            return []
-        span = [index]
-        tag = self.ner[index]
-        prev = index - 1
-        while prev > 0 and self.ner[prev] == tag:
-            span.append(prev)
-            prev -= 1
-        next = index + 1
-        while next < len(self.ner) and self.ner[next] == tag:
-            span.append(next)
-            next += 1
-        return span
-
-    def find_span_indexes(self, span):
-        for i, token in enumerate(self.tokens):
-            if token == span[0]:
-                _span = self.tokens[i: i + len(span)]
-                if len(_span) == len(span) and all(x == y for x, y in zip(span, _span)):
-                    return list(range(i, i + len(span)))
-        return None
-
-    def replace_span(self, indexes, new, pos=None, ner=None):
-        self.tokens = self.tokens[:indexes[0]] + new + self.tokens[indexes[-1] + 1:]
-        self.lemmas = self.lemmas[:indexes[0]] + new + self.lemmas[indexes[-1] + 1:]
-        if pos is None:
-            pos = [self.upos[indexes[0]]]
-        self.upos = self.upos[:indexes[0]] + pos + self.upos[indexes[-1] + 1:]
-        self.xpos = self.xpos[:indexes[0]] + pos + self.xpos[indexes[-1] + 1:]
-        if ner is None:
-            ner = [self.ner[indexes[0]]]
-        self.ner = self.ner[:indexes[0]] + ner + self.ner[indexes[-1] + 1:]
-
-    def remove_span(self, indexes):
-        self.replace_span(indexes, [], [], [])
-
-    def __repr__(self):
-        fields = []
-        for k, v in dict(
-                id=self.id,
-                snt=self.sentence,
-                token=self.tokens,
-                lemma=self.lemmas,
-                upos=self.upos,
-                xpos=self.xpos,
-                ner=self.ner,
-                abstract_map=self.abstract_map,
-                misc=self.misc,
-                graph=self.graph
-        ).items():
-            if v is None:
-                continue
-            if k == 'misc':
-                fields += v
-            elif k == 'graph':
-                fields.append(str(v))
-            else:
-                if not isinstance(v, str):
-                    v = json.dumps(v)
-                fields.append('# ::{} {}'.format(k, v))
-        return '\n'.join(fields)
-
-    def get_src_tokens(self):
-        return self.lemmas if self.lemmas else self.sentence.split()
-
-
 class AMRNode:
     attribute_priority = [
         ':instance', ':quant', ':mode', ':value', ':name', ':li', ':mod', ':frequency',
@@ -859,3 +766,98 @@ class SourceCopyVocabulary:
 
     def __repr__(self):
         return json.dumps(self.idx_to_token)
+
+
+class AMR:
+    graph: AMRGraph
+
+    def __init__(self,
+                 id=None,
+                 sentence=None,
+                 graph=None,
+                 token=None,
+                 lemma=None,
+                 upos=None,
+                 xpos=None,
+                 ner=None,
+                 abstract_map=None,
+                 misc=None):
+        self.id = id
+        self.sentence = sentence
+        self.graph = graph
+        self.tokens = token
+        self.lemmas = lemma
+        self.upos = upos
+        self.xpos = xpos
+        self.ner = ner
+        self.abstract_map = abstract_map
+        self.misc = misc
+
+    def is_named_entity(self, index):
+        return self.ner[index] not in ('0', 'O')
+
+    def get_named_entity_span(self, index):
+        if self.ner is None or not self.is_named_entity(index):
+            return []
+        span = [index]
+        tag = self.ner[index]
+        prev = index - 1
+        while prev > 0 and self.ner[prev] == tag:
+            span.append(prev)
+            prev -= 1
+        next = index + 1
+        while next < len(self.ner) and self.ner[next] == tag:
+            span.append(next)
+            next += 1
+        return span
+
+    def find_span_indexes(self, span):
+        for i, token in enumerate(self.tokens):
+            if token == span[0]:
+                _span = self.tokens[i: i + len(span)]
+                if len(_span) == len(span) and all(x == y for x, y in zip(span, _span)):
+                    return list(range(i, i + len(span)))
+        return None
+
+    def replace_span(self, indexes, new, pos=None, ner=None):
+        self.tokens = self.tokens[:indexes[0]] + new + self.tokens[indexes[-1] + 1:]
+        self.lemmas = self.lemmas[:indexes[0]] + new + self.lemmas[indexes[-1] + 1:]
+        if pos is None:
+            pos = [self.upos[indexes[0]]]
+        self.upos = self.upos[:indexes[0]] + pos + self.upos[indexes[-1] + 1:]
+        self.xpos = self.xpos[:indexes[0]] + pos + self.xpos[indexes[-1] + 1:]
+        if ner is None:
+            ner = [self.ner[indexes[0]]]
+        self.ner = self.ner[:indexes[0]] + ner + self.ner[indexes[-1] + 1:]
+
+    def remove_span(self, indexes):
+        self.replace_span(indexes, [], [], [])
+
+    def __repr__(self):
+        fields = []
+        for k, v in dict(
+                id=self.id,
+                snt=self.sentence,
+                token=self.tokens,
+                lemma=self.lemmas,
+                upos=self.upos,
+                xpos=self.xpos,
+                ner=self.ner,
+                abstract_map=self.abstract_map,
+                misc=self.misc,
+                graph=self.graph
+        ).items():
+            if v is None:
+                continue
+            if k == 'misc':
+                fields += v
+            elif k == 'graph':
+                fields.append(str(v))
+            else:
+                if not isinstance(v, str):
+                    v = json.dumps(v)
+                fields.append('# ::{} {}'.format(k, v))
+        return '\n'.join(fields)
+
+    def get_src_tokens(self):
+        return self.lemmas if self.lemmas else self.sentence.split()
