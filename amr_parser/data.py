@@ -172,15 +172,23 @@ class DataLoader(object):
     def __init__(self, vocabs, lex_map, filename, batch_size, for_train):
         self.data = []
         bert_tokenizer = vocabs.get('bert_tokenizer', None)
-        for amr, token, lemma in zip(*read_file(filename)):
+        for token, lemma, upos, xpos, ner, amr in zip(*read_file(filename)):
             if for_train:
                 _, _, not_ok = amr.root_centered_sort()
                 if not_ok or len(token) == 0:
                     continue
             cp_seq, mp_seq, token2idx, idx2token = lex_map.get_concepts(lemma, token, vocabs['predictable_concept'])
             datum = {
-                'amr': amr, 'tok': token, 'lem': lemma, 'cp_seq': cp_seq,
-                'mp_seq': mp_seq, 'token2idx': token2idx, 'idx2token': idx2token
+                'amr': amr,
+                'tok': token,
+                'lem': lemma,
+                'upos': upos,
+                'xpos': xpos,
+                'ner': ner,
+                'cp_seq': cp_seq,
+                'mp_seq': mp_seq,
+                'token2idx': token2idx,
+                'idx2token': idx2token
             }
             if bert_tokenizer is not None:
                 bert_token, token_subword_index = bert_tokenizer.tokenize(token)

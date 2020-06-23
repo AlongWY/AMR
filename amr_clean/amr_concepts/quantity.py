@@ -1,14 +1,16 @@
 import re
+from fractions import Fraction
 
 
-def quantify(x):
+def quantify(x: str):
+    x = x.strip('\'\"')
     if isinstance(x, int) or isinstance(x, float):
         return str(x)
     else:
         if re.search(r"^[0-9]+/[0-9]+$", x):
             numerator, denominator = x.split('/')
-            return str(int(numerator) / int(denominator))
-        elif re.search(r"^[0-9]+$", x):
+            return Fraction(int(numerator), int(denominator))
+        elif re.search(r"^[0-9]+(\.[0-9]*)?$", x):
             return x
         else:
             return None
@@ -123,6 +125,10 @@ class Quantity:
         '100000': ['hundred', 'of', 'thousand'],
         '10000000': ['ten', 'million'],
         '1000000000': ['billion'],
+        '1/2': ['one', 'half'],
+        '1/3': ['one', 'third'],
+        '1/4': ['one', 'four'],
+        '24/7': ['twenty', 'four', 'seven'],
         '2.5': ['2', 'and', 'a', 'half'],
         '7.5': ['seven', 'and', 'a', 'half'],
         '6.5': ['six', 'and', 'a', 'half'],
@@ -151,7 +157,7 @@ class Quantity:
             if q is None:
                 continue
             self.quant_count += 1
-            alignment, backup = self.get_alignment([q], node_position, node, attr, value)
+            alignment, backup = self.get_alignment([str(q)], node_position, node, attr, value)
             quant_tokens = self.normalize_quant(q)
             if quant_tokens is not None:
                 alignment2, backup2 = self.get_alignment(
@@ -246,6 +252,7 @@ class Quantity:
         return position
 
     def normalize_quant(self, q):
+        q = str(q)
         quant_tokens = self.normalize_dict.get(q, None)
         if quant_tokens is None and not re.search(r'[./]', q):
             billion = int(q) / 1000000000

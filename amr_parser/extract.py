@@ -5,10 +5,10 @@ import json, re, os
 
 from amr_parser.amr import AMR
 from amr_parser.AMRGraph import AMRGraph, number_regexp
+from amr_parser.AMRGraph import _is_abs_form
 
 
 class AMRIO:
-
     def __init__(self):
         pass
 
@@ -17,15 +17,27 @@ class AMRIO:
         with open(file_path, encoding='utf-8') as f:
             for line in f:
                 line = line.rstrip()
-                data = json.loads(line)
-                tokens = data['token']
-                lemma = data['lemma']
-                upos = data['upos']
-                xpos = data['xpos']
-
-                amr_g = AMR.parse_amr_json(data)
-                amr = AMRGraph(amr_g)
-                yield tokens, lemma, upos, xpos, amr
+                if line.startswith('# ::id '):
+                    amr_id = line[len('# ::id '):]
+                elif line.startswith('# ::snt '):
+                    sentence = line[len('# ::snt '):]
+                elif line.startswith('# ::token '):
+                    tokens = json.loads(line[len('# ::token '):])
+                elif line.startswith('# ::lemma '):
+                    lemmas = json.loads(line[len('# ::lemma '):])
+                    lemmas = [le if _is_abs_form(le) else le.lower() for le in lemmas]
+                elif line.startswith('# ::upos '):
+                    upos = json.loads(line[len('# ::upos '):])
+                elif line.startswith('# ::xpos '):
+                    xpos = json.loads(line[len('# ::xpos '):])
+                elif line.startswith('# ::ner '):
+                    ner = json.loads(line[len('# ::ner '):])
+                elif line.startswith('# ::abstract_map '):
+                    abstract_map = json.loads(line[len('# ::abstract_map '):])
+                    graph_line = AMR.get_amr_line(f)
+                    amr = AMR.parse_AMR_line(graph_line)
+                    myamr = AMRGraph(amr)
+                    yield tokens, lemmas, upos, xpos, ner, myamr
 
 
 class LexicalMap(object):
@@ -60,15 +72,16 @@ class LexicalMap(object):
 
 def read_file(filename):
     # read preprocessed amr file
-    token, lemma, upos, xpos, amr = [], [], [], [], []
-    for _token, _lemma, _upos, _xpos, _amr in AMRIO.read(filename):
+    token, lemma, upos, xpos, ner, amr = [], [], [], [], [], []
+    for _token, _lemma, _upos, _xpos, _ner, _amr in AMRIO.read(filename):
         token.append(_token)
         lemma.append(_lemma)
         upos.append(_upos)
         xpos.append(_xpos)
+        ner.append(_ner)
         amr.append(_amr)
     print('read from %s, %d amrs' % (filename, len(token)))
-    return token, lemma, upos, xpos, amr
+    return token, lemma, upos, xpos, ner, amr
 
 
 def make_vocab(batch_seq, char_level=False):
@@ -104,7 +117,7 @@ if __name__ == "__main__":
     args = parse_config()
     output_dir = args.output_dir
     os.makedirs(output_dir, exist_ok=True)
-    token, lemma, upos, xpos, amr = read_file(args.train_data)
+    token, lemma, upos, xpos, ner, amr = read_file(args.train_data)
     lexical_map = LexicalMap()
 
     # collect concepts and relations
@@ -131,6 +144,7 @@ if __name__ == "__main__":
     lemma_vocab, lemma_char_vocab = make_vocab(lemma, char_level=True)
     upos_vocab, upos_char_vocab = make_vocab(upos, char_level=True)
     xpos_vocab, xpos_char_vocab = make_vocab(xpos, char_level=True)
+    ner_vocab, ner_char_vocab = make_vocab(ner, char_level=True)
     conc_vocab, conc_char_vocab = make_vocab(conc, char_level=True)
     predictable_conc_vocab = make_vocab(predictable_conc)
     rel_vocab = make_vocab(rel)
@@ -148,6 +162,8 @@ if __name__ == "__main__":
     write_vocab(xpos_char_vocab, os.path.join(output_dir, 'xpos_char_vocab'))
     write_vocab(upos_vocab, os.path.join(output_dir, 'upos_vocab'))
     write_vocab(upos_char_vocab, os.path.join(output_dir, 'upos_char_vocab'))
+    write_vocab(ner_vocab, os.path.join(output_dir, 'ner_vocab'))
+    write_vocab(ner_char_vocab, os.path.join(output_dir, 'ner_char_vocab'))
     write_vocab(conc_vocab, os.path.join(output_dir, 'concept_vocab'))
     write_vocab(conc_char_vocab, os.path.join(output_dir, 'concept_char_vocab'))
     write_vocab(predictable_conc_vocab, os.path.join(output_dir, 'predictable_concept_vocab'))

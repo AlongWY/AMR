@@ -3,6 +3,8 @@ import re
 import random
 
 number_regexp = re.compile(r'^-?(\d)+(\.\d+)?$')
+abstract_regexp0 = re.compile(r'^([A-Z]+_)+\d+$')
+abstract_regexp1 = re.compile(r'^\d0*$')
 discard_regexp = re.compile(r'^n(\d+)?$')
 
 attr_value_set = set(['-', '+', 'interrogative', 'imperative', 'expressive'])
@@ -12,8 +14,16 @@ def _is_attr_form(x):
     return (x in attr_value_set or x.endswith('_') or number_regexp.match(x) is not None)
 
 
+def _is_abs_form(x):
+    return (abstract_regexp0.match(x) is not None or abstract_regexp1.match(x) is not None)
+
+
+def is_attr_or_abs_form(x):
+    return _is_attr_form(x) or _is_abs_form(x)
+
+
 def need_an_instance(x):
-    return (not _is_attr_form(x))
+    return (not _is_attr_form(x) or (abstract_regexp0.match(x) is not None))
 
 
 class AMRGraph(object):

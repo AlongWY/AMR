@@ -10,6 +10,7 @@ For detailed description of AMR, see http://www.isi.edu/natural-language/amr/a.p
 from __future__ import print_function
 from collections import defaultdict
 import sys
+import penman
 
 # change this if needed
 ERROR_LOG = sys.stderr
@@ -215,240 +216,26 @@ class AMR(object):
 
     @staticmethod
     def parse_AMR_line(line):
-        """
-        Parse a AMR from line representation to an AMR object.
-        This parsing algorithm scans the line once and process each character, in a shift-reduce style.
+        g = penman.decode(line)
+        instances = g.instances()
+        node_name_list, node_value_list = zip(*[(instance.source, instance.target) for instance in instances])
+        node_name_list = list(node_name_list)
+        node_value_list = list(node_value_list)
+        positions = {concept: idx for idx, concept in enumerate(node_name_list)}
+        relation_list = [[] for _ in node_name_list]
+        attribute_list = [[] for _ in node_name_list]
 
-        """
-        # Current state. It denotes the last significant symbol encountered. 1 for (, 2 for :, 3 for /,
-        # and 0 for start state or ')'
-        # Last significant symbol is ( --- start processing node name
-        # Last significant symbol is : --- start processing relation name
-        # Last significant symbol is / --- start processing node value (concept name)
-        # Last significant symbol is ) --- current node processing is complete
-        # Note that if these symbols are inside parenthesis, they are not significant symbols.
+        for src, label, tgt in g.edges():
+            relation_list[positions[src]].append([label[1:], tgt])
 
-        exceptions = set(["prep-on-behalf-of", "prep-out-of", "consist-of"])
-
-        def update_triple(node_relation_dict, triple):
-            # we detect a relation (r) between u and v, with direction u to v.
-            # in most cases, if relation name ends with "-of", e.g."arg0-of",
-            # it is reverse of some relation. For example, if a is "arg0-of" b,
-            # we can also say b is "arg0" a.
-            # If the relation name ends with "-of", we store the reverse relation.
-            # but note some exceptions like "prep-on-behalf-of" and "prep-out-of"
-            # also note relation "mod" is the reverse of "domain"
-            u, r, v = triple
-            if r.endswith("-of") and not r in exceptions:
-                node_relation_dict[v].append((r[:-3], u))
-            elif r == "mod":
-                node_relation_dict[v].append(("domain", u))
+        for src, label, tgt in g.attributes():
+            if label[1:] == "mod":
+                attribute_list[positions[src]].append(["domain", tgt.strip('\"\'')])
             else:
-                node_relation_dict[u].append((r, v))
+                attribute_list[positions[src]].append([label[1:], tgt.strip('\"\'')])
 
-        state = 0
-        # node stack for parsing
-        stack = []
-        # current not-yet-reduced character sequence
-        cur_charseq = []
-        # key: node name value: node value
-        node_dict = {}
-        # node name list (order: occurrence of the node)
-        node_name_list = []
-        # key: node name:  value: list of (relation name, the other node name)
-        node_relation_dict1 = defaultdict(list)
-        # key: node name, value: list of (attribute name, const value) or (relation name, unseen node name)
-        node_relation_dict2 = defaultdict(list)
-        # current relation name
-        cur_relation_name = ""
-        # having unmatched quote string
-        in_quote = False
-        for i, c in enumerate(line.strip()):
-            if c == " ":
-                # allow space in relation name
-                if state == 2:
-                    cur_charseq.append(c)
-                continue
-            # if c == "\"":
-            #     # flip in_quote value when a quote symbol is encountered
-            #     # insert placeholder if in_quote from last symbol
-            #     if in_quote:
-            #         cur_charseq.append('_')
-            #     in_quote = not in_quote
-            elif c == "(":
-                # not significant symbol if inside quote
-                if in_quote:
-                    cur_charseq.append(c)
-                    continue
-                # get the attribute name
-                # e.g :arg0 (x ...
-                # at this point we get "arg0"
-                if state == 2:
-                    # in this state, current relation name should be empty
-                    if cur_relation_name != "":
-                        print("Format error when processing ", line[0:i + 1], file=ERROR_LOG)
-                        return None
-                    # update current relation name for future use
-                    cur_relation_name = "".join(cur_charseq).strip()
-                    cur_charseq[:] = []
-                state = 1
-            elif c == ":":
-                # not significant symbol if inside quote
-                if in_quote:
-                    cur_charseq.append(c)
-                    continue
-                # Last significant symbol is "/". Now we encounter ":"
-                # Example:
-                # :OR (o2 / *OR*
-                #    :mod (o3 / official)
-                #  gets node value "*OR*" at this point
-                if state == 3:
-                    node_value = "".join(cur_charseq)
-                    # clear current char sequence
-                    cur_charseq[:] = []
-                    # pop node name ("o2" in the above example)
-                    cur_node_name = stack[-1]
-                    # update node name/value map
-                    node_dict[cur_node_name] = node_value
-                # Last significant symbol is ":". Now we encounter ":"
-                # Example:
-                # :op1 w :quant 30
-                # or :day 14 :month 3
-                # the problem is that we cannot decide if node value is attribute value (constant)
-                # or node value (variable) at this moment
-                elif state == 2:
-                    temp_attr_value = "".join(cur_charseq)
-                    cur_charseq[:] = []
-                    parts = temp_attr_value.split()
-                    if len(parts) < 2:
-                        print("Error in processing; part len < 2", line[0:i + 1], file=ERROR_LOG)
-                        return None
-                    # For the above example, node name is "op1", and node value is "w"
-                    # Note that this node name might not be encountered before
-                    relation_name = parts[0].strip()
-                    relation_value = parts[1].strip()
-                    # We need to link upper level node to the current
-                    # top of stack is upper level node
-                    if len(stack) == 0:
-                        print("Error in processing", line[:i], relation_name, relation_value, file=ERROR_LOG)
-                        return None
-                    # if we have not seen this node name before
-                    if relation_value not in node_dict:
-                        update_triple(node_relation_dict2, (stack[-1], relation_name, relation_value))
-                    else:
-                        update_triple(node_relation_dict1, (stack[-1], relation_name, relation_value))
-                state = 2
-            elif c == "/":
-                if in_quote:
-                    cur_charseq.append(c)
-                    continue
-                # Last significant symbol is "(". Now we encounter "/"
-                # Example:
-                # (d / default-01
-                # get "d" here
-                if state == 1:
-                    node_name = "".join(cur_charseq)
-                    cur_charseq[:] = []
-                    # if this node name is already in node_dict, it is duplicate
-                    if node_name in node_dict:
-                        print("Duplicate node name ", node_name, " in parsing AMR", file=ERROR_LOG)
-                        return None
-                    # push the node name to stack
-                    stack.append(node_name)
-                    # add it to node name list
-                    node_name_list.append(node_name)
-                    # if this node is part of the relation
-                    # Example:
-                    # :arg1 (n / nation)
-                    # cur_relation_name is arg1
-                    # node name is n
-                    # we have a relation arg1(upper level node, n)
-                    if cur_relation_name != "":
-                        update_triple(node_relation_dict1, (stack[-2], cur_relation_name, node_name))
-                        cur_relation_name = ""
-                else:
-                    # error if in other state
-                    print("Error in parsing AMR", line[0:i + 1], file=ERROR_LOG)
-                    return None
-                state = 3
-            elif c == ")":
-                if in_quote:
-                    cur_charseq.append(c)
-                    continue
-                # stack should be non-empty to find upper level node
-                if len(stack) == 0:
-                    print("Unmatched parenthesis at position", i, "in processing", line[0:i + 1], file=ERROR_LOG)
-                    return None
-                # Last significant symbol is ":". Now we encounter ")"
-                # Example:
-                # :op2 "Brown") or :op2 w)
-                # get \"Brown\" or w here
-                if state == 2:
-                    temp_attr_value = "".join(cur_charseq)
-                    cur_charseq[:] = []
-                    parts = temp_attr_value.split()
-                    if len(parts) < 2:
-                        print("Error processing", line[:i + 1], temp_attr_value, file=ERROR_LOG)
-                        return None
-                    relation_name = parts[0].strip()
-                    relation_value = parts[1].strip()
-                    # attribute value not seen before
-                    # Note that it might be a constant attribute value, or an unseen node
-                    # process this after we have seen all the node names
-                    if relation_value not in node_dict:
-                        update_triple(node_relation_dict2, (stack[-1], relation_name, relation_value))
-                    else:
-                        update_triple(node_relation_dict1, (stack[-1], relation_name, relation_value))
-                # Last significant symbol is "/". Now we encounter ")"
-                # Example:
-                # :arg1 (n / nation)
-                # we get "nation" here
-                elif state == 3:
-                    node_value = "".join(cur_charseq)
-                    cur_charseq[:] = []
-                    cur_node_name = stack[-1]
-                    # map node name to its value
-                    node_dict[cur_node_name] = node_value
-                # pop from stack, as the current node has been processed
-                stack.pop()
-                cur_relation_name = ""
-                state = 0
-            else:
-                # not significant symbols, so we just shift.
-                cur_charseq.append(c)
-        # create data structures to initialize an AMR
-        node_value_list = []
-        relation_list = []
-        attribute_list = []
-        for v in node_name_list:
-            if v not in node_dict:
-                print("Error: Node name not found", v, file=ERROR_LOG)
-                return None
-            else:
-                node_value_list.append(node_dict[v])
-            # build relation list and attribute list for this node
-            node_rel_list = []
-            node_attr_list = []
-            if v in node_relation_dict1:
-                for v1 in node_relation_dict1[v]:
-                    node_rel_list.append([v1[0], v1[1]])
-            if v in node_relation_dict2:
-                for v2 in node_relation_dict2[v]:
-                    # if value is in quote, it is a constant value
-                    # strip the quote and put it in attribute map
-                    if v2[1][0] == "\"" and v2[1][-1] == "\"":
-                        assert True == False
-                        node_attr_list.append([[v2[0]], v2[1][1:-1]])
-                    # if value is a node name
-                    elif v2[1] in node_dict:
-                        node_rel_list.append([v2[0], v2[1]])
-                    else:
-                        node_attr_list.append([v2[0], v2[1]])
-            # each node has a relation list and attribute list
-            relation_list.append(node_rel_list)
-            attribute_list.append(node_attr_list)
-        # add TOP as an attribute. The attribute value is the top node value
-        attribute_list[0].append(["TOP", node_value_list[0]])
+        attribute_list[positions[g.top]].append(['TOP', node_value_list[positions[g.top]]])
+
         result_amr = AMR(node_name_list, node_value_list, relation_list, attribute_list)
         return result_amr
 

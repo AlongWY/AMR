@@ -12,22 +12,6 @@ DEFAULT_PADDING_TOKEN = "@@PADDING@@"
 DEFAULT_OOV_TOKEN = "@@UNKNOWN@@"
 
 
-def alphanum_order(triples):
-    """
-    Sort a list of triples by relation name.
-
-    Embedded integers are sorted numerically, but otherwise the sorting
-    is alphabetic.
-    """
-    return sorted(
-        triples,
-        key=lambda t: [
-            int(t) if t.isdigit() else t
-            for t in re.split(r'([0-9]+)', t.relation or '')
-        ]
-    )
-
-
 def is_abstract_token(token):
     return re.search(r'^([A-Z]+_)+\d+$', token) or re.search(r'^\d0*$', token)
 
@@ -310,7 +294,8 @@ class AMRGraph(penman.Graph):
 
     def remove_node(self, node):
         self._G.remove_node(node)
-        triples = [(source, role, target) for source, role, target in self.triples if source != node.identifier]
+        triples = [(source, role, target) for source, role, target in self.triples if
+                   source != node.identifier and target != node.identifier]
         self._update_penman_graph(triples)
 
     def replace_node_attribute(self, node, attr, old, new):
