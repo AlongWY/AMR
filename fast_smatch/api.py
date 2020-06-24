@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from __future__ import print_function
-from fast_smatch.amr import AMR
+from .amr import AMR
 
 try:
     from _smatch import get_best_match, compute_f, clear_match_triple_dict

@@ -8,8 +8,8 @@ For detailed description of smatch, see http://www.isi.edu/natural-language/amr/
 """
 
 import sys, json, argparse
-from fast_smatch import amr
-from fast_smatch._smatch import get_best_match, compute_f
+from . import amr
+from ._smatch import get_best_match, compute_f
 from amr_parser.bert_utils import BertEncoderTokenizer
 
 # total number of iteration in smatch computation

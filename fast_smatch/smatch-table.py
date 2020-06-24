@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from .fast_smatch import amr
+from . import amr
 import sys
 import smatch
 import os
