@@ -114,7 +114,7 @@ def ArraysToTensor(xs):
 def batchify(data, vocabs, unk_rate=0.):
     _tok = ListsToTensor([[CLS] + x['tok'] for x in data], vocabs['tok'], unk_rate=unk_rate)
     _lem = ListsToTensor([[CLS] + x['lem'] for x in data], vocabs['lem'], unk_rate=unk_rate)
-    _pos = ListsToTensor([[CLS] + x['upos'] for x in data], vocabs['upos'], unk_rate=unk_rate)
+    _upos = ListsToTensor([[CLS] + x['upos'] for x in data], vocabs['upos'], unk_rate=unk_rate)
     _ner = ListsToTensor([[CLS] + x['ner'] for x in data], vocabs['ner'], unk_rate=unk_rate)
     _word_char = ListsofStringToTensor([[CLS] + x['tok'] for x in data], vocabs['word_char'])
 
@@ -152,7 +152,7 @@ def batchify(data, vocabs, unk_rate=0.):
     ret = {
         'tok': _tok,
         'lem': _lem,
-        'pos': _pos,
+        'upos': _upos,
         'ner': _ner,
         'rel': _rel,
         'word_char': _word_char,
