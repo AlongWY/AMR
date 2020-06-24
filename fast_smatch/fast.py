@@ -61,20 +61,6 @@ def get_amr_line(input_f):
     return "".join(cur_amr)
 
 
-def get_amr_json(bert_tokenizer, input_f):
-    for line in input_f:
-        line = line.strip()
-        if line == '':
-            return line
-        data = json.loads(line)
-        bert_token, token_subword_index = bert_tokenizer.tokenize(data['token'])
-        if len(bert_token) > 512:
-            print('skip')
-            continue
-        return data
-    return ''
-
-
 def build_arg_parser():
     """
     Build an argument g_parser using argparse. Use it when python version is 2.7 or later.
@@ -209,7 +195,7 @@ def main(arguments):
     # Read amr pairs from two files
     bert_tokenizer = BertEncoderTokenizer.from_pretrained('./bert-base-cased', do_lower_case=False)
     while True:
-        cur_amr1 = get_amr_json(bert_tokenizer, args.f[0])
+        cur_amr1 = get_amr_line(args.f[0])
         cur_amr2 = get_amr_line(args.f[1])
         if cur_amr1 == "" and cur_amr2 == "":
             break
