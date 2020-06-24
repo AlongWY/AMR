@@ -222,7 +222,7 @@ def main(arguments):
             print("Ignoring remaining AMRs", file=ERROR_LOG)
             break
 
-        amr1 = amr.AMR.parse_amr_json(cur_amr1)
+        amr1 = amr.AMR.parse_AMR_line(cur_amr1)
         amr2 = amr.AMR.parse_AMR_line(cur_amr2)
         prefix1 = "a"
         prefix2 = "b"
