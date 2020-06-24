@@ -3,8 +3,10 @@ import numpy as np
 from amr_parser.extract import read_file
 
 PAD, UNK, DUM, NIL, END, CLS = '<PAD>', '<UNK>', '<DUMMY>', '<NULL>', '<END>', '<CLS>'
-# GPU_SIZE = 12000  # okay for 8G memory
-GPU_SIZE = 24000  # okay for 16G memory
+GPU_SIZE = 12000  # okay for 8G memory
+
+
+# GPU_SIZE = 24000  # okay for 16G memory
 
 
 class Vocab(object):
@@ -112,8 +114,8 @@ def ArraysToTensor(xs):
 def batchify(data, vocabs, unk_rate=0.):
     _tok = ListsToTensor([[CLS] + x['tok'] for x in data], vocabs['tok'], unk_rate=unk_rate)
     _lem = ListsToTensor([[CLS] + x['lem'] for x in data], vocabs['lem'], unk_rate=unk_rate)
-    # _pos = ListsToTensor([[CLS] + x['pos'] for x in data], vocabs['pos'], unk_rate=unk_rate)
-    # _ner = ListsToTensor([[CLS] + x['ner'] for x in data], vocabs['ner'], unk_rate=unk_rate)
+    _pos = ListsToTensor([[CLS] + x['upos'] for x in data], vocabs['upos'], unk_rate=unk_rate)
+    _ner = ListsToTensor([[CLS] + x['ner'] for x in data], vocabs['ner'], unk_rate=unk_rate)
     _word_char = ListsofStringToTensor([[CLS] + x['tok'] for x in data], vocabs['word_char'])
 
     local_token2idx = [x['token2idx'] for x in data]
@@ -148,17 +150,18 @@ def batchify(data, vocabs, unk_rate=0.):
             _rel[v + 1, bidx, u + 1] = r
 
     ret = {
-        'lem': _lem,
         'tok': _tok,
-        'word_char': _word_char,
+        'lem': _lem,
+        'pos': _pos,
+        'ner': _ner,
         'rel': _rel,
+        'word_char': _word_char,
         'concept_in': _concept_in,
         'concept_char_in': _concept_char_in,
         'concept_out': _concept_out,
         'copy_seq': np.stack([_cp_seq, _mp_seq], -1),
         'local_token2idx': local_token2idx,
         'local_idx2token': local_idx2token,
-        'pos': None, 'ner': None,
     }
 
     bert_tokenizer = vocabs.get('bert_tokenizer', None)

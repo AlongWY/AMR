@@ -9,11 +9,12 @@ if [ $# == 1 ]; then
     --lem_vocab data/lem_vocab \
     --lem_char_vocab data/lem_char_vocab \
     --rel_vocab data/rel_vocab \
+    --ner_vocab data/ner_vocab \
     --concept_vocab data/concept_vocab \
     --concept_char_vocab data/concept_char_vocab \
     --predictable_concept_vocab data/predictable_concept_vocab \
-    --train_data data/amr.train.json \
-    --dev_data data/amr.dev.json \
+    --train_data data/amr.train.convert.input_clean.recategorize \
+    --dev_data data/amr.valid.convert.input_clean.recategorize \
     --bert_path ./bert-base-cased \
     --word_dim 300 \
     --word_char_dim 32 \
@@ -21,6 +22,7 @@ if [ $# == 1 ]; then
     --concept_dim 300 \
     --rel_dim 100 \
     --pos_dim 32 \
+    --ner_dim 16 \
     --cnn_filter 3 256 \
     --char2word_dim 128 \
     --char2concept_dim 128 \

@@ -29,8 +29,11 @@ def parse_config():
     parser.add_argument('--lem_char_vocab', type=str)
     parser.add_argument('--concept_vocab', type=str)
     parser.add_argument('--concept_char_vocab', type=str)
+    parser.add_argument('--ner_vocab', type=str)
+    # parser.add_argument('--ner_char_vocab', type=str)
     parser.add_argument('--predictable_concept_vocab', type=str)
     parser.add_argument('--rel_vocab', type=str)
+
     parser.add_argument('--pretrained_file', type=str, default=None)
     parser.add_argument('--bert_path', type=str, default=None)
 
@@ -40,7 +43,7 @@ def parse_config():
 
     parser.add_argument('--rel_dim', type=int)
     parser.add_argument('--pos_dim', type=int)
-    parser.add_argument('--ner_dim', type=int, default=0)
+    parser.add_argument('--ner_dim', type=int)
 
     parser.add_argument('--word_dim', type=int)
     parser.add_argument('--word_char_dim', type=int)
@@ -107,6 +110,7 @@ def load_vocabs(args):
     vocabs['tok'] = Vocab(args.tok_vocab, 5, [CLS])
     vocabs['lem'] = Vocab(args.lem_vocab, 5, [CLS])
     vocabs['pos'] = Vocab(args.pos_vocab, 5, [CLS])
+    vocabs['ner'] = Vocab(args.ner_vocab, 1, [CLS])
     vocabs['lem_char'] = Vocab(args.lem_vocab, 5, [CLS])
     vocabs['concept'] = Vocab(args.concept_vocab, 5, [DUM, END])
     vocabs['predictable_concept'] = Vocab(args.predictable_concept_vocab, 5, [DUM, END])
