@@ -30,6 +30,7 @@ def parse_config():
     parser.add_argument('--concept_vocab', type=str)
     parser.add_argument('--concept_char_vocab', type=str)
     parser.add_argument('--ner_vocab', type=str)
+    parser.add_argument('--pos_vocab', type=str)
     # parser.add_argument('--ner_char_vocab', type=str)
     parser.add_argument('--predictable_concept_vocab', type=str)
     parser.add_argument('--rel_vocab', type=str)
