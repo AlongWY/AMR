@@ -116,7 +116,7 @@ def batchify(data, vocabs, unk_rate=0.):
     _lem = ListsToTensor([[CLS] + x['lem'] for x in data], vocabs['lem'], unk_rate=unk_rate)
     _upos = ListsToTensor([[CLS] + x['upos'] for x in data], vocabs['upos'], unk_rate=unk_rate)
     _ner = ListsToTensor([[CLS] + x['ner'] for x in data], vocabs['ner'], unk_rate=unk_rate)
-    _word_char = ListsofStringToTensor([[CLS] + x['tok'] for x in data], vocabs['word_char'])
+    _tok_char = ListsofStringToTensor([[CLS] + x['tok'] for x in data], vocabs['tok_char'])
 
     local_token2idx = [x['token2idx'] for x in data]
     local_idx2token = [x['idx2token'] for x in data]
@@ -155,7 +155,7 @@ def batchify(data, vocabs, unk_rate=0.):
         'upos': _upos,
         'ner': _ner,
         'rel': _rel,
-        'word_char': _word_char,
+        'tok_char': _tok_char,
         'concept_in': _concept_in,
         'concept_char_in': _concept_char_in,
         'concept_out': _concept_out,
