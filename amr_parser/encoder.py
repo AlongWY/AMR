@@ -112,7 +112,7 @@ class WordEncoder(nn.Module):
         self.lem_embed = AMREmbedding(vocabs['lem'], word_dim, pretrained_file)
 
         if pos_dim > 0:
-            self.pos_embed = AMREmbedding(vocabs['pos'], pos_dim)
+            self.pos_embed = AMREmbedding(vocabs['upos'], pos_dim)
         else:
             self.pos_embed = None
         if ner_dim > 0:
