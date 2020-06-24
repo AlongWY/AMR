@@ -9,6 +9,7 @@ if [ $# == 1 ]; then
     --lem_vocab data/vocabs/lem_vocab \
     --lem_char_vocab data/vocabs/lem_char_vocab \
     --rel_vocab data/vocabs/rel_vocab \
+    --pos_vocab data/vocabs/upos_vocab \
     --ner_vocab data/vocabs/ner_vocab \
     --concept_vocab data/vocabs/concept_vocab \
     --concept_char_vocab data/vocabs/concept_char_vocab \
