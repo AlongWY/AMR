@@ -1,7 +1,7 @@
 from argparse import ArgumentParser
 from amr_parser.bert_utils import BertEncoderTokenizer
 from fast_smatch.amr import AMR
-from fast_smatch.fast_smatch import get_amr_json
+from fast_smatch.fast import get_amr_json
 import penman as pp
 import json, re
 
