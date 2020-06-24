@@ -7,7 +7,7 @@ For detailed description of smatch, see http://www.isi.edu/natural-language/amr/
 
 """
 
-import amr
+from fast_smatch import amr
 import os
 import random
 import sys

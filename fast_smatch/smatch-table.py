@@ -2,10 +2,8 @@
 
 from .fast_smatch import amr
 import sys
-import subprocess
 import smatch
 import os
-import random
 import time
 
 ERROR_LOG = sys.stderr
