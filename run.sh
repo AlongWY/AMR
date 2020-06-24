@@ -4,15 +4,15 @@
 
 if [ $# == 1 ]; then
   CUDA_VISIBLE_DEVICES=$1 PYTHONPATH=. python amr_parser/train.py \
-    --tok_vocab data/tok_vocab \
-    --tok_char_vocab data/tok_char_vocab \
-    --lem_vocab data/lem_vocab \
-    --lem_char_vocab data/lem_char_vocab \
-    --rel_vocab data/rel_vocab \
-    --ner_vocab data/ner_vocab \
-    --concept_vocab data/concept_vocab \
-    --concept_char_vocab data/concept_char_vocab \
-    --predictable_concept_vocab data/predictable_concept_vocab \
+    --tok_vocab data/vocabs/tok_vocab \
+    --tok_char_vocab data/vocabs/tok_char_vocab \
+    --lem_vocab data/vocabs/lem_vocab \
+    --lem_char_vocab data/vocabs/lem_char_vocab \
+    --rel_vocab data/vocabs/rel_vocab \
+    --ner_vocab data/vocabs/ner_vocab \
+    --concept_vocab data/vocabs/concept_vocab \
+    --concept_char_vocab data/vocabs/concept_char_vocab \
+    --predictable_concept_vocab data/vocabs/predictable_concept_vocab \
     --train_data data/amr.train.convert.input_clean.recategorize \
     --dev_data data/amr.valid.convert.input_clean.recategorize \
     --bert_path ./bert-base-cased \
