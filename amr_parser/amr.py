@@ -8,7 +8,6 @@ For detailed description of AMR, see http://www.isi.edu/natural-language/amr/a.p
 """
 
 from __future__ import print_function
-from collections import defaultdict
 import sys
 import penman
 
