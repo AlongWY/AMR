@@ -10,7 +10,7 @@ if [ $# == 1 ]; then
     --lem_char_vocab data/ucca/vocabs/lem_char_vocab \
     --rel_vocab data/ucca/vocabs/rel_vocab \
     --upos_vocab data/ucca/vocabs/upos_vocab \
-    --ner_vocab data/ucca/vocabs/ner_vocab \
+    --ner_vocab data/ucca/vocabs/xpos_vocab \
     --concept_vocab data/ucca/vocabs/concept_vocab \
     --concept_char_vocab data/ucca/vocabs/concept_char_vocab \
     --predictable_concept_vocab data/ucca/vocabs/predictable_concept_vocab \
