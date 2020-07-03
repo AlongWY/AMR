@@ -5,7 +5,6 @@ import torch.multiprocessing as mp
 import argparse, os, random
 from amr_parser.data import Vocab, DataLoader, DUM, END, CLS, NIL
 from amr_parser.parser import Parser
-from amr_parser.work import show_progress
 from amr_parser.extract import LexicalMap
 from amr_parser.adam import AdamWeightDecayOptimizer
 from amr_parser.utils import move_to_device
@@ -31,7 +30,6 @@ def parse_config():
     parser.add_argument('--concept_char_vocab', type=str)
     parser.add_argument('--ner_vocab', type=str)
     parser.add_argument('--upos_vocab', type=str)
-    # parser.add_argument('--ner_char_vocab', type=str)
     parser.add_argument('--predictable_concept_vocab', type=str)
     parser.add_argument('--rel_vocab', type=str)
 
@@ -44,7 +42,7 @@ def parse_config():
 
     parser.add_argument('--rel_dim', type=int)
     parser.add_argument('--pos_dim', type=int)
-    parser.add_argument('--ner_dim', type=int)
+    parser.add_argument('--ner_dim', type=int, default=-1)
 
     parser.add_argument('--word_dim', type=int)
     parser.add_argument('--word_char_dim', type=int)
@@ -113,8 +111,8 @@ def load_vocabs(args):
     vocabs['upos'] = Vocab(args.upos_vocab, 5, [CLS])
     vocabs['ner'] = Vocab(args.ner_vocab, 1, [CLS])
     vocabs['lem_char'] = Vocab(args.lem_vocab, 5, [CLS])
-    vocabs['concept'] = Vocab(args.concept_vocab, 5, [DUM, END])
-    vocabs['predictable_concept'] = Vocab(args.predictable_concept_vocab, 5, [DUM, END])
+    vocabs['concept'] = Vocab(args.concept_vocab, 1, [DUM, END])
+    vocabs['predictable_concept'] = Vocab(args.predictable_concept_vocab, 1, [DUM, END])
 
     vocabs['rel'] = Vocab(args.rel_vocab, 50, [NIL])
 

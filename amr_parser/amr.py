@@ -170,52 +170,16 @@ class AMR(object):
 
         """
         cur_amr = []
-        has_content = False
         for line in input_f:
             line = line.strip()
-            if line == "":
-                if not has_content:
-                    # empty lines before current AMR
-                    continue
-                else:
-                    # end of current AMR
-                    break
-            if line.strip().startswith("#"):
-                # ignore the comment line (starting with "#") in the AMR file
-                continue
-            else:
-                has_content = True
+            if line != "":
                 cur_amr.append(line.strip())
-        return "".join(cur_amr)
+            else:
+                break
+        return "\n".join(cur_amr)
 
     @staticmethod
-    def parse_amr_json(data):
-        node_name_list = []
-        node_value_list = []
-        relation_list = []
-        attribute_list = []
-        for idx, node in enumerate(data['nodes']):
-            node: dict
-            node_name_list.append(f"a{idx}")
-            node_value_list.append(node['label'])
-            attributes = []
-            for attribute, value in zip(node.get('properties', []), node.get('values', [])):
-                attributes.append([attribute, value])
-            attribute_list.append(attributes)
-            relation_list.append([])
-        for edge in data.get('edges', []):
-            source = edge['source']
-            target = edge['target']
-            label = edge['label']
-            relation_list[source].append([label, node_name_list[target]])
-        for top in data['tops']:
-            attribute_list[top].append(["TOP", node_value_list[top]])
-        result_amr = AMR(node_name_list, node_value_list, relation_list, attribute_list)
-        return result_amr
-
-    @staticmethod
-    def parse_AMR_line(line):
-        g = penman.decode(line)
+    def from_graph(g):
         instances = g.instances()
         node_name_list, node_value_list = zip(*[(instance.source, instance.target) for instance in instances])
         node_name_list = list(node_name_list)
@@ -225,17 +189,26 @@ class AMR(object):
         attribute_list = [[] for _ in node_name_list]
 
         for src, label, tgt in g.edges():
+            tgt: str
+            if len(tgt) >= 3 and tgt.startswith('\"') and tgt.endswith('\"'):
+                tgt = tgt.strip('\"')
             relation_list[positions[src]].append([label[1:], tgt])
 
         for src, label, tgt in g.attributes():
-            if label[1:] == "mod":
-                attribute_list[positions[src]].append(["domain", tgt.strip('\"\'')])
-            else:
-                attribute_list[positions[src]].append([label[1:], tgt.strip('\"\'')])
+            tgt: str
+            if len(tgt) >= 3 and tgt.startswith('\"') and tgt.endswith('\"'):
+                tgt = tgt.strip('\"')
+            attribute_list[positions[src]].append([label[1:], tgt])
 
         attribute_list[positions[g.top]].append(['TOP', node_value_list[positions[g.top]]])
 
-        result_amr = AMR(node_name_list, node_value_list, relation_list, attribute_list)
+        node_value_list_ = []
+        for value in node_value_list:
+            if len(value) >= 3 and value.startswith('\"') and value.endswith('\"'):
+                value = value.strip('\"')
+            node_value_list_.append(value)
+
+        result_amr = AMR(node_name_list, node_value_list_, relation_list, attribute_list)
         return result_amr
 
 
@@ -252,6 +225,6 @@ if __name__ == "__main__":
         if cur_line == "" or cur_line.startswith("#"):
             continue
         print("AMR", amr_count, file=DEBUG_LOG)
-        current = AMR.parse_AMR_line(cur_line)
+        current = AMR.from_graph(cur_line)
         current.output_amr()
         amr_count += 1

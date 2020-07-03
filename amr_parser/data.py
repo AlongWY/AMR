@@ -115,7 +115,6 @@ def batchify(data, vocabs, unk_rate=0.):
     _tok = ListsToTensor([[CLS] + x['tok'] for x in data], vocabs['tok'], unk_rate=unk_rate)
     _lem = ListsToTensor([[CLS] + x['lem'] for x in data], vocabs['lem'], unk_rate=unk_rate)
     _upos = ListsToTensor([[CLS] + x['upos'] for x in data], vocabs['upos'], unk_rate=unk_rate)
-    _ner = ListsToTensor([[CLS] + x['ner'] for x in data], vocabs['ner'], unk_rate=unk_rate)
     _tok_char = ListsofStringToTensor([[CLS] + x['tok'] for x in data], vocabs['tok_char'])
 
     local_token2idx = [x['token2idx'] for x in data]
@@ -153,7 +152,6 @@ def batchify(data, vocabs, unk_rate=0.):
         'tok': _tok,
         'lem': _lem,
         'upos': _upos,
-        'ner': _ner,
         'rel': _rel,
         'tok_char': _tok_char,
         'concept_in': _concept_in,
@@ -175,7 +173,7 @@ class DataLoader(object):
     def __init__(self, vocabs, lex_map, filename, batch_size, for_train):
         self.data = []
         bert_tokenizer = vocabs.get('bert_tokenizer', None)
-        for token, lemma, upos, xpos, ner, amr in zip(*read_file(filename)):
+        for token, lemma, upos, xpos, amr in zip(*read_file(filename)):
             if for_train:
                 _, _, not_ok = amr.root_centered_sort()
                 if not_ok or len(token) == 0:
@@ -187,7 +185,6 @@ class DataLoader(object):
                 'lem': lemma,
                 'upos': upos,
                 'xpos': xpos,
-                'ner': ner,
                 'cp_seq': cp_seq,
                 'mp_seq': mp_seq,
                 'token2idx': token2idx,

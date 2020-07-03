@@ -39,10 +39,7 @@ class AMRGraph(object):
         self.name2concept = dict()
 
         # will do some adjustments
-        self.abstract_concepts = dict()
         for _, name, concept in instance_triple:
-            if _is_attr_form(concept):
-                print('bad concept', _, name, concept)
             self.name2concept[name] = concept
             self.nodes.add(name)
         for rel, concept, value in attribute_triple:
@@ -51,14 +48,7 @@ class AMRGraph(object):
             # discard some empty names
             if rel == 'name' and discard_regexp.match(value):
                 continue
-            # abstract concept can't have an attribute
-            if concept in self.abstract_concepts:
-                print(rel, self.abstract_concepts[concept], value, "abstract concept cannot have an attribute")
-                continue
             name = "%s_attr_%d" % (value, len(self.name2concept))
-            if not _is_attr_form(value):
-                print('bad attribute', rel, concept, value)
-                continue
             self.name2concept[name] = value
             self._add_edge(rel, concept, name)
         for rel, head, tail in relation_triple:
