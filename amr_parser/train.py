@@ -42,7 +42,7 @@ def parse_config():
 
     parser.add_argument('--rel_dim', type=int)
     parser.add_argument('--pos_dim', type=int)
-    parser.add_argument('--ner_dim', type=int, default=-1)
+    parser.add_argument('--ner_dim', type=int, default=0)
 
     parser.add_argument('--word_dim', type=int)
     parser.add_argument('--word_char_dim', type=int)
