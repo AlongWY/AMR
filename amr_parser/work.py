@@ -73,8 +73,13 @@ def parse_batch(model, batch, beam_size, alpha, max_time_step):
 
 def parse_data(model, pp, data, input_file, output_file, beam_size=8, alpha=0.6, max_time_step=100, logger=None):
     tot = 0
+    # match(output_file, input_file)
+    if logger is not None:
+        logger.info("Start Eval")
     with open(output_file, 'w', encoding='utf-8') as fo:
-        for batch in data:
+        for idx, batch in enumerate(data):
+            if idx % 100 == 0 and logger is not None:
+                logger.info(f"Have predict {idx} uccas")
             batch = move_to_device(batch, model.device)
             res = parse_batch(model, batch, beam_size, alpha, max_time_step)
             for concept, relation, score in zip(res['concept'], res['relation'], res['score']):
@@ -84,9 +89,9 @@ def parse_data(model, pp, data, input_file, output_file, beam_size=8, alpha=0.6,
                 tot += 1
     # match(output_file, input_file)
     if logger is None:
-        print('write down %d amrs' % tot)
+        print('write down %d uccas' % tot)
     else:
-        logger.info(print('write down %d amrs' % tot))
+        logger.info('write down %d uccas' % tot)
 
 
 def load_ckpt_without_bert(model, test_model, device):

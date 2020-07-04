@@ -244,13 +244,13 @@ def main(local_rank, args):
                 if (batches_acm > 10000 or args.resume_ckpt is not None) and \
                         (batches_acm % args.eval_every == -1 % args.eval_every):
                     model.eval()
-                    parse_data(model, pp, dev_data, args.dev_data,
-                               '%s/epoch%d_batch%d_dev_out' % (args.ckpt, epoch, batches_acm), logger=logger)
                     torch.save({'args': args,
                                 'model': model.state_dict(),
                                 'batches_acm': batches_acm,
                                 'optimizer': optimizer.state_dict()},
                                '%s/epoch%d_batch%d' % (args.ckpt, epoch, batches_acm))
+                    parse_data(model, pp, dev_data, args.dev_data,
+                               '%s/epoch%d_batch%d_dev_out' % (args.ckpt, epoch, batches_acm), logger=logger)
                     model.train()
 
 
