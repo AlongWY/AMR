@@ -34,7 +34,7 @@ if [ $# == 1 ]; then
     --inference_layers 4 \
     --dropout 0.2 \
     --unk_rate 0.33 \
-    --epochs 100000 \
+    --epochs 20000 \
     --train_batch_size 6000 \
     --dev_batch_size 6000 \
     --lr_scale 1. \
