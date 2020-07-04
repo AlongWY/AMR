@@ -72,7 +72,7 @@ class Parser(nn.Module):
     def work(self, data, beam_size, max_time_step, min_time_step=1):
         with torch.no_grad():
             word_repr, word_mask, probe = self.encode_step_with_bert(
-                data['tok'], data['lem'], data['upos'], data['ner'],
+                data['tok'], data['lem'], data['upos'], None,
                 data['tok_char'], data['bert_token'], data['token_subword_index']
             )
 
