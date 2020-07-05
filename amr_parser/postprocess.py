@@ -14,13 +14,16 @@ class PostProcessor(object):
         """ res_concept: list of strings
             res_relation: list of (dep:int, head:int, arc_prob:float, rel_prob:list(vocab))
         """
+        pattern = re.compile(r'''[\s():/,\\#~]+''')
         ret = []
         names = []
         for i, c in enumerate(res_concept):
             if need_an_instance(c):
                 name = 'c' + str(i)
+                c = f"\"{c}\"" if pattern.search(c) else c
                 ret.append((name, 'instance', c))
             else:
+                c = f"\"{c}\"" if pattern.search(c) else c
                 if c.endswith('_'):
                     name = '"' + c[:-1] + '"'
                 else:

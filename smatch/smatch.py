@@ -665,6 +665,7 @@ def get_amr_match(cur_amr1, cur_amr2, sent_num=1, justinstance=False, justattrib
             print("Error in parsing amr %d: %s" % (i, cur_amr), file=ERROR_LOG)
             print("Please check if the AMR is ill-formatted. Ignoring remaining AMRs", file=ERROR_LOG)
             print("Error message: %s" % e, file=ERROR_LOG)
+            raise e
     amr1, amr2 = amr_pair
     prefix1 = "a"
     prefix2 = "b"
@@ -736,11 +737,15 @@ def score_amr_pairs(f1, f2, justinstance=False, justattribute=False, justrelatio
     total_match_num = total_test_num = total_gold_num = 0
     # Read amr pairs from two files
     for sent_num, (cur_amr1, cur_amr2) in enumerate(generate_amr_lines(f1, f2), start=1):
-        best_match_num, test_triple_num, gold_triple_num = get_amr_match(cur_amr1, cur_amr2,
-                                                                         sent_num=sent_num,  # sentence number
-                                                                         justinstance=justinstance,
-                                                                         justattribute=justattribute,
-                                                                         justrelation=justrelation)
+        try:
+            best_match_num, test_triple_num, gold_triple_num = get_amr_match(cur_amr1, cur_amr2,
+                                                                             sent_num=sent_num,  # sentence number
+                                                                             justinstance=justinstance,
+                                                                             justattribute=justattribute,
+                                                                             justrelation=justrelation)
+        except Exception as e:
+            continue
+
         total_match_num += best_match_num
         total_test_num += test_triple_num
         total_gold_num += gold_triple_num
@@ -800,7 +805,7 @@ if __name__ == "__main__":
         '-f',
         nargs=2,
         required=True,
-        type=argparse.FileType('r'),
+        type=argparse.FileType('r', encoding='utf-8'),
         help=('Two files containing AMR pairs. '
               'AMRs in each file are separated by a single blank line'))
     parser.add_argument(
