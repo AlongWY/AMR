@@ -97,7 +97,16 @@ def main(args):
                     edge["source"] = remap[source]
                     edge["target"] = remap[target]
 
-            out.write(json.dumps({"id": metadata['id'], "tops": 0, "nodes": nodes, "edges": edges}) + '\n')
+            out.write(json.dumps({
+                "id": metadata['id'],
+                "flavor": 1,
+                "framework": "ucca",
+                "version": 1.0,
+                "tops": [0],
+                "input": metadata['snt'],
+                "time": "2020-04-27",
+                "nodes": nodes,
+                "edges": edges}) + '\n')
 
 
 if __name__ == '__main__':
