@@ -86,7 +86,7 @@ def parse_data(model, pp, data, input_file, output_file, beam_size=8, alpha=0.6,
             for concept, relation, score in zip(res['concept'], res['relation'], res['score']):
                 fo.write('# ::conc ' + json.dumps(concept) + '\n')
                 fo.write('# ::score %.6f\n' % score)
-                fo.write(pp.postprocesbs(concept, relation) + '\n\n')
+                fo.write(pp.postprocess(concept, relation) + '\n\n')
                 tot += 1
     # match(output_file, input_file)
     if logger is None:
