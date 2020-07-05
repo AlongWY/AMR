@@ -39,7 +39,7 @@ def main(args):
                 else:
                     triples.append(Triple(source=concept, role=':instance', target='multi'))
                     for idx, value in enumerate(instance):
-                        triples.append(Triple(source=concept, role=f':op{idx}', target=value))
+                        triples.append(Triple(source=concept, role=f':op', target=value))
 
             triples = [Triple(source=source, role=role, target=f"\"{target}\"") \
                            if pattern.search(target) else Triple(source=source, role=role, target=target)
