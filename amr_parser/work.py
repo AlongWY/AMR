@@ -125,7 +125,7 @@ if __name__ == "__main__":
     vocabs['tok'] = Vocab(model_args.tok_vocab, 5, [CLS])
     vocabs['lem'] = Vocab(model_args.lem_vocab, 5, [CLS])
     vocabs['upos'] = Vocab(model_args.upos_vocab, 5, [CLS])
-    vocabs['ner'] = Vocab(args.ner_vocab, 1, [CLS])
+    vocabs['ner'] = Vocab(model_args.ner_vocab, 1, [CLS])
     vocabs['lem_char'] = Vocab(model_args.lem_vocab, 5, [CLS])
     vocabs['concept'] = Vocab(model_args.concept_vocab, 1, [DUM, END])
     vocabs['predictable_concept'] = Vocab(model_args.predictable_concept_vocab, 1, [DUM, END])
