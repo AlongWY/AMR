@@ -22,7 +22,7 @@ def main(args):
                 if anchors is not None:
                     instance = [ucca_data['input'][anchor['from']:anchor['to']] for anchor in anchors]
                 else:
-                    instance = ['[UNREAL]']
+                    instance = ['[unreal]']
 
                 instances.append(instance)
 
@@ -37,7 +37,7 @@ def main(args):
                 if len(instance) == 1:
                     triples.append(Triple(source=concept, role=':instance', target=instance[0]))
                 else:
-                    triples.append(Triple(source=concept, role=':instance', target='multi'))
+                    triples.append(Triple(source=concept, role=':instance', target='[multi]'))
                     for idx, value in enumerate(instance):
                         triples.append(Triple(source=concept, role=f':op', target=value))
 

@@ -737,14 +737,11 @@ def score_amr_pairs(f1, f2, justinstance=False, justattribute=False, justrelatio
     total_match_num = total_test_num = total_gold_num = 0
     # Read amr pairs from two files
     for sent_num, (cur_amr1, cur_amr2) in enumerate(generate_amr_lines(f1, f2), start=1):
-        try:
-            best_match_num, test_triple_num, gold_triple_num = get_amr_match(cur_amr1, cur_amr2,
-                                                                             sent_num=sent_num,  # sentence number
-                                                                             justinstance=justinstance,
-                                                                             justattribute=justattribute,
-                                                                             justrelation=justrelation)
-        except Exception as e:
-            continue
+        best_match_num, test_triple_num, gold_triple_num = get_amr_match(cur_amr1, cur_amr2,
+                                                                         sent_num=sent_num,  # sentence number
+                                                                         justinstance=justinstance,
+                                                                         justattribute=justattribute,
+                                                                         justrelation=justrelation)
 
         total_match_num += best_match_num
         total_test_num += test_triple_num

@@ -9,7 +9,7 @@ For detailed description of AMR, see http://www.isi.edu/natural-language/amr/a.p
 
 from __future__ import print_function
 import sys
-import penman
+import penman as pp
 
 # change this if needed
 ERROR_LOG = sys.stderr
@@ -177,6 +177,11 @@ class AMR(object):
             else:
                 break
         return "\n".join(cur_amr)
+
+    @staticmethod
+    def parse_graph_line(lines):
+        g = pp.decode(lines)
+        return AMR.from_graph(g)
 
     @staticmethod
     def from_graph(g):
