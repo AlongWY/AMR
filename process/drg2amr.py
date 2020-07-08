@@ -17,29 +17,17 @@ def main(args):
 
             for node in drg_data['nodes']:
                 concepts.append(f"c{node['id']}")
-                anchors = node.get('anchors', None)
-
-                if anchors is not None:
-                    instance = [drg_data['input'][anchor['from']:anchor['to']] for anchor in anchors]
-                else:
-                    instance = ['[unreal]']
-
-                instances.append(instance)
+                instances.append(node.get('label', '[unreal]').strip('\"'))
 
             for edge in drg_data['edges']:
                 src = edge['source']
                 tgt = edge['target']
-                label = edge['label']
+                label = edge.get('label', 'link')
 
                 triples.append(Triple(source=f"c{src}", role=label, target=f"c{tgt}"))
 
             for concept, instance in zip(concepts, instances):
-                if len(instance) == 1:
-                    triples.append(Triple(source=concept, role=':instance', target=instance[0]))
-                else:
-                    triples.append(Triple(source=concept, role=':instance', target='[multi]'))
-                    for idx, value in enumerate(instance):
-                        triples.append(Triple(source=concept, role=f':op', target=value))
+                triples.append(Triple(source=concept, role=':instance', target=instance))
 
             triples = [Triple(source=source, role=role, target=f"\"{target}\"") \
                            if pattern.search(target) else Triple(source=source, role=role, target=target)
