@@ -28,9 +28,6 @@ def generate_amr_lines(f1, f2):
 
 
 def get_anchors(word, snt):
-    # snt = snt.lower()
-    word = word.lower()
-
     if len(word) >= 3 and word.startswith('\"') and word.endswith('\"'):
         word = word.strip('\"')
 
@@ -61,7 +58,7 @@ def main(args):
             metadata = ucca1.metadata
 
             snt: str
-            snt = metadata['snt'].lower()
+            snt = metadata['snt']
 
             nodes = []
             node_map = {}
