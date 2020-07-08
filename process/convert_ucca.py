@@ -56,6 +56,8 @@ def main(args):
                 id_ = int(src[1:])
                 node_map[id_] = index
                 tgt = tgt.lower()
+                if tgt == 'Rubbish'.lower():
+                    print(tgt)
                 if len(tgt) >= 3 and tgt.startswith('\"') and tgt.endswith('\"'):
                     tgt = tgt.strip('\"')
                 try:
