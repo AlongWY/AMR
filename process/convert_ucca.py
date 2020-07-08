@@ -52,20 +52,41 @@ def main(args):
             node_map = {}
 
             for index, (src, role, tgt) in enumerate(ucca1.instances()):
+                tgt: str
                 id_ = int(src[1:])
                 node_map[id_] = index
+                tgt = tgt.lower()
+                if len(tgt) >= 3 and tgt.startswith('\"') and tgt.endswith('\"'):
+                    tgt = tgt.strip('\"')
                 try:
-                    start = snt.index(tgt)
-                    nodes.append({
-                        'id': id_,
-                        # 'tgt': tgt,
-                        "anchors": [{
-                            "from": start,
-                            "end": start + len(tgt)
-                        }]
-                    })
+                    pattern = re.escape(tgt)
+                    new_nodes = []
+                    for match in re.finditer(f"{pattern}(\\s|$|\\W)", snt):
+                        new_nodes.append({
+                            'id': id_,
+                            # 'tgt': tgt,
+                            "anchors": [{
+                                "from": match.start(),
+                                "end": match.start() + len(tgt)
+                            }]
+                        })
+                        break
+                    if len(new_nodes):
+                        nodes.extend(new_nodes)
+                    else:
+                        start = snt.index(tgt)
+                        nodes.append({
+                            'id': id_,
+                            # 'tgt': tgt,
+                            "anchors": [{
+                                "from": start,
+                                "end": start + len(tgt)
+                            }]
+                        })
                 except Exception as e:
                     nodes.append({'id': id_})
+                    if tgt != '[unreal]' and tgt != '[multi]':
+                        print(tgt)
 
             removed = []
             edges = []
@@ -96,6 +117,8 @@ def main(args):
 
                     edge["source"] = remap[source]
                     edge["target"] = remap[target]
+            for node in nodes:
+                node['anchors'] = sorted(node['anchors'], key='source')
 
             out.write(json.dumps({
                 "id": metadata['id'],
