@@ -68,12 +68,11 @@ def main(args):
 
             for index, (src, role, tgt) in enumerate(ucca1.instances()):
                 tgt: str
-                id_ = int(src[1:])
-                node_map[id_] = index
+                node_map[src] = index
                 try:
                     start, end = get_anchors(tgt, snt)
                     nodes.append({
-                        'id': id_,
+                        'id': src,
                         # 'tgt': tgt,
                         "anchors": [{
                             "from": start,
@@ -82,27 +81,22 @@ def main(args):
                     })
                 except Exception as e:
                     nodes.append({
-                        'id': id_,
-                        'tgt': tgt
+                        'id': src,
+                        # 'tgt': tgt
                     })
                     if tgt != '[unreal]' and tgt != '[multi]':
                         print(tgt)
 
-            removed = []
             edges = []
-            removed_map = {}
             for src, role, tgt in ucca1.edges():
                 label: str = role[1:]
-                source = int(src[1:])
-                target = int(tgt[1:])
                 edges.append({
-                    "source": source,
-                    "target": target,
+                    "source": src,
+                    "target": tgt,
                     "label": label
                 })
 
             for src, role, tgt in ucca1.attributes():
-                src = int(src[1:])
                 nodes[node_map[src]].setdefault('anchors', [])
                 start, end = get_anchors(tgt, snt)
                 nodes[node_map[src]]['anchors'].append(
@@ -112,24 +106,21 @@ def main(args):
                     }
                 )
 
-            nodes = [node for node in nodes if node['id'] not in removed]
             remap = {node['id']: index for index, node in enumerate(nodes)}
-            if remap != node_map:
-                for node in nodes:
-                    node['id'] = remap[node['id']]
-                for edge in edges:
-                    source = removed_map.get(edge["source"], edge["source"])
-                    target = removed_map.get(edge["target"], edge["target"])
+            for node in nodes:
+                node['id'] = remap[node['id']]
+            for edge in edges:
+                edge["source"] = remap[edge["source"]]
+                edge["target"] = remap[edge["target"]]
 
-                    edge["source"] = remap[source]
-                    edge["target"] = remap[target]
+            top = remap[ucca1.top]
 
             out.write(json.dumps({
                 "id": metadata['id'],
                 "flavor": 1,
                 "framework": "ucca",
                 "version": 1.0,
-                "tops": [0],
+                "tops": [top],
                 "input": metadata['snt'],
                 "time": "2020-04-27",
                 "nodes": nodes,
