@@ -91,8 +91,8 @@ import argparse
 
 def parse_config():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--train_data', type=str)
-    parser.add_argument('--output_dir', type=str)
+    parser.add_argument('--train_data', '-t', type=str)
+    parser.add_argument('--output_dir', '-o', type=str)
     return parser.parse_args()
 
 
