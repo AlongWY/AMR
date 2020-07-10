@@ -73,7 +73,7 @@ def main(args):
                         # 'tgt': tgt,
                         "anchors": [{
                             "from": start,
-                            "end": end
+                            "to": end
                         }]
                     })
                 except Exception as e:
@@ -99,7 +99,7 @@ def main(args):
                 nodes[node_map[src]]['anchors'].append(
                     {
                         "from": start,
-                        "end": end
+                        "to": end
                     }
                 )
 
