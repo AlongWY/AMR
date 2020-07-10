@@ -95,7 +95,7 @@ def main(args):
                     "label": label[0]
                 })
 
-                if label.encode('r'):
+                if label.endswith('r'):
                     edges[-1].update({"attributes": ["remote"], "values": [True]})
 
             for src, role, tgt in ucca1.attributes():
