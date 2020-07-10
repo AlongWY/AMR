@@ -59,6 +59,7 @@ def main(args):
 
             snt: str
             snt = metadata['snt']
+            snt = snt.lower()
 
             nodes = []
             node_map = {}
@@ -87,21 +88,28 @@ def main(args):
             edges = []
             for src, role, tgt in ucca1.edges():
                 label: str = role[1:]
+
                 edges.append({
                     "source": src,
                     "target": tgt,
-                    "label": label
+                    "label": label[0]
                 })
+
+                if label.encode('r'):
+                    edges[-1].update({"attributes": ["remote"], "values": [True]})
 
             for src, role, tgt in ucca1.attributes():
                 nodes[node_map[src]].setdefault('anchors', [])
-                start, end = get_anchors(tgt, snt)
-                nodes[node_map[src]]['anchors'].append(
-                    {
-                        "from": start,
-                        "to": end
-                    }
-                )
+                try:
+                    start, end = get_anchors(tgt, snt)
+                    nodes[node_map[src]]['anchors'].append(
+                        {
+                            "from": start,
+                            "to": end
+                        }
+                    )
+                except Exception as e:
+                    continue
 
             remap = {node['id']: index for index, node in enumerate(nodes)}
             for node in nodes:

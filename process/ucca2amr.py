@@ -31,7 +31,10 @@ def main(args):
                 tgt = edge['target']
                 label = edge['label']
 
-                triples.append(Triple(source=f"c{src}", role=label, target=f"c{tgt}"))
+                if 'attributes' in edge:
+                    triples.append(Triple(source=f"c{src}", role=f'{label}r', target=f"c{tgt}"))
+                else:
+                    triples.append(Triple(source=f"c{src}", role=label, target=f"c{tgt}"))
 
             for concept, instance in zip(concepts, instances):
                 if len(instance) == 1:
