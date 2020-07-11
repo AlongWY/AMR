@@ -76,11 +76,13 @@ class Parser(nn.Module):
                 data['tok_char'], data['bert_token'], data['token_subword_index']
             )
 
-            mem_dict = {'snt_state': word_repr,
-                        'snt_padding_mask': word_mask,
-                        'probe': probe,
-                        'local_idx2token': data['local_idx2token'],
-                        'copy_seq': data['copy_seq']}
+            mem_dict = {
+                'snt_state': word_repr,
+                'snt_padding_mask': word_mask,
+                'probe': probe,
+                'local_idx2token': data['local_idx2token'],
+                'copy_seq': data['copy_seq']
+            }
             init_state_dict = {}
             init_hyp = Hypothesis(init_state_dict, [DUM], 0.)
             bsz = word_repr.size(1)
@@ -144,6 +146,8 @@ class Parser(nn.Module):
         # pred_arc[:,:,0] = 1
         # rel_confidence = rel_ll.masked_fill(pred_arc, 0.).sum(-1, keepdim=True)
         LL = conc_ll + arc_confidence.sum(-1, keepdim=True)  # + rel_confidence
+
+        # todo only generate from inputs
 
         def idx2token(idx, local_vocab):
             if idx in local_vocab:

@@ -54,11 +54,11 @@ class AMRGraph(object):
         for rel, head, tail in relation_triple:
             self._add_edge(rel, head, tail)
 
-        # lower concept
-        for name in self.name2concept:
-            v = self.name2concept[name]
-            v = v.lower()
-            self.name2concept[name] = v
+        # # lower concept
+        # for name in self.name2concept:
+        #     v = self.name2concept[name]
+        #     v = v.lower()
+        #     self.name2concept[name] = v
 
     def __len__(self):
         return len(self.name2concept)
