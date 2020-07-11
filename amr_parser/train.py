@@ -106,13 +106,13 @@ def data_proc(data, queue):
 
 def load_vocabs(args):
     vocabs = dict()
-    vocabs['tok'] = Vocab(args.tok_vocab, 5, [CLS])
-    vocabs['lem'] = Vocab(args.lem_vocab, 5, [CLS])
+    vocabs['tok'] = Vocab(args.tok_vocab, 1, [CLS])
+    vocabs['lem'] = Vocab(args.lem_vocab, 1, [CLS])
     vocabs['upos'] = Vocab(args.upos_vocab, 5, [CLS])
-    vocabs['ner'] = Vocab(args.ner_vocab, 1, [CLS])
+    vocabs['ner'] = Vocab(args.ner_vocab, 5, [CLS])
     vocabs['lem_char'] = Vocab(args.lem_vocab, 5, [CLS])
     vocabs['concept'] = Vocab(args.concept_vocab, 1, [DUM, END])
-    vocabs['predictable_concept'] = Vocab(args.predictable_concept_vocab, 1, [DUM, END])
+    vocabs['predictable_concept'] = Vocab(args.predictable_concept_vocab, 5, [DUM, END])
 
     vocabs['rel'] = Vocab(args.rel_vocab, 50, [NIL])
 
