@@ -28,6 +28,7 @@ def generate_amr_lines(f1, f2):
 
 
 def get_anchors(word, snt):
+    word = word.lower()
     if len(word) >= 3 and word.startswith('\"') and word.endswith('\"'):
         word = word.strip('\"')
 
@@ -59,6 +60,7 @@ def main(args):
 
             snt: str
             snt = metadata['snt']
+            snt = snt.lower()
 
             nodes = []
             node_map = {}
