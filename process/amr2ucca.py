@@ -59,7 +59,6 @@ def main(args):
 
             snt: str
             snt = metadata['snt']
-            snt = snt.lower()
 
             nodes = []
             node_map = {}
