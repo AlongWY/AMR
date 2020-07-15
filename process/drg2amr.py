@@ -7,7 +7,7 @@ from penman import Graph, Triple
 
 def main(args):
     pattern = re.compile(r'''[\s():/,\\#~]+''')
-    re_attrs = re.compile(r'''(\w+)\.(\w+\.\d+)''')
+    re_attrs = re.compile(r'''([\w'-~]+)\.(\w+\.\d+)''')
     with open(args.input, encoding='utf-8') as f, open(args.output, mode='w', encoding='utf-8') as out:
         for idx, line in enumerate(f.readlines()):
             drg_data = json.loads(line)
@@ -21,7 +21,7 @@ def main(args):
                 concepts.append(f"c{node['id']}")
                 instance = node.get('label', '[unreal]').strip('\"')
                 if re.match(re_attrs, instance):
-                    pass
+                    instance = re.sub(re_attrs, r'\1', instance)
                 instances.append(instance)
 
             for edge in drg_data['edges']:
