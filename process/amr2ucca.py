@@ -54,6 +54,7 @@ def main(args):
                 )
             )
 
+        cnt = 0
         for idx, (ucca1, ucca2) in enumerate(ucca_pair):
             ucca1.metadata.update(ucca2.metadata)
             metadata = ucca1.metadata
@@ -85,6 +86,7 @@ def main(args):
                     })
                     if tgt != '[unreal]' and tgt != '[multi]':
                         print(tgt)
+                        cnt += 1
 
             edges = []
             for src, role, tgt in ucca1.edges():

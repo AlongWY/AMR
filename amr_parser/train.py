@@ -112,7 +112,9 @@ def load_vocabs(args):
     vocabs['ner'] = Vocab(args.ner_vocab, 5, [CLS])
     vocabs['lem_char'] = Vocab(args.lem_vocab, 5, [CLS])
     vocabs['concept'] = Vocab(args.concept_vocab, 1, [DUM, END])
-    vocabs['predictable_concept'] = Vocab(args.predictable_concept_vocab, 5, [DUM, END])
+
+    # 仅生成 [multi] 和 [unreal]
+    vocabs['predictable_concept'] = Vocab(args.predictable_concept_vocab, 7000, [DUM, END])
 
     vocabs['rel'] = Vocab(args.rel_vocab, 50, [NIL])
 
