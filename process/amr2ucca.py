@@ -1,6 +1,9 @@
 import re, json
 from argparse import ArgumentParser
+from itertools import chain
 from typing import List, Tuple
+from collections import Counter
+from networkx import DiGraph
 
 import penman as pp
 
@@ -28,7 +31,7 @@ def generate_amr_lines(f1, f2):
 
 
 def get_anchors(word, snt):
-    word = word.lower()
+    # word = word.lower()
     if len(word) >= 3 and word.startswith('\"') and word.endswith('\"'):
         word = word.strip('\"')
 
@@ -38,6 +41,127 @@ def get_anchors(word, snt):
 
     start = snt.index(word)
     return start, start + len(word)
+
+
+def get_all_anchors(word: str, snt: str):
+    # word = word.lower()
+    if len(word) >= 3 and word.startswith('\"') and word.endswith('\"'):
+        word = word.strip('\"')
+
+    if word.isalnum():
+        pattern = re.escape(word)
+        return [(match.start(), match.start() + len(word)) for match in re.finditer(f"{pattern}(\\s|$|\\W)", snt)]
+    else:
+        pattern = re.escape(word)
+        return [(match.start(), match.start() + len(word)) for match in re.finditer(f"{pattern}", snt)]
+
+
+def distance(cand, anchors):
+    start, end = cand
+
+    res = float('inf')
+    for anchor in anchors:
+        anchor_start = anchor['from']
+        anchor_end = anchor['to']
+
+        dis = min(abs(anchor_start - end), abs(anchor_end - start))
+        res = min(dis, dis)
+
+    return res
+
+
+def replace_nearest(node, current, candicates, near_anchors):
+    nearest = candicates[0]
+    nearest_dis = distance(nearest, near_anchors)
+
+    for cand in candicates[1:]:
+        dis = distance(cand, near_anchors)
+        if dis < nearest_dis:
+            nearest = cand
+            nearest_dis = dis
+
+    index = node['anchors'].index(current)
+
+    node['anchors'][index] = {'from': nearest[0], 'to': nearest[1]}
+
+
+need_fix = []
+
+
+class Anchor:
+    def __init__(self, id, **kwargs):
+        self.id = id
+        self.dict = kwargs
+
+    def __hash__(self):
+        return hash(json.dumps(self.dict))
+
+    def __eq__(self, other):
+        if not isinstance(other, Anchor):
+            return False
+        return hash(self) == hash(other)
+
+    def __str__(self):
+        return json.dumps(dict(**self.dict, id=self.id))
+
+    def __repr__(self):
+        return json.dumps(dict(**self.dict, id=self.id))
+
+
+def anchors_fix(mrp: dict):
+    snt = mrp['input']
+    counter = Counter()
+    anchors = [[Anchor(**anchor, id=node['id']) for anchor in node['anchors']] for node in mrp['nodes'] if
+               'anchors' in node]
+    anchors = list(chain(*anchors))
+
+    counter.update(anchors)
+    node_counter = dict()
+
+    for node in anchors:
+        node_counter.setdefault(node, [])
+        node_counter[node].append(node)
+
+    most = counter.most_common(1)
+
+    if len(most) > 0 and most[0][1] > 1:
+        need_fix.append(mrp)
+
+        graph = DiGraph()
+        for node in mrp['nodes']:
+            graph_node = node.copy()
+            id = graph_node.pop('id')
+            graph.add_node(id, **graph_node)
+
+        for edge in mrp['edges']:
+            graph.add_edge(edge['source'], edge['target'])
+
+        for key, num in counter.items():
+            if num < 2:
+                continue
+            for node in node_counter[key]:
+                id = node.id
+                start = node.dict['from']
+                end = node.dict['to']
+                word = snt[start:end]
+
+                all_anchors = get_all_anchors(word, snt)
+                if len(all_anchors) == 0:
+                    continue
+
+                links = [edge_to for edge_from, edge_to in graph.edges(id)] + \
+                        [edge_from for edge_from, edge_to in graph.in_edges(id)]
+
+                same_layer = list(
+                    chain(*[[edge_to for edge_from, edge_to in graph.edges(link) if edge_to != id] for link in links]))
+                up_layer = list(chain(*[[edge_from for edge_from, edge_to in graph.in_edges(link)] for link in links]))
+
+                near_anchors = list(chain(*[graph.nodes[link]['anchors'] for link in links + same_layer + up_layer if
+                                            len(graph.nodes[link])]))
+
+                replace_nearest(mrp['nodes'][id], node.dict, all_anchors, near_anchors)
+
+    return mrp
 
 
 def main(args):
@@ -61,7 +185,7 @@ def main(args):
 
             snt: str
             snt = metadata['snt']
-            snt = snt.lower()
+            # snt = snt.lower()
 
             nodes = []
             node_map = {}
@@ -85,7 +209,7 @@ def main(args):
                         # 'tgt': tgt
                     })
                     if tgt != '[unreal]' and tgt != '[multi]':
-                        print(tgt)
+                        # print(tgt)
                         cnt += 1
 
             edges = []
@@ -123,7 +247,7 @@ def main(args):
 
             top = remap[ucca1.top]
 
-            out.write(json.dumps({
+            mrp = {
                 "id": metadata['id'],
                 "flavor": 1,
                 "framework": "ucca",
@@ -132,7 +256,16 @@ def main(args):
                 "input": metadata['snt'],
                 "time": "2020-04-27",
                 "nodes": nodes,
-                "edges": edges}) + '\n')
+                "edges": edges
+            }
+
+            mrp = anchors_fix(mrp)
+
+            out.write(json.dumps(mrp) + '\n')
+
+    with open(f"{args.output}_fix", mode='w', encoding='utf-8') as out:
+        for mrp in need_fix:
+            out.write(json.dumps(mrp) + '\n')
 
 
 if __name__ == '__main__':
