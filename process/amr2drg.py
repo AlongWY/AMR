@@ -45,9 +45,6 @@ def main(args):
             ucca1.metadata.update(ucca2.metadata)
             metadata = ucca1.metadata
 
-            snt: str
-            snt = metadata['snt'].lower()
-
             nodes = []
             node_map = {}
 
@@ -56,59 +53,29 @@ def main(args):
                 id_ = int(src[1:])
                 node_map[id_] = index
                 tgt = tgt.lower()
-                if tgt == 'Rubbish'.lower():
-                    print(tgt)
                 if len(tgt) >= 3 and tgt.startswith('\"') and tgt.endswith('\"'):
                     tgt = tgt.strip('\"')
-                try:
-                    pattern = re.escape(tgt)
-                    new_nodes = []
-                    for match in re.finditer(f"{pattern}(\\s|$|\\W)", snt):
-                        new_nodes.append({
-                            'id': id_,
-                            # 'tgt': tgt,
-                            "anchors": [{
-                                "from": match.start(),
-                                "end": match.start() + len(tgt)
-                            }]
-                        })
-                        break
-                    if len(new_nodes):
-                        nodes.extend(new_nodes)
-                    else:
-                        start = snt.index(tgt)
-                        nodes.append({
-                            'id': id_,
-                            # 'tgt': tgt,
-                            "anchors": [{
-                                "from": start,
-                                "end": start + len(tgt)
-                            }]
-                        })
-                except Exception as e:
-                    nodes.append({'id': id_})
-                    if tgt != '[unreal]' and tgt != '[multi]':
-                        print(tgt)
+                nodes.append({
+                    'id': id_
+                })
 
-            removed = []
+                if tgt != '[unreal]':
+                    nodes[-1]['label'] = tgt
+
             edges = []
             removed_map = {}
             for src, role, tgt in ucca1.edges():
                 label: str = role[1:]
                 source = int(src[1:])
                 target = int(tgt[1:])
-                if label.startswith("op"):
-                    nodes[node_map[source]].setdefault("anchors", [])
-                    nodes[node_map[source]]['anchors'].extend(nodes[node_map[target]].get('anchors', []))
-                    removed.append(target)
-                    removed_map[target] = source
-                else:
-                    edges.append({
-                        "source": source,
-                        "target": target,
-                        "label": label
-                    })
-            nodes = [node for node in nodes if node['id'] not in removed]
+                edges.append({
+                    "source": source,
+                    "target": target
+                })
+
+                if label != 'link':
+                    edges[-1]['label'] = label
+
             remap = {node['id']: index for index, node in enumerate(nodes)}
             if remap != node_map:
                 for node in nodes:
@@ -119,17 +86,15 @@ def main(args):
 
                     edge["source"] = remap[source]
                     edge["target"] = remap[target]
-            for node in nodes:
-                node['anchors'] = sorted(node['anchors'], key='source')
 
             out.write(json.dumps({
                 "id": metadata['id'],
-                "flavor": 1,
-                "framework": "ucca",
-                "version": 1.0,
+                "flavor": 2,
+                "framework": "drg",
+                "version": 1.1,
                 "tops": [0],
                 "input": metadata['snt'],
-                "time": "2020-04-27",
+                "time": "2020-06-16",
                 "nodes": nodes,
                 "edges": edges}) + '\n')
 
