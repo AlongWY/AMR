@@ -4,7 +4,7 @@ from amr_clean.postprocess.expander import Expander
 from amr_clean.postprocess.node_restore import NodeRestore
 
 
-def postprocess2(x):
+def postprocess(x):
     file_path, util_dir = x
     print(file_path, args.util_dir)
     node_utils = NU.from_json(util_dir, 0)
@@ -29,24 +29,6 @@ def postprocess2(x):
     os.remove(file_path + '.frame.wiki')
 
 
-def postprocess1(x):
-    file_path, util_dir = x
-    print(file_path, args.util_dir)
-    node_utils = NU.from_json(util_dir, 0)
-
-    nr = NodeRestore(node_utils)
-    with open(file_path + '.frame', 'w', encoding='utf-8') as f:
-        for amr in nr.restore_file(file_path):
-            f.write(str(amr) + '\n\n')
-
-    expander = Expander(util_dir=util_dir)
-    with open(file_path + '.post', 'w', encoding='utf-8') as f:
-        for amr in expander.expand_file(file_path + '.frame'):
-            f.write(str(amr) + '\n\n')
-
-    os.remove(file_path + '.frame')
-
-
 if __name__ == '__main__':
     import argparse, os
     from multiprocessing import Pool
@@ -55,7 +37,6 @@ if __name__ == '__main__':
     parser.add_argument('--amr_path', required=True)
     parser.add_argument('--util_dir', default='./temp')
     parser.add_argument('--nprocessors', default=4, type=int)
-    parser.add_argument('--v', default=1, type=int)
 
     args = parser.parse_args()
 
@@ -71,9 +52,4 @@ if __name__ == '__main__':
         amr_files = [(args.amr_path, args.util_dir)]
 
     pool = Pool(args.nprocessors)
-    if args.v == 2:
-        pool.map(postprocess2, amr_files)
-    elif args.v == 1:
-        pool.map(postprocess1, amr_files)
-    else:
-        assert False
+    pool.map(postprocess, amr_files)

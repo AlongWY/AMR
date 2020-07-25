@@ -1,23 +1,18 @@
 from argparse import ArgumentParser
-from amr_parser.bert_utils import BertEncoderTokenizer
-from fast_smatch.amr import AMR
-from fast_smatch.fast import get_amr_json
 import penman as pp
 import json, re
 
-from penman import Graph, Triple
+from penman import Graph
 
 
 def main(args):
     pattern = re.compile(r'''[\s()":/,\\'#]+''')
-    bert_tokenizer = BertEncoderTokenizer.from_pretrained('./bert-base-cased', do_lower_case=False)
     num_sentences = 0
     with open(args.input, encoding='utf-8') as f, open(args.output, mode='w', encoding='utf-8') as out:
-        while True:
-            amr_data = get_amr_json(bert_tokenizer, f)
+        for amr_data in f.readlines():
             if amr_data == '' or amr_data is None:
                 break
-
+            amr_data = json.loads(amr_data)
             amr_nodes = amr_data['nodes']
             amr_edges = amr_data.get('edges', [])
 
