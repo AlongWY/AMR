@@ -17,6 +17,7 @@ if [ $# == 1 ]; then
     --train_data data/drg/drg.train.convert \
     --dev_data data/drg/drg.valid.convert \
     --bert_path ./bert-base-cased \
+    --ckpt drg_ckpt \
     --word_dim 300 \
     --word_char_dim 32 \
     --concept_char_dim 32 \
@@ -42,7 +43,6 @@ if [ $# == 1 ]; then
     --print_every 100 \
     --eval_every 1000 \
     --batches_per_update 1 \
-    --ckpt ckpt \
     --world_size 3 \
     --gpus 3
 else
