@@ -4,6 +4,7 @@
 /stanford-corenlp-full-2018-10-05
 /stanford-corenlp
 /bert-base-cased
+/electra-base
 
 *.DS_Store
 *.pyc
