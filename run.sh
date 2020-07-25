@@ -4,19 +4,20 @@
 
 if [ $# == 1 ]; then
   CUDA_VISIBLE_DEVICES=$1 PYTHONPATH=. python amr_parser/train.py \
-    --tok_vocab data/vocabs/tok_vocab \
-    --tok_char_vocab data/vocabs/tok_char_vocab \
-    --lem_vocab data/vocabs/lem_vocab \
-    --lem_char_vocab data/vocabs/lem_char_vocab \
-    --rel_vocab data/vocabs/rel_vocab \
-    --upos_vocab data/vocabs/upos_vocab \
-    --ner_vocab data/vocabs/ner_vocab \
-    --concept_vocab data/vocabs/concept_vocab \
-    --concept_char_vocab data/vocabs/concept_char_vocab \
-    --predictable_concept_vocab data/vocabs/predictable_concept_vocab \
-    --train_data data/amr.train.convert.input_clean.recategorize \
-    --dev_data data/amr.valid.convert.input_clean.recategorize \
+    --tok_vocab data/amr/vocabs/tok_vocab \
+    --tok_char_vocab data/amr/vocabs/tok_char_vocab \
+    --lem_vocab data/amr/vocabs/lem_vocab \
+    --lem_char_vocab data/amr/vocabs/lem_char_vocab \
+    --rel_vocab data/amr/vocabs/rel_vocab \
+    --upos_vocab data/amr/vocabs/upos_vocab \
+    --ner_vocab data/amr/vocabs/ner_vocab \
+    --concept_vocab data/amr/vocabs/concept_vocab \
+    --concept_char_vocab data/amr/vocabs/concept_char_vocab \
+    --predictable_concept_vocab data/amr/vocabs/predictable_concept_vocab \
+    --train_data data/amr.train.convert.input_clean.recategorize.nosense \
+    --dev_data data/amr.valid.convert.input_clean.recategorize.nosense \
     --bert_path ./bert-base-cased \
+    --ckpt amr_ckpt \
     --word_dim 300 \
     --word_char_dim 32 \
     --concept_char_dim 32 \
@@ -43,7 +44,6 @@ if [ $# == 1 ]; then
     --print_every 100 \
     --eval_every 1000 \
     --batches_per_update 1 \
-    --ckpt ckpt \
     --world_size 3 \
     --gpus 3
 else
