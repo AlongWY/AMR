@@ -56,7 +56,7 @@ class Parser(nn.Module):
 
     def encode_step_with_bert(self, tok, lem, pos, ner, word_char, bert_token, token_subword_index):
         word_repr = self.word_encoder(word_char, tok, lem, pos, ner)
-        bert_embed, *_ = self.bert_encoder(bert_token, token_subword_index=token_subword_index)
+        bert_embed = self.bert_encoder(bert_token, token_subword_index=token_subword_index)
         bert_embed = bert_embed.transpose(0, 1)
         word_repr = word_repr + self.bert_adaptor(bert_embed)
         word_repr = self.embed_scale * word_repr + self.embed_positions(tok)
