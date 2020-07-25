@@ -54,12 +54,12 @@ class BertEncoder(BertModel):
         token_type_ids = None
         attention_mask = input_ids.ne(0)
 
-        encoded_layers, pooled_output = super(BertEncoder, self).forward(
+        encoded_layers, *extra = super(BertEncoder, self).forward(
             input_ids, attention_mask, token_type_ids)
         if token_subword_index is None:
-            return encoded_layers[:, 1:-1], pooled_output
+            return encoded_layers[:, 1:-1], *extra
         else:
-            return self.average_pooling(encoded_layers, token_subword_index), pooled_output
+            return self.average_pooling(encoded_layers, token_subword_index), *extra
 
     def average_pooling(self, encoded_layers, token_subword_index):
         batch_size, num_tokens, num_subwords = token_subword_index.size()
