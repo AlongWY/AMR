@@ -8,6 +8,8 @@ from penman import Graph, Triple
 def main(args):
     pattern = re.compile(r'''[\s():/,\\#~]+''')
     re_attrs = re.compile(r'''([\w'-~]+)\.(\w+\.\d+)''')
+    comma = set()
+    comma_count = 0
     with open(args.input, encoding='utf-8') as f, open(args.output, mode='w', encoding='utf-8') as out:
         for idx, line in enumerate(f.readlines()):
             drg_data = json.loads(line)
@@ -19,9 +21,17 @@ def main(args):
 
             for node in drg_data['nodes']:
                 concepts.append(f"c{node['id']}")
-                instance = node.get('label', '[unreal]').strip('\"')
+                instance = node.get('label', '[unreal]')
+                if instance.startswith("\""):
+                    comma.add(instance)
+                    comma_count += 1
+                instance = instance.strip('\"')
                 if re.match(re_attrs, instance):
+                    attr = re.sub(re_attrs, r'\2', instance)
                     instance = re.sub(re_attrs, r'\1', instance)
+                else:
+                    attr = None
+                attrs.append(attr)
                 instances.append(instance)
 
             for edge in drg_data['edges']:
@@ -33,6 +43,10 @@ def main(args):
 
             for concept, instance in zip(concepts, instances):
                 triples.append(Triple(source=concept, role=':instance', target=instance))
+
+            for concept, attr in zip(concepts, attrs):
+                if attr:
+                    triples.append(Triple(source=concept, role=':op', target=attr))
 
             triples = [Triple(source=source, role=role, target=f"\"{target}\"") \
                            if pattern.search(target) else Triple(source=source, role=role, target=target)
@@ -53,8 +67,8 @@ def main(args):
 
             graph_en = pp.encode(graph)
             graph_de = pp.decode(graph_en)
-
             out.write(graph_en + '\n\n')
+    print(len(comma), comma_count, comma)
 
 
 if __name__ == '__main__':
