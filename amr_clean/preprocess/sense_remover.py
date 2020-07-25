@@ -112,7 +112,6 @@ class SenseRemover:
 
 if __name__ == '__main__':
     import argparse
-
     from amr_clean.node_utils import NodeUtilities as NU
 
     parser = argparse.ArgumentParser('sense_remover.py')

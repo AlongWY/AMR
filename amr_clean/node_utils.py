@@ -6,7 +6,6 @@ from collections import Counter
 import editdistance
 
 from amr_clean.io import AMRIO
-from amr_clean.propbank_reader import PropbankReader
 import logging
 
 logger = logging.getLogger(__name__)
@@ -86,15 +85,11 @@ class NodeUtilities:
         return nu
 
     @classmethod
-    def from_raw(cls, amr_train_files, propbank_dir, verbalization_file, dump_dir,
+    def from_raw(cls,
+                 amr_train_files,
+                 dump_dir,
                  # Hyperparameters
-                 train_file_base_freq=1,
-                 propbank_base_freq=1,
-                 propbank_bonus=10,
-                 verbalization_base_freq=1,
-                 verbalize_freq=100,
-                 maybe_verbalize_freq=1,
-                 verbalize_bonus=10
+                 train_file_base_freq=1
                  ):
 
         # counter[senseless_node]: the occurrence of senseless_node
@@ -110,16 +105,6 @@ class NodeUtilities:
             frame_lemma_counter=frame_lemma_counter
         )
         nu._update_counter_from_train_files(amr_train_files, train_file_base_freq)
-        propbank_reader = PropbankReader(propbank_dir)
-        nu._update_counter_from_propbank(propbank_reader, propbank_base_freq, propbank_bonus)
-        nu._update_counter_from_verbalization(
-            verbalization_file,
-            verbalization_base_freq,
-            verbalize_freq,
-            maybe_verbalize_freq,
-            verbalize_bonus
-        )
-
         nu.frequent_senseless_nodes = cls._get_frequent_senseless_nodes(senseless_node_counter)
         nu.frame_lemma_map = nu._get_map_from_counter(nu.frame_lemma_counter)
         nu.lemma_frame_map = nu._get_map_from_counter(nu.lemma_frame_counter)
@@ -156,42 +141,6 @@ class NodeUtilities:
                         frame_lemma = re.sub(WORDSENSE_RE, '', frame)
                         self._update_counter(self.lemma_frame_counter, frame_lemma, frame, base_freq)
                         self._update_counter(self.frame_lemma_counter, frame, frame_lemma, base_freq)
-
-    def _update_counter_from_propbank(self, propbank_reader, base_freq=1, bonus=10):
-        logger.info('Updating (lemma, frame) counter from Propbank.')
-        for lemma, frames in propbank_reader.lemma_map.items():
-            for frame in frames:
-                freq = base_freq
-                if lemma == frame.lemma:  # bonus the frame lemma.
-                    freq *= bonus
-                self._update_counter(self.lemma_frame_counter, lemma, frame.frame, freq)
-                self._update_counter(self.frame_lemma_counter, frame.frame, lemma, freq)
-
-    def _update_counter_from_verbalization(
-            self, verbalization_file,
-            base_freq=1,
-            verbalize_freq=100,
-            maybe_verbalize_freq=1,
-            bonus=10,
-    ):
-        logger.info('Updating (lemma, frame) counter from Verbalization.')
-        with open(verbalization_file, encoding='utf-8') as f:
-            for line in f:
-                parts = line.strip().split(' ')
-                if len(parts) == 4 and parts[0] in ('VERBALIZE', 'MAYBE-VERBALIZE'):
-                    lemma = parts[1]
-                    frame = parts[3]
-                    frame_lemma = re.sub(WORDSENSE_RE, '', frame)
-
-                    freq = verbalize_freq if parts[0] == 'VERBALIZE' else maybe_verbalize_freq
-                    if lemma == frame_lemma:  # bonus frame lemma
-                        freq *= bonus
-                    self._update_counter(self.lemma_frame_counter, lemma, frame, freq)
-
-                    freq = base_freq
-                    if lemma == frame_lemma:  # bonus frame lemma
-                        freq *= bonus
-                    self._update_counter(self.frame_lemma_counter, frame, lemma, freq)
 
     @staticmethod
     def _get_map_from_counter(counter):
@@ -247,30 +196,14 @@ if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser('node_utils.py')
-    parser.add_argument('--amr_train_files', nargs='+', default=['data/all_amr/train_amr.txt.features'])
-    parser.add_argument('--propbank_dir', default='data/AMR/amr_3.0/misc/propbank-frames-xml-2016-03-08')
-    parser.add_argument('--verbalization_file', default='data/AMR/amr_3.0/misc/verbalization-list-v1.06.txt')
-    parser.add_argument('--dump_dir', default='./temp/')
+    parser.add_argument('--amr_train_files', nargs='+', default=['data/amr_mrp/amr.train.convert'])
+    parser.add_argument('--dump_dir', default='data/amr_utils')
     parser.add_argument('--train_file_base_freq', type=float, default=1)
-    parser.add_argument('--propbank_base_freq', type=float, default=1)
-    parser.add_argument('--propbank_bonus', type=float, default=10)
-    parser.add_argument('--verbalization_base_freq', type=float, default=1)
-    parser.add_argument('--verbalize_freq', type=float, default=100)
-    parser.add_argument('--maybe_verbalize_freq', type=float, default=100)
-    parser.add_argument('--verbalize_bonus', type=float, default=10)
 
     args = parser.parse_args()
 
     nu = NodeUtilities.from_raw(
         args.amr_train_files,
-        args.propbank_dir,
-        args.verbalization_file,
         args.dump_dir,
-        args.train_file_base_freq,
-        args.propbank_base_freq,
-        args.propbank_bonus,
-        args.verbalization_base_freq,
-        args.verbalize_freq,
-        args.maybe_verbalize_freq,
-        args.verbalize_bonus
+        args.train_file_base_freq
     )

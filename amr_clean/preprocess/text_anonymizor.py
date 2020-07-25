@@ -236,14 +236,11 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser("text_anonymizor.py")
-
     parser.add_argument('--amr_file', required=True, help="File to anonymize.")
     parser.add_argument('--util_dir')
     args = parser.parse_args()
-
     text_anonymizor = TextAnonymizor.from_json(
         os.path.join(args.util_dir, "text_anonymization_rules.json"))
-
     with open(args.amr_file + ".recategorize", "w", encoding="utf-8") as f:
         for amr in AMRIO.read(args.amr_file):
             amr.abstract_map = text_anonymizor(amr)
