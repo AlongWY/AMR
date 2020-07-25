@@ -7,7 +7,6 @@ from penman import Graph
 
 def main(args):
     pattern = re.compile(r'''[\s()":/,\\'#]+''')
-    num_sentences = 0
     with open(args.input, encoding='utf-8') as f, open(args.output, mode='w', encoding='utf-8') as out:
         for amr_data in f.readlines():
             if amr_data == '' or amr_data is None:
@@ -16,38 +15,42 @@ def main(args):
             amr_nodes = amr_data['nodes']
             amr_edges = amr_data.get('edges', [])
 
-            graph = []
+            triples = []
             concepts = []
 
             for node in amr_nodes:
                 short_name = f'c{node["id"]}'
                 concept = node["label"]
                 concepts.append(concept)
-                graph.append((short_name, 'instance', concept))
+                triples.append((short_name, 'instance', concept))
                 for attr, value in zip(node.get('properties', []), node.get('values', [])):
                     value = f"\"{value}\"" if pattern.search(value) else value
-                    graph.append((short_name, attr, value))
+                    triples.append((short_name, attr, value))
             for edge in amr_edges:
                 src = f'c{edge["source"]}'
                 target = f'c{edge["target"]}'
                 label = edge["label"]
                 target = f"\"{target}\"" if pattern.search(target) else target
-                graph.append((src, label, target))
+                triples.append((src, label, target))
 
-            graph = Graph(graph)
+            top = amr_data['tops'][0]
 
-            out.write('# ::id ' + amr_data['id'] + '\n')
-            out.write('# ::snt ' + amr_data['input'] + '\n')
-            out.write('# ::token ' + json.dumps(amr_data['token']) + '\n')
-            out.write('# ::lemma ' + json.dumps(amr_data['lemma']) + '\n')
-            out.write('# ::upos ' + json.dumps(amr_data['upos']) + '\n')
-            out.write('# ::xpos ' + json.dumps(amr_data['xpos']) + '\n')
-            out.write('# ::ner ' + json.dumps(amr_data['ner']) + '\n')
-            out.write('# ::conc ' + json.dumps(concepts) + '\n')
-            out.write(pp.encode(graph) + '\n\n')
-            num_sentences += 1
-            if num_sentences % 1000 == 0:
-                print(f"Processed {num_sentences} sentences!")
+            id = amr_data['id']
+            snt = json.dumps(amr_data['input'])
+            token = json.dumps(amr_data['token'])
+            lemma = json.dumps(amr_data['lemma'])
+            upos = json.dumps(amr_data['upos'])
+            xpos = json.dumps(amr_data['xpos'])
+            ner = json.dumps(amr_data['ner'])
+
+            graph = Graph(triples, top=f"c{top}", metadata=dict(
+                id=id, snt=snt, token=token, lemma=lemma, upos=upos, xpos=xpos, ner=ner
+            ))
+
+            graph_en = pp.encode(graph)
+            graph_de = pp.decode(graph_en)
+
+            out.write(graph_en + '\n\n')
 
 
 if __name__ == '__main__':

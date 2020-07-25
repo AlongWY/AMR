@@ -3,9 +3,9 @@
 from collections import Counter
 import json, re, os
 
+import penman as pp
 from amr_parser.amr import AMR
-from amr_parser.AMRGraph import AMRGraph, number_regexp
-from amr_parser.AMRGraph import _is_abs_form
+from amr_parser.AMRGraph import AMRGraph
 
 
 class AMRIO:
@@ -15,29 +15,13 @@ class AMRIO:
     @staticmethod
     def read(file_path):
         with open(file_path, encoding='utf-8') as f:
-            for line in f:
-                line = line.rstrip()
-                if line.startswith('# ::id '):
-                    amr_id = line[len('# ::id '):]
-                elif line.startswith('# ::snt '):
-                    sentence = line[len('# ::snt '):]
-                elif line.startswith('# ::token '):
-                    tokens = json.loads(line[len('# ::token '):])
-                elif line.startswith('# ::lemma '):
-                    lemmas = json.loads(line[len('# ::lemma '):])
-                    lemmas = [le if _is_abs_form(le) else le.lower() for le in lemmas]
-                elif line.startswith('# ::upos '):
-                    upos = json.loads(line[len('# ::upos '):])
-                elif line.startswith('# ::xpos '):
-                    xpos = json.loads(line[len('# ::xpos '):])
-                elif line.startswith('# ::ner '):
-                    ner = json.loads(line[len('# ::ner '):])
-                elif line.startswith('# ::abstract_map '):
-                    abstract_map = json.loads(line[len('# ::abstract_map '):])
-                    graph_line = AMR.get_amr_line(f)
-                    amr = AMR.parse_AMR_line(graph_line)
-                    myamr = AMRGraph(amr)
-                    yield tokens, lemmas, upos, xpos, ner, myamr
+            while f.readable():
+                graph_line = AMR.get_amr_line(f)
+                if graph_line == "":
+                    break
+                graph = pp.decode(graph_line)
+                amr = AMR.from_graph(graph)
+                yield graph, amr
 
 
 class LexicalMap(object):
@@ -72,16 +56,16 @@ class LexicalMap(object):
 
 def read_file(filename):
     # read preprocessed amr file
-    token, lemma, upos, xpos, ner, amr = [], [], [], [], [], []
-    for _token, _lemma, _upos, _xpos, _ner, _amr in AMRIO.read(filename):
-        token.append(_token)
-        lemma.append(_lemma)
-        upos.append(_upos)
-        xpos.append(_xpos)
-        ner.append(_ner)
-        amr.append(_amr)
-    print('read from %s, %d amrs' % (filename, len(token)))
-    return token, lemma, upos, xpos, ner, amr
+    token, lemma, upos, xpos, ner, amrs = [], [], [], [], [], []
+    for graph, amr in AMRIO.read(filename):
+        token.append(json.loads(graph.metadata['token']))
+        lemma.append(json.loads(graph.metadata['lemma']))
+        upos.append(json.loads(graph.metadata['upos']))
+        xpos.append(json.loads(graph.metadata['xpos']))
+        ner.append(json.loads(graph.metadata['ner']))
+        amrs.append(AMRGraph(amr))
+    print('read from %s, %d uccas' % (filename, len(amrs)))
+    return token, lemma, upos, xpos, ner, amrs
 
 
 def make_vocab(batch_seq, char_level=False):

@@ -85,7 +85,7 @@ class SenseRemover:
 
     def update_graph(self, graph, node, old, new):
         if new is not None:
-            graph.replace_node_attribute(node, 'instance', old, new)
+            graph.replace_node_attribute(node, ':instance', old, new)
             self.try_restore(str(old), new)
         else:
             self.try_restore(old, old)
