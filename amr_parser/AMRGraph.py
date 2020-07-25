@@ -7,7 +7,7 @@ abstract_regexp0 = re.compile(r'^([A-Z]+_)+\d+$')
 abstract_regexp1 = re.compile(r'^\d0*$')
 discard_regexp = re.compile(r'^n(\d+)?$')
 
-attr_value_set = set(['-', '+', 'interrogative', 'imperative', 'expressive'])
+attr_value_set = {'-', '+', 'interrogative', 'imperative', 'expressive'}
 
 
 def _is_attr_form(x):
@@ -57,8 +57,11 @@ class AMRGraph(object):
                 continue
             name = "%s_attr_%d" % (value, len(self.name2concept))
             if not _is_attr_form(value):
-                print('bad attribute', rel, concept, value)
-                continue
+                if _is_abs_form(value):
+                    self.abstract_concepts[name] = value
+                else:
+                    print('bad attribute', rel, concept, value)
+                    continue
             self.name2concept[name] = value
             self._add_edge(rel, concept, name)
         for rel, head, tail in relation_triple:

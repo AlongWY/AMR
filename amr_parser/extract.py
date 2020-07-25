@@ -64,7 +64,7 @@ def read_file(filename):
         xpos.append(json.loads(graph.metadata['xpos']))
         ner.append(json.loads(graph.metadata['ner']))
         amrs.append(AMRGraph(amr))
-    print('read from %s, %d uccas' % (filename, len(amrs)))
+    print('read from %s, %d amrs' % (filename, len(amrs)))
     return token, lemma, upos, xpos, ner, amrs
 
 
