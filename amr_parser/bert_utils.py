@@ -1,6 +1,8 @@
 import torch
-from transformers import BertTokenizer, BertModel
+from transformers import BertTokenizer, ElectraModel as BertModel
 import numpy as np
+
+
 class BertEncoderTokenizer(BertTokenizer):
 
     def __init__(self, *args, **kwargs):
@@ -33,7 +35,8 @@ class BertEncoderTokenizer(BertTokenizer):
 
     def _back_to_txt_for_check(self, token_ids):
         for tokens in token_ids:
-            print (self.convert_ids_to_tokens(tokens))
+            print(self.convert_ids_to_tokens(tokens))
+
 
 class BertEncoder(BertModel):
 

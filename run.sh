@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*_
 # Author: Yunlong Feng <ylfeng@ir.hit.edu.cn>
 
-if [ $# == 1 ]; then
+if [ $# -eq 1 ]; then
   CUDA_VISIBLE_DEVICES=$1 PYTHONPATH=. python amr_parser/train.py \
     --tok_vocab data/amr/vocabs/tok_vocab \
     --tok_char_vocab data/amr/vocabs/tok_char_vocab \
