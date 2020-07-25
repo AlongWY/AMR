@@ -16,7 +16,7 @@ if [ $# == 1 ]; then
     --predictable_concept_vocab data/drg/vocabs/predictable_concept_vocab \
     --train_data data/drg/drg.train.convert \
     --dev_data data/drg/drg.valid.convert \
-    --bert_path ./bert-base-cased \
+    --bert_path ./electra-base \
     --ckpt drg_ckpt \
     --word_dim 300 \
     --word_char_dim 32 \
