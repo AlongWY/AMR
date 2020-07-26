@@ -8,6 +8,8 @@ from penman import Graph, Triple
 
 from amr_parser import amr
 
+attr_regex = re.compile(r'''(\w+\.\d+)''')
+
 
 def generate_amr_lines(f1, f2):
     """
@@ -68,14 +70,24 @@ def main(args):
                 label: str = role[1:]
                 source = int(src[1:])
                 target = int(tgt[1:])
-                edges.append({
-                    "source": source,
-                    "target": target
-                })
+                source_label = nodes[node_map[source]].get('label', None)
+                target_label = nodes[node_map[target]].get('label', None)
+                if source_label and target_label and label == 'op':
+                    if attr_regex.fullmatch(target_label):
+                        nodes[node_map[source]]['label'] = f"{source_label}.{target_label}"
+                        removed_map[target] = source
+                    # else:
+                    #     print("not match")
+                elif label != 'op' and (target_label is None or not attr_regex.fullmatch(target_label)):
+                    edges.append({
+                        "source": source,
+                        "target": target
+                    })
 
-                if label != 'link':
-                    edges[-1]['label'] = label
+                    if label != 'link':
+                        edges[-1]['label'] = label
 
+            nodes = [node for node in nodes if node['id'] not in removed_map]
             remap = {node['id']: index for index, node in enumerate(nodes)}
             if remap != node_map:
                 for node in nodes:
