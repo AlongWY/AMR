@@ -1,10 +1,13 @@
 /.idea/
 /data/
-/ckpt/
-/stanford-corenlp-full-2018-10-05
-/stanford-corenlp
-/bert-base-cased
-/electra-base
+/ckpt
+/amr_ckpt/
+/ucca_ckpt/
+/drg_ckpt/
+/stanford-corenlp-full-2018-10-05/
+/stanford-corenlp/
+/bert-base-cased/
+/electra-base/
 
 *.DS_Store
 *.pyc
