@@ -54,7 +54,6 @@ def main(args):
                 tgt: str
                 id_ = int(src[1:])
                 node_map[id_] = index
-                tgt = tgt.lower()
                 if len(tgt) >= 3 and tgt.startswith('\"') and tgt.endswith('\"'):
                     tgt = tgt.strip('\"')
                 nodes.append({
@@ -87,24 +86,26 @@ def main(args):
                     if label != 'link':
                         edges[-1]['label'] = label
 
+            top = int(ucca1.top[1:])
             nodes = [node for node in nodes if node['id'] not in removed_map]
             remap = {node['id']: index for index, node in enumerate(nodes)}
-            if remap != node_map:
-                for node in nodes:
-                    node['id'] = remap[node['id']]
-                for edge in edges:
-                    source = removed_map.get(edge["source"], edge["source"])
-                    target = removed_map.get(edge["target"], edge["target"])
+            top = remap[top]
 
-                    edge["source"] = remap[source]
-                    edge["target"] = remap[target]
+            for node in nodes:
+                node['id'] = remap[node['id']]
+            for edge in edges:
+                source = removed_map.get(edge["source"], edge["source"])
+                target = removed_map.get(edge["target"], edge["target"])
+
+                edge["source"] = remap[source]
+                edge["target"] = remap[target]
 
             out.write(json.dumps({
                 "id": metadata['id'],
                 "flavor": 2,
                 "framework": "drg",
                 "version": 1.1,
-                "tops": [0],
+                "tops": [top],
                 "input": metadata['snt'],
                 "time": "2020-06-16",
                 "nodes": nodes,
