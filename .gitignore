@@ -1,6 +1,8 @@
 /.idea/
 /data/
 /ckpt/
+/drg_ckpt/
+/amr_ckpt/
 /stanford-corenlp-full-2018-10-05
 /stanford-corenlp
 /bert-base-cased
