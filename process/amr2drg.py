@@ -86,6 +86,15 @@ def main(args):
                     if label != 'link':
                         edges[-1]['label'] = label
 
+            for src, role, tgt in ucca1.attributes():
+                label: str = role[1:]
+                source = int(src[1:])
+
+                src_label = nodes[node_map[source]]['label']
+                if label == 'op':
+                    if attr_regex.fullmatch(tgt):
+                        nodes[node_map[source]]['label'] = f"{src_label}.{tgt}"
+
             top = int(ucca1.top[1:])
             nodes = [node for node in nodes if node['id'] not in removed_map]
             remap = {node['id']: index for index, node in enumerate(nodes)}
