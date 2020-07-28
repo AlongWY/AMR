@@ -16,7 +16,7 @@ if [ $# -eq 1 ]; then
     --predictable_concept_vocab data/amr/vocabs/predictable_concept_vocab \
     --train_data data/amr.train.convert.input_clean.recategorize.nosense \
     --dev_data data/amr.valid.convert.input_clean.recategorize.nosense \
-    --bert_path ./electra-base \
+    --bert_path ./electra-large \
     --ckpt amr_ckpt \
     --word_dim 300 \
     --word_char_dim 32 \
