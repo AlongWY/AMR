@@ -5,9 +5,10 @@ from collections import defaultdict
 
 def parse_config():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--companion', type=str)
-    parser.add_argument('--path', type=str)
-    parser.add_argument('--output', type=str)
+
+    parser.add_argument('--input', '-i', type=str, required=True)
+    parser.add_argument('--output', '-o', type=str, required=True)
+    parser.add_argument('--companion', '-c', type=str, required=True)
 
     return parser.parse_args()
 
@@ -32,7 +33,7 @@ if __name__ == '__main__':
     print("Companion loaded")
 
     with open(args.output, mode='w', encoding='utf-8') as out:
-        with open(args.path, encoding='utf-8') as f:
+        with open(args.input, encoding='utf-8') as f:
             for line in f:
                 sentence_json = json.loads(line)
                 id = sentence_json['id']
