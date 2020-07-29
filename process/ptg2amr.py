@@ -26,15 +26,12 @@ def main(args):
                     comma.add(instance)
                     comma_count += 1
                 instance = instance.strip('\"')
-                if re.match(re_attrs, instance):
-                    attr = re.sub(re_attrs, r'\2', instance)
-                    instance = re.sub(re_attrs, r'\1', instance)
-                else:
-                    attr = None
-                attrs.append(attr)
+
+                # for properties, values in zip(node.get('properties', ()), node.get('values', ())):
+                #     attrs.append((properties, values))
                 instances.append(instance)
 
-            for edge in drg_data['edges']:
+            for edge in drg_data.get('edges', ()):
                 src = edge['source']
                 tgt = edge['target']
                 label = edge.get('label', 'link')
@@ -44,9 +41,9 @@ def main(args):
             for concept, instance in zip(concepts, instances):
                 triples.append(Triple(source=concept, role=':instance', target=instance))
 
-            for concept, attr in zip(concepts, attrs):
-                if attr:
-                    triples.append(Triple(source=concept, role=':op', target=attr))
+            # for concept, (op, attr) in zip(concepts, attrs):
+            #     if attr:
+            #         triples.append(Triple(source=concept, role=op, target=attr))
 
             triples = [Triple(source=source, role=role, target=f"\"{target}\"") \
                            if pattern.search(target) else Triple(source=source, role=role, target=target)
