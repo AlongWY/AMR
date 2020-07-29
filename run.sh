@@ -4,20 +4,20 @@
 
 if [ $# -eq 1 ]; then
   CUDA_VISIBLE_DEVICES=$1 PYTHONPATH=. python amr_parser/train.py \
-    --tok_vocab data/drg/vocabs/tok_vocab \
-    --tok_char_vocab data/drg/vocabs/tok_char_vocab \
-    --lem_vocab data/drg/vocabs/lem_vocab \
-    --lem_char_vocab data/drg/vocabs/lem_char_vocab \
-    --rel_vocab data/drg/vocabs/rel_vocab \
-    --upos_vocab data/drg/vocabs/upos_vocab \
-    --ner_vocab data/drg/vocabs/xpos_vocab \
-    --concept_vocab data/drg/vocabs/concept_vocab \
-    --concept_char_vocab data/drg/vocabs/concept_char_vocab \
-    --predictable_concept_vocab data/drg/vocabs/predictable_concept_vocab \
-    --train_data data/drg/drg.train.convert \
-    --dev_data data/drg/drg.valid.convert \
+    --tok_vocab data/ptg/vocabs/tok_vocab \
+    --tok_char_vocab data/ptg/vocabs/tok_char_vocab \
+    --lem_vocab data/ptg/vocabs/lem_vocab \
+    --lem_char_vocab data/ptg/vocabs/lem_char_vocab \
+    --rel_vocab data/ptg/vocabs/rel_vocab \
+    --upos_vocab data/ptg/vocabs/upos_vocab \
+    --ner_vocab data/ptg/vocabs/xpos_vocab \
+    --concept_vocab data/ptg/vocabs/concept_vocab \
+    --concept_char_vocab data/ptg/vocabs/concept_char_vocab \
+    --predictable_concept_vocab data/ptg/vocabs/predictable_concept_vocab \
+    --train_data data/ptg/train.convert \
+    --dev_data data/ptg/valid.convert \
     --bert_path ./electra-base \
-    --ckpt drg_ckpt \
+    --ckpt ptg_ckpt \
     --word_dim 300 \
     --word_char_dim 32 \
     --concept_char_dim 32 \

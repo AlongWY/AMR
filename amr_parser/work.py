@@ -16,7 +16,7 @@ logging.basicConfig(
     datefmt='%Y-%m-%d %H:%M:%S'
 )
 logger = logging.getLogger(__name__)
-logger.addHandler(logging.FileHandler('drg_work.log'))
+logger.addHandler(logging.FileHandler('ptg_work.log'))
 
 
 def parse_config():
