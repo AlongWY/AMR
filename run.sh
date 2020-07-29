@@ -14,8 +14,8 @@ if [ $# -eq 1 ]; then
     --concept_vocab data/amr/vocabs/concept_vocab \
     --concept_char_vocab data/amr/vocabs/concept_char_vocab \
     --predictable_concept_vocab data/amr/vocabs/predictable_concept_vocab \
-    --train_data data/amr.train.convert.input_clean.recategorize.nosense \
-    --dev_data data/amr.valid.convert.input_clean.recategorize.nosense \
+    --train_data data/amr/amr.train.convert.input_clean.recategorize.nosense \
+    --dev_data data/amr/amr.valid.convert.input_clean.recategorize.nosense \
     --bert_path ./electra-large \
     --ckpt amr_ckpt \
     --word_dim 300 \
