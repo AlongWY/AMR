@@ -69,31 +69,13 @@ def main(args):
                 label: str = role[1:]
                 source = int(src[1:])
                 target = int(tgt[1:])
-                source_label = nodes[node_map[source]].get('label', None)
-                target_label = nodes[node_map[target]].get('label', None)
-                if source_label and target_label and label == 'op':
-                    if attr_regex.fullmatch(target_label):
-                        nodes[node_map[source]]['label'] = f"{source_label}.{target_label}"
-                        removed_map[target] = source
-                    # else:
-                    #     print("not match")
-                elif label != 'op' and (target_label is None or not attr_regex.fullmatch(target_label)):
-                    edges.append({
-                        "source": source,
-                        "target": target
-                    })
+                edges.append({
+                    "source": source,
+                    "target": target
+                })
 
-                    if label != 'link':
-                        edges[-1]['label'] = label
-
-            for src, role, tgt in ucca1.attributes():
-                label: str = role[1:]
-                source = int(src[1:])
-
-                src_label = nodes[node_map[source]]['label']
-                if label == 'op':
-                    if attr_regex.fullmatch(tgt):
-                        nodes[node_map[source]]['label'] = f"{src_label}.{tgt}"
+                if label != 'link':
+                    edges[-1]['label'] = label
 
             top = int(ucca1.top[1:])
             nodes = [node for node in nodes if node['id'] not in removed_map]
@@ -111,9 +93,9 @@ def main(args):
 
             out.write(json.dumps({
                 "id": metadata['id'],
-                "flavor": 2,
-                "framework": "drg",
-                "version": 1.1,
+                "flavor": 1,
+                "framework": "ptg",
+                "version": 1.0,
                 "tops": [top],
                 "input": metadata['snt'],
                 "time": "2020-06-16",
