@@ -47,7 +47,7 @@ class Parser(nn.Module):
         self.device = device
         self.bert_encoder = bert_encoder
         if bert_encoder is not None:
-            self.bert_adaptor = nn.Linear(768, embed_dim)
+            self.bert_adaptor = nn.Linear(bert_encoder.config.hidden_size, embed_dim)
         self.reset_parameters()
 
     def reset_parameters(self):
