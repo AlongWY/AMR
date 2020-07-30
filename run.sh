@@ -44,7 +44,8 @@ if [ $# -eq 1 ]; then
     --eval_every 1000 \
     --batches_per_update 1 \
     --world_size 3 \
-    --gpus 3
+    --gpus 3 \
+    --MASTER_PORT "8993"
 else
   echo "$0 [CUDA DEVICES]"
 fi
