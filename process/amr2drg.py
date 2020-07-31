@@ -30,6 +30,10 @@ def generate_amr_lines(f1, f2):
 
 
 def main(args):
+    re_attrs = re.compile(r'''([\w'-~]+)\.(\w+\.\d+)''')
+    with open(args.rule, encoding='utf-8') as f:
+        rule = json.load(f)
+
     with open(args.input, encoding='utf-8') as f, \
             open(args.extra, encoding='utf-8') as e, \
             open(args.output, mode='w', encoding='utf-8') as out:
@@ -102,6 +106,10 @@ def main(args):
 
             for node in nodes:
                 node['id'] = remap[node['id']]
+                label = node.get('label', None)
+                if label is not None and re_attrs.fullmatch(label):
+                    node['label'] = f"\"{label}\""
+
             for edge in edges:
                 source = removed_map.get(edge["source"], edge["source"])
                 target = removed_map.get(edge["target"], edge["target"])
@@ -126,6 +134,7 @@ if __name__ == '__main__':
     argparser.add_argument('--input', '-i', required=True)
     argparser.add_argument('--extra', '-e', required=True)
     argparser.add_argument('--output', '-o', required=True)
+    argparser.add_argument('--rule', '-r', default='data/drg/drg_no_comma.json')
     args = argparser.parse_args()
 
     main(args)
