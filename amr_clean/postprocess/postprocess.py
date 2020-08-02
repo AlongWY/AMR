@@ -6,7 +6,7 @@ from amr_clean.postprocess.node_restore import NodeRestore
 
 def postprocess(x):
     file_path, util_dir = x
-    print(file_path, args.util_dir)
+    print(file_path, util_dir)
     node_utils = NU.from_json(util_dir, 0)
 
     nr = NodeRestore(node_utils)
@@ -35,7 +35,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser('node_restore.py')
     parser.add_argument('--amr_path', required=True)
-    parser.add_argument('--util_dir', default='./temp')
+    parser.add_argument('--util_dir', default='data/amr/utils')
     parser.add_argument('--nprocessors', default=4, type=int)
 
     args = parser.parse_args()
