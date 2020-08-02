@@ -68,8 +68,13 @@ def eval(gold, predict):
 
 
 def main(args):
+    best_f1 = 0.
+    best_name = ""
     for filename in glob.glob(f'{args.d}/*_out'):
         f1 = eval(args.g, filename)
+        if f1 > best_f1:
+            best_f1 = f1
+            best_name = filename
         print(filename, "f1:", f1)
 
 
