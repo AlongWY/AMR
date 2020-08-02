@@ -1,3 +1,4 @@
+import os
 from amr_clean.postprocess.wikification import Wikification
 from amr_clean.node_utils import NodeUtilities as NU
 from amr_clean.postprocess.expander import Expander

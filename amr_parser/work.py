@@ -6,6 +6,7 @@ from amr_parser.postprocess import PostProcessor
 from amr_parser.extract import LexicalMap
 from amr_parser.utils import move_to_device
 from amr_parser.bert_utils import BertEncoderTokenizer, BertEncoder
+from transformers import ElectraConfig
 
 import argparse, os, re
 
@@ -131,7 +132,8 @@ if __name__ == "__main__":
     lexical_mapping = LexicalMap()
 
     bert_tokenizer = BertEncoderTokenizer.from_pretrained(model_args.bert_path, do_lower_case=False)
-    bert_encoder = BertEncoder.from_pretrained(model_args.bert_path)
+    bert_config = ElectraConfig.from_pretrained(model_args.bert_path)
+    bert_encoder = BertEncoder(bert_config)
     vocabs['bert_tokenizer'] = bert_tokenizer
 
     model = Parser(

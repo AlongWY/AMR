@@ -8,6 +8,7 @@
 /stanford-corenlp
 /bert-base-cased
 /electra-base
+/electra-large
 
 *.DS_Store
 *.pyc

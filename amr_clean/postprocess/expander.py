@@ -169,7 +169,6 @@ class Expander:
     def _load_utils(self):
         with open(os.path.join(self.util_dir, 'name_op_cooccur_counter.json'), encoding='utf-8') as f:
             self.name_ops_map = json.load(f)
-            self.name_ops_map['u.n.'].pop('United Nations')
 
         # The country list is downloaded from github:
         # https://github.com/Dinu/country-nationality-list
