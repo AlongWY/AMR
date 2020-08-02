@@ -35,10 +35,12 @@ def eval(gold, predict):
             if cur_amr1 == "" and cur_amr2 == "":
                 break
             if cur_amr1 == "":
+                print(cur_amr1, cur_amr2)
                 print("Error: File 1 has less AMRs than file 2", file=ERROR_LOG)
                 print("Ignoring remaining AMRs", file=ERROR_LOG)
                 break
             if cur_amr2 == "":
+                print(cur_amr1, cur_amr2)
                 print("Error: File 2 has less AMRs than file 1", file=ERROR_LOG)
                 print("Ignoring remaining AMRs", file=ERROR_LOG)
                 break
