@@ -21,8 +21,8 @@ logger.addHandler(logging.FileHandler('work.log'))
 def parse_config():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--load_path', type=str, default='ckpt/epoch447_batch164999')
-    parser.add_argument('--test_data', type=str, default='data/amr.valid.json')
+    parser.add_argument('--load_path', type=str, default='amr_ckpt/epoch535_batch154999')
+    parser.add_argument('--test_data', type=str, default='data/amr/amr.test.convert.input_clean.recategorize.nosense')
     parser.add_argument('--test_batch_size', type=int, default=4444)
     parser.add_argument('--beam_size', type=int, default=8)
     parser.add_argument('--alpha', type=float, default=0.6)
