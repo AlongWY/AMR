@@ -41,8 +41,11 @@ class AMRGraph(object):
         # will do some adjustments
         self.abstract_concepts = dict()
         for _, name, concept in instance_triple:
-            if _is_attr_form(concept):
-                print('bad concept', _, name, concept)
+            if is_attr_or_abs_form(concept):
+                if _is_abs_form(concept):
+                    self.abstract_concepts[name] = concept
+                else:
+                    print('bad concept', _, name, concept)
             self.name2concept[name] = concept
             self.nodes.add(name)
         for rel, concept, value in attribute_triple:
@@ -70,7 +73,8 @@ class AMRGraph(object):
         # lower concept
         for name in self.name2concept:
             v = self.name2concept[name]
-            v = v.lower()
+            if not _is_abs_form(v):
+                v = v.lower()
             self.name2concept[name] = v
 
     def __len__(self):

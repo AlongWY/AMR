@@ -92,8 +92,8 @@ import argparse
 
 def parse_config():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--train_data', type=str)
-    parser.add_argument('--output_dir', type=str)
+    parser.add_argument('--train_data', type=str, default='data/amr/amr.train.convert.input_clean.recategorize.nosense')
+    parser.add_argument('--output_dir', type=str, default='data/amr/vocabs')
     return parser.parse_args()
 
 
