@@ -37,24 +37,24 @@ def main(args):
     with open(args.input, encoding='utf-8') as f, \
             open(args.extra, encoding='utf-8') as e, \
             open(args.output, mode='w', encoding='utf-8') as out:
-        ucca_pair: List[Tuple[Graph, Graph]]
-        ucca_pair = []
+        drg_pair: List[Tuple[Graph, Graph]]
+        drg_pair = []
         for sent_num, (cur_amr1, cur_amr2) in enumerate(generate_amr_lines(f, e), start=1):
-            ucca_pair.append(
+            drg_pair.append(
                 (
                     pp.decode(cur_amr1),
                     pp.decode(cur_amr2)
                 )
             )
 
-        for idx, (ucca1, ucca2) in enumerate(ucca_pair):
-            ucca1.metadata.update(ucca2.metadata)
-            metadata = ucca1.metadata
+        for idx, (drg, extra) in enumerate(drg_pair):
+            drg.metadata.update(extra.metadata)
+            metadata = drg.metadata
 
             nodes = []
             node_map = {}
 
-            for index, (src, role, tgt) in enumerate(ucca1.instances()):
+            for index, (src, role, tgt) in enumerate(drg.instances()):
                 tgt: str
                 id_ = int(src[1:])
                 node_map[id_] = index
@@ -69,7 +69,7 @@ def main(args):
 
             edges = []
             removed_map = {}
-            for src, role, tgt in ucca1.edges():
+            for src, role, tgt in drg.edges():
                 label: str = role[1:]
                 source = int(src[1:])
                 target = int(tgt[1:])
@@ -90,16 +90,18 @@ def main(args):
                     if label != 'link':
                         edges[-1]['label'] = label
 
-            for src, role, tgt in ucca1.attributes():
+            for src, role, tgt in drg.attributes():
                 label: str = role[1:]
                 source = int(src[1:])
 
-                src_label = nodes[node_map[source]]['label']
-                if label == 'op':
+                src_label = None
+                if 'label' in nodes[node_map[source]]:
+                    src_label = nodes[node_map[source]]['label']
+                if label == 'op' and src_label:
                     if attr_regex.fullmatch(tgt):
                         nodes[node_map[source]]['label'] = f"{src_label}.{tgt}"
 
-            top = int(ucca1.top[1:])
+            top = int(drg.top[1:])
             nodes = [node for node in nodes if node['id'] not in removed_map]
             remap = {node['id']: index for index, node in enumerate(nodes)}
             top = remap[top]
@@ -107,7 +109,7 @@ def main(args):
             for node in nodes:
                 node['id'] = remap[node['id']]
                 label = node.get('label', None)
-                if label is not None and re_attrs.fullmatch(label):
+                if not (label is None or re_attrs.fullmatch(label) or label in rule):
                     node['label'] = f"\"{label}\""
 
             for edge in edges:
