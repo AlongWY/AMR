@@ -76,6 +76,7 @@ def main(args):
             best_f1 = f1
             best_name = filename
         print(filename, "f1:", f1)
+    print(best_name)
 
 
 def build_arg_parser():
