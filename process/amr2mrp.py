@@ -46,7 +46,7 @@ def main(args):
                 node_map[src] = index
 
                 nodes.append({
-                    'id': src,
+                    'id': index,
                     "label": tgt
                 })
 
@@ -69,7 +69,7 @@ def main(args):
                 nodes[source].setdefault('values', [])
 
                 nodes[source]['properties'].append(label)
-                nodes[source]['values'].append(tgt)
+                nodes[source]['values'].append(tgt.lower().strip("\""))
 
             top = node_map[amr.top]
 
