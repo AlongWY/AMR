@@ -52,5 +52,7 @@ if __name__ == '__main__':
     else:
         amr_files = [(args.amr_path, args.util_dir)]
 
-    pool = Pool(args.nprocessors)
-    pool.map(postprocess, amr_files)
+    postprocess(amr_files[0])
+
+    # pool = Pool(args.nprocessors)
+    # pool.map(postprocess, amr_files)

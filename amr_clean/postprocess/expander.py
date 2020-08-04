@@ -140,14 +140,14 @@ class Expander:
         graph = amr.graph
         ops = self.get_ops(saved_dict)
         old = node.instance
-        graph.replace_node_attribute(node, 'instance', old, 'name')
+        graph.replace_node_attribute(node, ':instance', old, 'name')
         for i, op in enumerate(ops, 1):
             graph.add_node_attribute(node, 'op{}'.format(i), op)
 
     def expand_date_node(self, node, saved_dict, amr):
         graph = amr.graph
         attrs = saved_dict['attrs']
-        graph.replace_node_attribute(node, 'instance', node.instance, 'date-entity')
+        graph.replace_node_attribute(node, ':instance', node.instance, 'date-entity')
         for key, value in attrs.items():
             graph.add_node_attribute(node, key, value)
         edges = saved_dict['edges']
@@ -157,13 +157,13 @@ class Expander:
 
     def expand_score_node(self, node, saved_dict, amr):
         graph = amr.graph
-        graph.replace_node_attribute(node, 'instance', node.instance, 'score-entity')
+        graph.replace_node_attribute(node, ':instance', node.instance, 'score-entity')
         for i, op in enumerate(saved_dict['ops'], 1):
             graph.add_node_attribute(node, 'op{}'.format(i), op)
 
     def expand_ordinal_node(self, node, saved_dict, amr):
         graph = amr.graph
-        graph.replace_node_attribute(node, 'instance', node.instance, 'ordinal-entity')
+        graph.replace_node_attribute(node, ':instance', node.instance, 'ordinal-entity')
         graph.add_node_attribute(node, 'value', int(saved_dict['ops'][0]))
 
     def _load_utils(self):
