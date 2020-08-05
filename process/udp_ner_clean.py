@@ -47,7 +47,7 @@ def main(args):
                 })
 
             res[mrp_json['id']] = to_clean
-        out.write(json.dumps(res, ensure_ascii=False) + '\n')
+        out.write(json.dumps(res, ensure_ascii=False, indent=2) + '\n')
 
 
 if __name__ == '__main__':
