@@ -132,8 +132,7 @@ if __name__ == "__main__":
     lexical_mapping = LexicalMap()
 
     bert_tokenizer = BertEncoderTokenizer.from_pretrained(model_args.bert_path, do_lower_case=False)
-    bert_config = ElectraConfig.from_pretrained(model_args.bert_path)
-    bert_encoder = BertEncoder(bert_config)
+    bert_encoder = BertEncoder.from_pretrained(model_args.bert_path)
     vocabs['bert_tokenizer'] = bert_tokenizer
 
     model = Parser(
