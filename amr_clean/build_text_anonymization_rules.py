@@ -1,4 +1,5 @@
 import json
+from editdistance import distance
 from os import path
 
 from amr_clean.io import AMRIO
@@ -143,6 +144,13 @@ if __name__ == '__main__':
             for key, value in amr.abstract_map.items():
                 value_type = value["type"]
                 value_span = value["span"]
+
+                if len(value_span) <= 1:
+                    continue
+
+                if (value_type == 'named-entity' or value_type == 'ordinal-entity') \
+                        and distance(value_span, value["ops"]) > 3:
+                    continue
 
                 value["ner"] = type_ner_mapper.get(
                     value_span.lower(), {
