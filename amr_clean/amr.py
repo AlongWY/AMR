@@ -308,9 +308,9 @@ class AMRGraph(penman.Graph):
                 found = True
                 t = (node.identifier, attr, new)
             triples.append(t)
-        if not found:
-            print('Something went wrong!!!')
-            raise KeyError
+        # if not found:
+        #     print('Something went wrong!!!')
+        #     raise KeyError
         self.triples = sorted(triples, key=lambda x: model.alphanumeric_order(x[0]))
 
     def remove_node_attribute(self, node, attr, value):

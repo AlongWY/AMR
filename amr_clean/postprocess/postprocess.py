@@ -35,7 +35,7 @@ if __name__ == '__main__':
     from multiprocessing import Pool
 
     parser = argparse.ArgumentParser('node_restore.py')
-    parser.add_argument('--amr_path', required=True)
+    parser.add_argument('--amr_path', default='amr_ckpt/amr.test.pred')
     parser.add_argument('--util_dir', default='data/amr/utils')
     parser.add_argument('--nprocessors', default=4, type=int)
 

@@ -33,7 +33,7 @@ class GraphRepair:
         nodes = [node for node in graph.get_nodes()]
         for node in nodes:
             for attr, value in node.attributes:
-                if value == '@@UNKNOWN@@' and attr != 'instance':
+                if value == '@@UNKNOWN@@' and attr != ':instance':
                     graph.remove_node_attribute(node, attr, value)
             if node.instance == '@@UNKNOWN@@':
                 if len(list(graph._G.edges(node))) == 0:
@@ -58,17 +58,17 @@ class GraphRepair:
             for source, target in edges:
                 label = graph._G[source][target]['label']
                 # `name`, `ARGx`, and `ARGx-of` should only appear once.
-                if label == 'name':  # or label.startswith('ARG'):
+                if label == ':name':  # or label.startswith('ARG'):
                     edge_counter[label].append(target)
                 # the target of `opx' should only appear once.
-                elif label.startswith('op') or label.startswith('snt'):
+                elif label.startswith(':op') or label.startswith('snt'):
                     edge_counter[str(target.instance)].append(target)
                 else:
                     edge_counter[label + str(target.instance)].append(target)
             for label, children in edge_counter.items():
                 if len(children) == 1:
                     continue
-                if label == 'name':
+                if label == ':name':
                     # remove redundant edges.
                     for target in children[1:]:
                         if len(list(graph._G.in_edges(target))) == 1 and len(list(graph._G.edges(target))) == 0:

@@ -97,6 +97,8 @@ class Expander:
                         if abstract_type == 'quantity':
                             if isinstance(saved_dict['value'], str) and "/" in saved_dict['value']:
                                 saved_dict['value'] = '"' + saved_dict['value'] + '"'
+                            if isinstance(saved_dict['value'], int):
+                                saved_dict['value'] = f'{saved_dict["value"]}'
                             graph.replace_node_attribute(node, attr, value, saved_dict['value'])
                             self.quantity_expand_count += 1
 
