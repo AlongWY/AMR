@@ -4,7 +4,7 @@
 
 if [ $# -eq 1 ]; then
   CUDA_VISIBLE_DEVICES=$1 PYTHONPATH=. python amr_parser/work.py \
-    --load_path amr_ckpt/epoch401_batch115999 \
+    --load_path amr_ckpt/epoch342_batch98999 \
     --test_data data/test.input.recategorize
 else
   echo "$0 [CUDA DEVICES]"
