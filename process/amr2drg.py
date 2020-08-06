@@ -52,72 +52,64 @@ def main(args):
             metadata = drg.metadata
 
             nodes = []
-            node_map = {}
+            node_map = {}  # concepts to index
 
             for index, (src, role, tgt) in enumerate(drg.instances()):
-                tgt: str
-                id_ = int(src[1:])
-                node_map[id_] = index
+                node_map[src] = index
                 if len(tgt) >= 3 and tgt.startswith('\"') and tgt.endswith('\"'):
                     tgt = tgt.strip('\"')
-                nodes.append({
-                    'id': id_
-                })
-
+                nodes.append({'id': src})
                 if tgt != '[unreal]':
                     nodes[-1]['label'] = tgt
 
             edges = []
             removed_map = {}
+            drg_edges = []
             for src, role, tgt in drg.edges():
-                label: str = role[1:]
-                source = int(src[1:])
-                target = int(tgt[1:])
-                source_label = nodes[node_map[source]].get('label', None)
-                target_label = nodes[node_map[target]].get('label', None)
-                if source_label and target_label and label == 'op':
-                    if attr_regex.fullmatch(target_label):
-                        nodes[node_map[source]]['label'] = f"{source_label}.{target_label}"
-                        removed_map[target] = source
-                    # else:
-                    #     print("not match")
-                elif label != 'op' and (target_label is None or not attr_regex.fullmatch(target_label)):
-                    edges.append({
-                        "source": source,
-                        "target": target
-                    })
+                source_label = nodes[node_map[src]].get('label', None)
+                target_label = nodes[node_map[tgt]].get('label', None)
+                if source_label and target_label and attr_regex.fullmatch(target_label):
+                    nodes[node_map[src]]['label'] = f"{source_label}.{target_label}"
+                    removed_map[tgt] = src
+                else:
+                    drg_edges.append((src, role, tgt))
 
-                    if label != 'link':
-                        edges[-1]['label'] = label
+            for src, role, tgt in drg_edges:
+                label: str = role[1:]
+                edges.append({
+                    "source": src,
+                    "target": tgt
+                })
+                if label != 'link':
+                    edges[-1]['label'] = label
 
             for src, role, tgt in drg.attributes():
                 label: str = role[1:]
-                source = int(src[1:])
-
-                src_label = None
-                if 'label' in nodes[node_map[source]]:
-                    src_label = nodes[node_map[source]]['label']
+                src_label = nodes[node_map[src]].get('label', None)
                 if label == 'op' and src_label:
                     if attr_regex.fullmatch(tgt):
-                        nodes[node_map[source]]['label'] = f"{src_label}.{tgt}"
+                        nodes[node_map[src]]['label'] = f"{src_label}.{tgt}"
 
-            top = int(drg.top[1:])
             nodes = [node for node in nodes if node['id'] not in removed_map]
             remap = {node['id']: index for index, node in enumerate(nodes)}
-            top = remap[top]
+
+            for key, value in remap.items():
+                node_map[key] = value
+
+            for node_id, replaced in removed_map.items():
+                node_map[node_id] = node_map[replaced]
 
             for node in nodes:
-                node['id'] = remap[node['id']]
+                node['id'] = node_map[node['id']]
                 label = node.get('label', None)
                 if not (label is None or re_attrs.fullmatch(label) or label in rule):
                     node['label'] = f"\"{label}\""
 
             for edge in edges:
-                source = removed_map.get(edge["source"], edge["source"])
-                target = removed_map.get(edge["target"], edge["target"])
+                edge["source"] = node_map[edge["source"]]
+                edge["target"] = node_map[edge["target"]]
 
-                edge["source"] = remap[source]
-                edge["target"] = remap[target]
+            top = node_map[drg.top]
 
             out.write(json.dumps({
                 "id": metadata['id'],
