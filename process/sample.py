@@ -8,7 +8,7 @@ import os
 def load_mrp(file):
     mrps = {}
     ids = []
-    with open(file, 'r') as fi:
+    with open(file, 'r', encoding='utf-8') as fi:
         line = fi.readline().strip()
         while line:
             mrp = json.loads(line, object_pairs_hook=collections.OrderedDict)
@@ -39,7 +39,7 @@ def split_mrp(split, ids):
 
 def load_ids(idfile):
     id_splits = []
-    with open(idfile, 'r') as fi:
+    with open(idfile, 'r', encoding='utf-8') as fi:
         splits_ = fi.read().strip().split('\n\n')
         for split_ in splits_:
             split_ = split_.split('\n')
@@ -51,18 +51,19 @@ def load_ids(idfile):
 
 
 def output_mrp(id_splits, mrps, outfile):
+    global string
     assert len(id_splits) == 3
     for n_spl, id_split in enumerate(id_splits):
         if n_spl == 0:
-            str = 'dev'
+            string = 'dev'
         elif n_spl == 1:
-            str = 'test'
+            string = 'test'
         elif n_spl == 2:
-            str = 'train'
-        file = outfile + '-' + str + '.aug.mrp'
-        with open(file, 'w') as fo:
+            string = 'train'
+        file = outfile + '-' + string + '.aug.mrp'
+        with open(file, 'w', encoding='utf-8') as fo:
             for id in id_split:
-                fo.write((json.dumps(mrps[id]) + '\n').encode('utf-8'))
+                fo.write((json.dumps(mrps[id], ensure_ascii=False) + '\n'))
 
 
 def output_ids(id_splits, idfile):
@@ -72,29 +73,29 @@ def output_ids(id_splits, idfile):
             fo.write('\n'.join(id_split) + '\n\n')
 
 
-parser = argparse.ArgumentParser(description='Sample Data')
-parser.add_argument("input", type=str, help="Input MRP file")
-parser.add_argument("--split", type=str, help="Split proportion (seperated by :)")
-parser.add_argument("output_dir", type=str, help="Output Augmented file dir")
-parser.add_argument("--input_ids", type=str, help="Input instance ids")
-parser.add_argument("--output_ids", type=str, help="Output ids")
-args = parser.parse_args()
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Sample Data')
+    parser.add_argument("input", type=str, help="Input MRP file")
+    parser.add_argument("output_dir", type=str, help="Output Augmented file dir")
+    parser.add_argument("--split", type=str, help="Split proportion (seperated by :)")
+    parser.add_argument("--input_ids", type=str, help="Input instance ids")
+    parser.add_argument("--output_ids", type=str, help="Output ids")
+    args = parser.parse_args()
 
-ids, mrps = load_mrp(args.input)
-num = len(mrps)
-if args.split:
-    assert not args.input_ids
-    id_splits = split_mrp(args.split, ids)
+    ids, mrps = load_mrp(args.input)
+    num = len(mrps)
+    if args.split:
+        assert not args.input_ids
+        id_splits = split_mrp(args.split, ids)
+    elif args.input_ids:
+        assert not args.split
+        id_splits = load_ids(args.input_ids)
 
-elif args.input_ids:
-    assert not args.split
-    id_splits = load_ids(args.input_ids)
+    print('number of ids in each split: ', ' '.join([str(len(dat)) for dat in id_splits]))
 
-print('number of ids in each split: ', ' '.join([str(len(dat)) for dat in id_splits]))
+    # outfile=os.path.join(args.output_dir, os.path.basename(args.input))
+    outfile = args.output_dir
+    output_mrp(id_splits, mrps, outfile)
 
-# outfile=os.path.join(args.output_dir, os.path.basename(args.input))
-outfile = args.output_dir
-output_mrp(id_splits, mrps, outfile)
-
-if args.output_ids:
-    output_ids(id_splits, args.output_ids)
+    if args.output_ids:
+        output_ids(id_splits, args.output_ids)
