@@ -17,7 +17,7 @@ if [ $# -eq 1 ]; then
     --train_data data/amr_zh/train.mrp.convert \
     --dev_data data/amr_zh/dev.mrp.convert \
     --bert_path ./electra-zh-large \
-    --ckpt amr_ckpt \
+    --ckpt amr_zh_ckpt \
     --word_dim 300 \
     --word_char_dim 32 \
     --concept_char_dim 32 \
