@@ -17,7 +17,7 @@ if [ $# -eq 1 ]; then
     --train_data data/drg_deu/train.mrp.convert \
     --dev_data data/drg_deu/dev.mrp.convert \
     --bert_path ./bert_base_de \
-    --ckpt drg_ckpt \
+    --ckpt drg_deu_ckpt \
     --word_dim 300 \
     --word_char_dim 32 \
     --concept_char_dim 32 \
