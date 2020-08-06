@@ -1,5 +1,5 @@
 import torch
-from transformers import BertTokenizer, ElectraModel as BertModel
+from transformers import BertTokenizer, BertModel
 import numpy as np
 
 
