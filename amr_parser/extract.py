@@ -62,7 +62,9 @@ def read_file(filename):
         lemma.append(json.loads(graph.metadata['lemma']))
         upos.append(json.loads(graph.metadata['upos']))
         xpos.append(json.loads(graph.metadata['xpos']))
-        ner.append(json.loads(graph.metadata['ner']))
+        ner.append(json.loads(
+            json.dumps(graph.metadata.get('ner', ["O"] * len(token[-1])))
+        ))
         amrs.append(AMRGraph(amr))
     print('read from %s, %d amrs' % (filename, len(amrs)))
     return token, lemma, upos, xpos, ner, amrs
@@ -92,8 +94,9 @@ import argparse
 
 def parse_config():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--train_data', type=str, default='data/amr/amr.train.convert.input_clean.recategorize.nosense')
-    parser.add_argument('--output_dir', type=str, default='data/amr/vocabs')
+    parser.add_argument('--train_data', '-t', type=str,
+                        default='data/amr/amr.train.convert.input_clean.recategorize.nosense')
+    parser.add_argument('--output_dir', '-o', type=str, default='data/amr/vocabs')
     return parser.parse_args()
 
 
