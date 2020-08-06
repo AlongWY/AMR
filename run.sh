@@ -14,7 +14,7 @@ if [ $# -eq 1 ]; then
     --concept_vocab data/amr_zh/vocabs/concept_vocab \
     --concept_char_vocab data/amr_zh/vocabs/concept_char_vocab \
     --predictable_concept_vocab data/amr_zh/vocabs/predictable_concept_vocab \
-    --train_data data/amr_zh/train.convert \
+    --train_data data/amr_zh/train.mrp.convert \
     --dev_data data/amr_zh/dev.mrp.convert \
     --bert_path ./electra-zh-large \
     --ckpt amr_ckpt \
