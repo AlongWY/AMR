@@ -59,23 +59,10 @@ class AMRGraph(object):
                 print(rel, self.abstract_concepts[concept], value, "abstract concept cannot have an attribute")
                 continue
             name = "%s_attr_%d" % (value, len(self.name2concept))
-            if not _is_attr_form(value):
-                if _is_abs_form(value):
-                    self.abstract_concepts[name] = value
-                else:
-                    print('bad attribute', rel, concept, value)
-                    continue
             self.name2concept[name] = value
             self._add_edge(rel, concept, name)
         for rel, head, tail in relation_triple:
             self._add_edge(rel, head, tail)
-
-        # lower concept
-        for name in self.name2concept:
-            v = self.name2concept[name]
-            if not _is_abs_form(v):
-                v = v.lower()
-            self.name2concept[name] = v
 
     def __len__(self):
         return len(self.name2concept)

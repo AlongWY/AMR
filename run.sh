@@ -4,19 +4,19 @@
 
 if [ $# -eq 1 ]; then
   CUDA_VISIBLE_DEVICES=$1 PYTHONPATH=. python amr_parser/train.py \
-    --tok_vocab data/amr/vocabs/tok_vocab \
-    --tok_char_vocab data/amr/vocabs/tok_char_vocab \
-    --lem_vocab data/amr/vocabs/lem_vocab \
-    --lem_char_vocab data/amr/vocabs/lem_char_vocab \
-    --rel_vocab data/amr/vocabs/rel_vocab \
-    --upos_vocab data/amr/vocabs/upos_vocab \
-    --ner_vocab data/amr/vocabs/ner_vocab \
-    --concept_vocab data/amr/vocabs/concept_vocab \
-    --concept_char_vocab data/amr/vocabs/concept_char_vocab \
-    --predictable_concept_vocab data/amr/vocabs/predictable_concept_vocab \
-    --train_data data/amr/amr.train.convert.input_clean.recategorize.nosense \
-    --dev_data data/amr/amr.valid.convert.input_clean.recategorize.nosense \
-    --bert_path ./electra-large \
+    --tok_vocab data/amr_zh/vocabs/tok_vocab \
+    --tok_char_vocab data/amr_zh/vocabs/tok_char_vocab \
+    --lem_vocab data/amr_zh/vocabs/lem_vocab \
+    --lem_char_vocab data/amr_zh/vocabs/lem_char_vocab \
+    --rel_vocab data/amr_zh/vocabs/rel_vocab \
+    --upos_vocab data/amr_zh/vocabs/upos_vocab \
+    --ner_vocab data/amr_zh/vocabs/ner_vocab \
+    --concept_vocab data/amr_zh/vocabs/concept_vocab \
+    --concept_char_vocab data/amr_zh/vocabs/concept_char_vocab \
+    --predictable_concept_vocab data/amr_zh/vocabs/predictable_concept_vocab \
+    --train_data data/amr_zh/train.convert \
+    --dev_data data/amr_zh/dev.mrp.convert \
+    --bert_path ./electra-zh-large \
     --ckpt amr_ckpt \
     --word_dim 300 \
     --word_char_dim 32 \
@@ -24,7 +24,7 @@ if [ $# -eq 1 ]; then
     --concept_dim 300 \
     --rel_dim 100 \
     --pos_dim 32 \
-    --ner_dim 16 \
+    --ner_dim 0 \
     --cnn_filter 3 256 \
     --char2word_dim 128 \
     --char2concept_dim 128 \
