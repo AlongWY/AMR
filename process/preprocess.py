@@ -34,7 +34,10 @@ if __name__ == '__main__':
     with open(args.output, mode='w', encoding='utf-8') as out:
         with open(args.path, encoding='utf-8') as f:
             for line in f:
-                sentence_json = json.loads(line)
-                id = sentence_json['id']
-                sentence_json.update(mrp[id])
-                out.write(json.dumps(sentence_json) + '\n')
+                try:
+                    sentence_json = json.loads(line)
+                    id = sentence_json['id']
+                    sentence_json.update(mrp[id])
+                    out.write(json.dumps(sentence_json, ensure_ascii=False) + '\n')
+                except Exception as e:
+                    continue

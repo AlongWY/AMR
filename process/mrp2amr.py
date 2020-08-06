@@ -12,8 +12,8 @@ def main(args):
             if amr_data == '' or amr_data is None:
                 break
             amr_data = json.loads(amr_data)
-            amr_nodes = amr_data['nodes']
-            amr_edges = amr_data.get('edges', [])
+            amr_nodes = amr_data.pop('nodes')
+            amr_edges = amr_data.pop('edges', [])
 
             triples = []
             concepts = []
@@ -21,11 +21,15 @@ def main(args):
             for node in amr_nodes:
                 short_name = f'c{node["id"]}'
                 concept = node["label"]
+                if pattern.search(concept):
+                    concept = f"\"{concept}\""
                 concepts.append(concept)
                 triples.append((short_name, 'instance', concept))
                 for attr, value in zip(node.get('properties', []), node.get('values', [])):
-                    value = f"\"{value}\"" if pattern.search(value) else value
+                    if pattern.search(value):
+                        value = f"\"{value}\""
                     triples.append((short_name, attr, value))
+
             for edge in amr_edges:
                 src = f'c{edge["source"]}'
                 target = f'c{edge["target"]}'
@@ -33,19 +37,20 @@ def main(args):
                 target = f"\"{target}\"" if pattern.search(target) else target
                 triples.append((src, label, target))
 
-            top = amr_data['tops'][0]
+            top = amr_data.pop('tops')[0]
 
-            id = amr_data['id']
-            snt = json.dumps(amr_data['input'])
-            token = json.dumps(amr_data['token'])
-            lemma = json.dumps(amr_data['lemma'])
-            upos = json.dumps(amr_data['upos'])
-            xpos = json.dumps(amr_data['xpos'])
-            ner = json.dumps(amr_data['ner'])
+            # id = amr_data['id']
+            # snt = json.dumps(amr_data['input'])
+            # token = json.dumps(amr_data['token'])
+            # lemma = json.dumps(amr_data['lemma'])
+            # upos = json.dumps(amr_data['upos'])
+            # xpos = json.dumps(amr_data['xpos'])
+            # ner = json.dumps(amr_data['ner'])
 
-            graph = Graph(triples, top=f"c{top}", metadata=dict(
-                id=id, snt=snt, token=token, lemma=lemma, upos=upos, xpos=xpos, ner=ner
-            ))
+            for key, value in amr_data.items():
+                amr_data[key] = json.dumps(value, ensure_ascii=False)
+
+            graph = Graph(triples, top=f"c{top}", metadata=amr_data)
 
             graph_en = pp.encode(graph)
             graph_de = pp.decode(graph_en)
