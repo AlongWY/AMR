@@ -7,10 +7,16 @@ def main(args):
             open(args.input, encoding='utf-8') as file, \
             open(args.extra, encoding='utf-8') as extra:
         for input_sent, extra_sent in zip(file.readlines(), extra.readlines()):
+            input_sent = json.loads(input_sent)
             extra_sent = json.loads(extra_sent)
 
+            if "language" in extra_sent:
+                input_sent["language"] = extra_sent["language"]
+            else:
+                input_sent["language"] = 'eng'
+
             if args.framework in extra_sent["targets"]:
-                out.write(input_sent)
+                out.write(json.dumps(input_sent, ensure_ascii=False) + '\n')
 
 
 if __name__ == '__main__':
