@@ -14,8 +14,8 @@ if [ $# -eq 1 ]; then
     --concept_vocab data/drg_deu/all_vocabs/concept_vocab \
     --concept_char_vocab data/drg_deu/all_vocabs/concept_char_vocab \
     --predictable_concept_vocab data/drg_deu/all_vocabs/predictable_concept_vocab \
-    --train_data data/drg_deu/data/drg_deu/drg.all.convert \
-    --dev_data data/drg_deu/data/drg_deu/drg.all.convert \
+    --train_data data/drg_deu/drg.all.convert \
+    --dev_data data/drg_deu/drg.all.convert \
     --bert_path ./bert_base_de \
     --ckpt drg_deu_all_ckpt \
     --word_dim 300 \
