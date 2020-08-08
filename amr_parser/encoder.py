@@ -109,16 +109,23 @@ class WordEncoder(nn.Module):
         super(WordEncoder, self).__init__()
         self.char_embed = AMREmbedding(vocabs['tok_char'], char_dim)
         self.char2word = CNNEncoder(filters, char_dim, char2word_dim)
-        self.lem_embed = AMREmbedding(vocabs['lem'], word_dim, pretrained_file)
+
+        if word_dim > 0:
+            self.lem_embed = AMREmbedding(vocabs['lem'], word_dim, pretrained_file)
+        else:
+            self.lem_embed = None
+            word_dim = 0
 
         if pos_dim > 0:
             self.pos_embed = AMREmbedding(vocabs['upos'], pos_dim)
         else:
             self.pos_embed = None
+            pos_dim = 0
         if ner_dim > 0:
             self.ner_embed = AMREmbedding(vocabs['ner'], ner_dim)
         else:
             self.ner_embed = None
+            ner_dim = 0
 
         tot_dim = word_dim + pos_dim + ner_dim + char2word_dim
 
@@ -137,8 +144,10 @@ class WordEncoder(nn.Module):
         char_repr = self.char_embed(char_input.view(seq_len * bsz, -1))
         char_repr = self.char2word(char_repr).view(seq_len, bsz, -1)
 
-        lem_repr = self.lem_embed(lem_input)
-        reprs = [char_repr, lem_repr]
+        reprs = [char_repr]
+        if self.lem_embed is not None:
+            lem_repr = self.lem_embed(lem_input)
+            reprs.append(lem_repr)
 
         if self.pos_embed is not None:
             pos_repr = self.pos_embed(pos_input)

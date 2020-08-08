@@ -2,8 +2,10 @@
 /data/
 /ckpt/
 /drg_ckpt/
+/drg_deu_ckpt/
 /ptg_ckpt/
 /amr_ckpt/
+/amr_zh_ckpt/
 /stanford-corenlp-full-2018-10-05
 /stanford-corenlp
 /bert-base-cased

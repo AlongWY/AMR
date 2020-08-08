@@ -20,6 +20,7 @@ class AMRIO:
                 if graph_line == "":
                     break
                 graph = pp.decode(graph_line)
+                graph.metadata['lemma'] = graph.metadata['token']
                 amr = AMR.from_graph(graph)
                 yield graph, amr
 
@@ -95,8 +96,8 @@ import argparse
 def parse_config():
     parser = argparse.ArgumentParser()
     parser.add_argument('--train_data', '-t', type=str,
-                        default='data/amr/amr.train.convert.input_clean.recategorize.nosense')
-    parser.add_argument('--output_dir', '-o', type=str, default='data/amr/vocabs')
+                        default='data/amr_zh/train.mrp.convert')
+    parser.add_argument('--output_dir', '-o', type=str, default='data/amr_zh/vocabs')
     return parser.parse_args()
 
 

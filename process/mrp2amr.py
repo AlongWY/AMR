@@ -7,6 +7,7 @@ from penman import Graph
 
 def main(args):
     pattern = re.compile(r'''[\s()":/,\\'#]+''')
+    word_attr = re.compile(r'''(\w+)-(\d+)''')
     with open(args.input, encoding='utf-8') as f, open(args.output, mode='w', encoding='utf-8') as out:
         for amr_data in f.readlines():
             if amr_data == '' or amr_data is None:
@@ -21,6 +22,13 @@ def main(args):
             for node in amr_nodes:
                 short_name = f'c{node["id"]}'
                 concept = node["label"]
+
+                m = word_attr.match(concept)
+                if m:
+                    concept = m.group(1)
+                    attr = m.group(2)
+                    triples.append((short_name, 'link', attr))
+
                 if pattern.search(concept):
                     concept = f"\"{concept}\""
                 concepts.append(concept)
