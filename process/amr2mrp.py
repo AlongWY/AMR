@@ -74,16 +74,16 @@ def main(args):
             top = node_map[amr.top]
 
             out.write(json.dumps({
-                "id": metadata['id'],
+                "id": json.loads(metadata['id']),
                 "flavor": 2,
                 "framework": "amr",
                 "language": 'zho',
                 "version": 1.1,
                 "tops": [top],
-                "input": metadata['snt'],
+                "input": json.loads(metadata['input']),
                 "time": "2020-06-22",
                 "nodes": nodes,
-                "edges": edges}) + '\n')
+                "edges": edges}, ensure_ascii=False) + '\n')
 
 
 if __name__ == '__main__':
