@@ -118,7 +118,7 @@ def main(args):
                 "language": "deu",
                 "version": 1.1,
                 "tops": [top],
-                "input": json.loads(metadata['snt']),
+                "input": " ".join(json.loads(metadata['snt'])),
                 "time": "2020-06-16",
                 "nodes": nodes,
                 "edges": edges}) + '\n')
