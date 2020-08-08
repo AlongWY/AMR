@@ -77,6 +77,7 @@ def main(args):
                 "id": metadata['id'],
                 "flavor": 2,
                 "framework": "amr",
+                "language": 'eng',
                 "version": 1.1,
                 "tops": [top],
                 "input": metadata['snt'],

@@ -14,17 +14,37 @@ def main(args):
             amr_data = json.loads(amr_data)
             triples = [("c0", ":instance", "none")]
 
-            id = amr_data['id']
-            snt = json.dumps(amr_data['input'])
-            token = json.dumps(amr_data['token'])
-            lemma = json.dumps(amr_data['lemma'])
-            upos = json.dumps(amr_data['upos'])
-            xpos = json.dumps(amr_data['xpos'])
-            ner = json.dumps(amr_data['ner'])
+            if 'tokenization' in amr_data:
+                id = amr_data['id']
 
-            graph = Graph(triples, metadata=dict(
-                id=id, snt=snt, token=token, lemma=lemma, upos=upos, xpos=xpos, ner=ner
-            ))
+                tokenization = amr_data['tokenization']
+                properties = tokenization[0]['properties']
+
+                snt = json.dumps([token['label'] for token in tokenization], ensure_ascii=False)
+                token = json.dumps([token['label'] for token in tokenization], ensure_ascii=False)
+                lemma = json.dumps([token['values'][properties.index('lemma')] for token in tokenization],
+                                   ensure_ascii=False)
+                upos = json.dumps([token['values'][properties.index('upos')] for token in tokenization],
+                                  ensure_ascii=False)
+                xpos = json.dumps([token['values'][properties.index('xpos')] for token in tokenization],
+                                  ensure_ascii=False)
+                # ner = json.dumps([token['values'][properties.index('ner')] for token in tokenization], ensure_ascii=False)
+
+                graph = Graph(triples, metadata=dict(
+                    id=id, snt=snt, token=token, lemma=lemma, upos=upos, xpos=xpos
+                ))
+            else:
+                id = amr_data['id']
+                snt = json.dumps(amr_data['input'], ensure_ascii=False)
+                token = json.dumps(amr_data['token'], ensure_ascii=False)
+                lemma = json.dumps(amr_data['lemma'], ensure_ascii=False)
+                upos = json.dumps(amr_data['upos'], ensure_ascii=False)
+                xpos = json.dumps(amr_data['xpos'], ensure_ascii=False)
+                ner = json.dumps(amr_data['ner'], ensure_ascii=False)
+
+                graph = Graph(triples, metadata=dict(
+                    id=id, snt=snt, token=token, lemma=lemma, upos=upos, xpos=xpos, ner=ner
+                ))
 
             graph_en = pp.encode(graph)
             graph_de = pp.decode(graph_en)
