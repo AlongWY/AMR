@@ -115,6 +115,7 @@ def main(args):
                 "id": metadata['id'],
                 "flavor": 2,
                 "framework": "drg",
+                "language": "deu",
                 "version": 1.1,
                 "tops": [top],
                 "input": metadata['snt'],
@@ -128,7 +129,7 @@ if __name__ == '__main__':
     argparser.add_argument('--input', '-i', required=True)
     argparser.add_argument('--extra', '-e', required=True)
     argparser.add_argument('--output', '-o', required=True)
-    argparser.add_argument('--rule', '-r', default='data/drg/drg_no_comma.json')
+    argparser.add_argument('--rule', '-r', default='data/drg_deu/drg_no_comma.json')
     args = argparser.parse_args()
 
     main(args)

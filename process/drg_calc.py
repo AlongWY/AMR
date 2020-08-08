@@ -35,7 +35,7 @@ def main(args):
 if __name__ == '__main__':
     argparser = ArgumentParser()
     argparser.add_argument('--input', '-i', required=True)
-    argparser.add_argument('--output', '-o', default="data/drg")
+    argparser.add_argument('--output', '-o', default="data/drg_deu")
     args = argparser.parse_args()
 
     main(args)
