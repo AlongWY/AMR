@@ -117,7 +117,7 @@ def main(args):
                 "framework": "drg",
                 "version": 1.1,
                 "tops": [top],
-                "input": metadata['snt'],
+                "input": json.loads(metadata['snt']),
                 "time": "2020-06-16",
                 "nodes": nodes,
                 "edges": edges}) + '\n')
