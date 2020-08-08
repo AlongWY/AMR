@@ -7,6 +7,8 @@ For detailed description of AMR, see http://www.isi.edu/natural-language/amr/a.p
 """
 
 from __future__ import print_function
+
+import re
 import sys
 import penman as pp
 
@@ -154,7 +156,7 @@ class AMR(object):
         print(self.__str__(), file=DEBUG_LOG)
 
     @staticmethod
-    def get_amr_line(input_f):
+    def get_amr_line(input_f, escape=False):
         """
         Read the file containing AMRs. AMRs are separated by a blank line.
         Each call of get_amr_line() returns the next available AMR (in one-line form).
@@ -163,6 +165,8 @@ class AMR(object):
         cur_amr = []
         for line in input_f:
             line = line.strip()
+            if '~' in line and escape:
+                line = re.sub(r'(~+)', r'"\1"', line)
             if line != "":
                 cur_amr.append(line.strip())
             else:

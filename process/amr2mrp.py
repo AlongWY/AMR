@@ -31,15 +31,17 @@ def generate_amr_lines(f1):
 def main(args):
     with open(args.input, encoding='utf-8') as f, \
             open(args.output, mode='w', encoding='utf-8') as out:
-        anr_pair: List[Graph]
-        anr_pair = []
+        rule_attr = re.compile(r'''(\d+)''')
         for sent_num, cur_amr1 in enumerate(generate_amr_lines(f), start=1):
-            anr_pair.append(pp.decode(cur_amr1))
+            amr = pp.decode(cur_amr1)
 
-        for idx, amr in enumerate(anr_pair):
             metadata = amr.metadata
             nodes = []
             node_map = {}
+
+            # instances = amr.instances()
+            # amr_edges = amr.edges()
+            # attributes = amr.attributes()
 
             for index, (src, role, tgt) in enumerate(amr.instances()):
                 tgt: str
@@ -65,22 +67,28 @@ def main(args):
                 source = node_map[src]
                 label: str = role[1:]
 
+                tgt = tgt.lower().strip("\"")
+                if rule_attr.match(tgt) and label == 'polarity':
+                    continue
+                if rule_attr.match(tgt) and label == 'link':
+                    nodes[source]['label'] = f"{nodes[source]['label']}-{tgt}"
+                    continue
                 nodes[source].setdefault('properties', [])
                 nodes[source].setdefault('values', [])
 
                 nodes[source]['properties'].append(label)
-                nodes[source]['values'].append(tgt.lower().strip("\""))
+                nodes[source]['values'].append(tgt)
 
             top = node_map[amr.top]
 
             out.write(json.dumps({
-                "id": json.loads(metadata['id']),
+                "id": metadata['id'],
                 "flavor": 2,
                 "framework": "amr",
                 "language": 'zho',
                 "version": 1.1,
                 "tops": [top],
-                "input": json.loads(metadata['input']),
+                "input": " ".join(json.loads(metadata['snt'])),
                 "time": "2020-06-22",
                 "nodes": nodes,
                 "edges": edges}, ensure_ascii=False) + '\n')

@@ -13,7 +13,7 @@ def generate_amr_lines(f1, f2):
     :return: generator of cur_amr1, cur_amr2 pairs: one-line AMR strings
     """
     while True:
-        cur_amr1 = amr.AMR.get_amr_line(f1)
+        cur_amr1 = amr.AMR.get_amr_line(f1, escape=True)
         cur_amr2 = amr.AMR.get_amr_line(f2)
         if not cur_amr1 and not cur_amr2:
             pass
