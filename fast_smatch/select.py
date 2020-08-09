@@ -31,7 +31,7 @@ def eval(gold, predict):
     with open(gold, encoding='utf-8') as f0, open(predict, encoding='utf-8') as f1:
         while True:
             cur_amr1 = AMR.get_amr_line(f0)
-            cur_amr2 = AMR.get_amr_line(f1)
+            cur_amr2 = AMR.get_amr_line(f1, escape=True)
             if cur_amr1 == "" and cur_amr2 == "":
                 break
             if cur_amr1 == "":
