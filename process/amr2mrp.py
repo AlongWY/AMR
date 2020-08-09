@@ -63,6 +63,7 @@ def main(args):
                     "label": label
                 })
 
+            done_sources = set()
             for src, role, tgt in amr.attributes():
                 source = node_map[src]
                 label: str = role[1:]
@@ -71,7 +72,9 @@ def main(args):
                 if rule_attr.match(tgt) and label == 'polarity':
                     continue
                 if rule_attr.match(tgt) and label == 'link':
-                    nodes[source]['label'] = f"{nodes[source]['label']}-{tgt}"
+                    if tgt not in done_sources:
+                        done_sources.add(tgt)
+                        nodes[source]['label'] = f"{nodes[source]['label']}-{tgt}"
                     continue
                 nodes[source].setdefault('properties', [])
                 nodes[source].setdefault('values', [])
