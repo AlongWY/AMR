@@ -1,29 +1,32 @@
 import torch
-from transformers import BertTokenizer, BertModel
+# from transformers import BertTokenizer, BertModel
+from transformers import XLMRobertaTokenizer as BertTokenizer, XLMRobertaModel as BertModel
 import numpy as np
+
+PAD_TOEKN_ID = 0
 
 
 class BertEncoderTokenizer(BertTokenizer):
 
     def __init__(self, *args, **kwargs):
         super(BertEncoderTokenizer, self).__init__(*args, **kwargs)
+        global PAD_TOEKN_ID
+        PAD_TOEKN_ID = self.pad_token_id
 
     def tokenize(self, tokens, split=True):
-        tokens = ['[CLS]'] + tokens + ['[SEP]']
         if not split:
-            split_tokens = [t if t in self.vocab else '[UNK]' for t in tokens]
+            split_tokens = [t if t in self.vocab else self.unk_token for t in tokens]
             gather_indexes = None
         else:
-            split_tokens, _gather_indexes = [], []
+            split_tokens, _gather_indexes = [self.cls_token], [[0]]
             for token in tokens:
                 indexes = []
-                for i, sub_token in enumerate(self.wordpiece_tokenizer.tokenize(token)):
+                for i, sub_token in enumerate(self._tokenize(token)):
                     indexes.append(len(split_tokens))
                     split_tokens.append(sub_token)
                 _gather_indexes.append(indexes)
 
-            # We only want CLS and tokens (exclude SEP)
-            _gather_indexes = _gather_indexes[:-1]
+            split_tokens = split_tokens + [self.eos_token]
             max_index_list_len = max(len(indexes) for indexes in _gather_indexes)
             gather_indexes = np.zeros((len(_gather_indexes), max_index_list_len))
             for i, indexes in enumerate(_gather_indexes):
@@ -51,7 +54,7 @@ class BertEncoder(BertModel):
         """
         # encoded_layers: [batch_size, num_subword_pieces, hidden_size]
         token_type_ids = None
-        attention_mask = input_ids.ne(0)
+        attention_mask = input_ids.ne(PAD_TOEKN_ID)
 
         encoded_layers, *extra = super(BertEncoder, self).forward(
             input_ids, attention_mask, token_type_ids)

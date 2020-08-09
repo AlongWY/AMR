@@ -16,7 +16,7 @@ if [ $# -eq 1 ]; then
     --predictable_concept_vocab data/drg_deu/all_vocabs/predictable_concept_vocab \
     --train_data data/drg_deu/drg.all.convert \
     --dev_data data/drg_deu/drg.all.convert \
-    --bert_path ./bert_base_de \
+    --bert_path ./xlm-roberta-large \
     --ckpt drg_deu_all_ckpt \
     --word_dim 300 \
     --word_char_dim 32 \
@@ -24,6 +24,7 @@ if [ $# -eq 1 ]; then
     --concept_dim 300 \
     --rel_dim 100 \
     --pos_dim 32 \
+    --ner_dim 32 \
     --cnn_filter 3 256 \
     --char2word_dim 128 \
     --char2concept_dim 128 \
