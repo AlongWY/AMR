@@ -163,7 +163,7 @@ class Parser(nn.Module):
 
     def forward(self, data):
         word_repr, word_mask, probe = self.encode_step_with_bert(
-            data['tok'], data['lem'], data['upos'], None,
+            data['tok'], data['lem'], data['upos'], data['xpos'],
             data['tok_char'], data['bert_token'], data['token_subword_index']
         )
         concept_repr = self.embed_scale * self.concept_encoder(data['concept_char_in'], data['concept_in']) + \
