@@ -115,7 +115,7 @@ def batchify(data, vocabs, unk_rate=0.):
     _tok = ListsToTensor([[CLS] + x['tok'] for x in data], vocabs['tok'], unk_rate=unk_rate)
     _lem = ListsToTensor([[CLS] + x['lem'] for x in data], vocabs['lem'], unk_rate=unk_rate)
     _upos = ListsToTensor([[CLS] + x['upos'] for x in data], vocabs['upos'], unk_rate=unk_rate)
-    _xpos = ListsToTensor([[CLS] + x['xpos'] for x in data], vocabs['xpos'], unk_rate=unk_rate)
+    _xpos = ListsToTensor([[CLS] + x['xpos'] for x in data], vocabs['ner'], unk_rate=unk_rate)
     _tok_char = ListsofStringToTensor([[CLS] + x['tok'] for x in data], vocabs['tok_char'])
 
     local_token2idx = [x['token2idx'] for x in data]
