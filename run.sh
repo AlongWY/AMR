@@ -36,13 +36,13 @@ if [ $# -eq 1 ]; then
     --inference_layers 4 \
     --dropout 0.2 \
     --unk_rate 0.33 \
-    --epochs 20000 \
-    --train_batch_size 6000 \
-    --dev_batch_size 6000 \
+    --epochs 8000 \
+    --train_batch_size 8000 \
+    --dev_batch_size 8000 \
     --lr_scale 1. \
-    --warmup_steps 2000 \
-    --print_every 100 \
-    --eval_every 1000 \
+    --warmup_steps 200 \
+    --print_every 10 \
+    --eval_every 100 \
     --batches_per_update 1 \
     --world_size 3 \
     --gpus 3 \
