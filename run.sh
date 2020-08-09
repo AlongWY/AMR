@@ -40,7 +40,7 @@ if [ $# -eq 1 ]; then
     --train_batch_size 8000 \
     --dev_batch_size 8000 \
     --lr_scale 1. \
-    --warmup_steps 200 \
+    --warmup_steps 2000 \
     --print_every 10 \
     --eval_every 100 \
     --batches_per_update 1 \
