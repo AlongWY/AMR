@@ -65,12 +65,15 @@ def main(args):
             edges = []
             removed_map = {}
             drg_edges = []
+            done_set = set()
             for src, role, tgt in drg.edges():
                 source_label = nodes[node_map[src]].get('label', None)
                 target_label = nodes[node_map[tgt]].get('label', None)
                 if source_label and target_label and attr_regex.fullmatch(target_label):
-                    nodes[node_map[src]]['label'] = f"{source_label}.{target_label}"
-                    removed_map[tgt] = src
+                    if src not in done_set:
+                        done_set.add(src)
+                        nodes[node_map[src]]['label'] = f"{source_label}.{target_label}"
+                        removed_map[tgt] = src
                 else:
                     drg_edges.append((src, role, tgt))
 
@@ -82,13 +85,15 @@ def main(args):
                 })
                 if label != 'link':
                     edges[-1]['label'] = label
-
+            done_set = set()
             for src, role, tgt in drg.attributes():
                 label: str = role[1:]
                 src_label = nodes[node_map[src]].get('label', None)
                 if label == 'op' and src_label:
                     if attr_regex.fullmatch(tgt):
-                        nodes[node_map[src]]['label'] = f"{src_label}.{tgt}"
+                        if src not in done_set:
+                            done_set.add(src)
+                            nodes[node_map[src]]['label'] = f"{src_label}.{tgt}"
 
             nodes = [node for node in nodes if node['id'] not in removed_map]
             remap = {node['id']: index for index, node in enumerate(nodes)}
