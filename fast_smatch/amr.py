@@ -8,6 +8,8 @@ For detailed description of AMR, see http://www.isi.edu/natural-language/amr/a.p
 """
 
 from __future__ import print_function
+
+import re
 import sys
 import penman
 
@@ -162,7 +164,7 @@ class AMR(object):
         print(self.__str__(), file=DEBUG_LOG)
 
     @staticmethod
-    def get_amr_line(input_f):
+    def get_amr_line(input_f, escape=False):
         """
         Read the file containing AMRs. AMRs are separated by a blank line.
         Each call of get_amr_line() returns the next available AMR (in one-line form).
@@ -170,23 +172,15 @@ class AMR(object):
 
         """
         cur_amr = []
-        has_content = False
         for line in input_f:
             line = line.strip()
-            if line == "":
-                if not has_content:
-                    # empty lines before current AMR
-                    continue
-                else:
-                    # end of current AMR
-                    break
-            if line.strip().startswith("#"):
-                # ignore the comment line (starting with "#") in the AMR file
-                continue
-            else:
-                has_content = True
+            if '~' in line and escape:
+                line = re.sub(r'(~+)', r'"\1"', line)
+            if line != "":
                 cur_amr.append(line.strip())
-        return "".join(cur_amr)
+            else:
+                break
+        return "\n".join(cur_amr)
 
     @staticmethod
     def parse_amr_json(data):
