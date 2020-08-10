@@ -4,11 +4,15 @@
 /drg_ckpt/
 /ptg_ckpt/
 /amr_ckpt/
+/amr_zh_ckpt/
+/drg_deu_all_ckpt/
+/drg_deu_ckpt/
 /stanford-corenlp-full-2018-10-05
 /stanford-corenlp
 /bert-base-cased
 /electra-base
 /electra-large
+/xlm-roberta-large
 
 *.DS_Store
 *.pyc
